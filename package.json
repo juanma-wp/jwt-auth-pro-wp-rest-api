@@ -1,0 +1,42 @@
+{
+  "name": "wp-rest-auth-jwt",
+  "version": "1.0.0",
+  "description": "Simple, secure JWT authentication for WordPress REST API",
+  "private": true,
+  "scripts": {
+    "env": "wp-env",
+    "env:start": "wp-env start",
+    "env:start:debug": "wp-env start --xdebug",
+    "env:stop": "wp-env stop",
+    "env:destroy": "wp-env destroy",
+    "env:clean": "wp-env clean all",
+    "env:logs": "wp-env logs",
+    "env:reset": "wp-env destroy && wp-env start",
+    "env:update": "wp-env start --update",
+    "test": "wp-env run tests-cli --env-cwd=wp-content/plugins/wp-rest-auth-jwt vendor/bin/phpunit --testdox",
+    "test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/wp-rest-auth-jwt vendor/bin/phpunit --testsuite=unit --testdox",
+    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/wp-rest-auth-jwt vendor/bin/phpunit --testsuite=integration --testdox",
+    "composer:install": "wp-env run tests-cli --env-cwd=wp-content/plugins/wp-rest-auth-jwt composer install",
+    "composer:update": "wp-env run tests-cli --env-cwd=wp-content/plugins/wp-rest-auth-jwt composer update"
+  },
+  "devDependencies": {
+    "@wordpress/env": "^10.31.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juanma-wp/wp-rest-auth-jwt"
+  },
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "jwt",
+    "authentication",
+    "rest-api"
+  ],
+  "author": "WordPress Developer",
+  "license": "GPL-2.0-or-later"
+}

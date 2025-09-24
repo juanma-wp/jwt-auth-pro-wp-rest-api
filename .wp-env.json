@@ -1,0 +1,33 @@
+{
+  "core": "WordPress/WordPress#6.8",
+  "phpVersion": "8.1",
+  "plugins": [
+    "."
+  ],
+  "themes": [
+    "WordPress/twentytwentyfour"
+  ],
+  "config": {
+    "WP_DEBUG": true,
+    "WP_DEBUG_LOG": true,
+    "WP_DEBUG_DISPLAY": false,
+    "SCRIPT_DEBUG": true,
+    "WP_JWT_AUTH_SECRET": "development-secret-key-for-testing-only-never-use-in-production-this-should-be-much-longer",
+    "WP_JWT_ACCESS_TTL": 3600,
+    "WP_JWT_REFRESH_TTL": 86400
+  },
+  "port": 8888,
+  "testsPort": 8889,
+  "env": {
+    "tests": {
+      "config": {
+        "WP_DEBUG": true,
+        "WP_DEBUG_LOG": true,
+        "WP_DEBUG_DISPLAY": false,
+        "WP_JWT_AUTH_SECRET": "development-secret-key-for-testing-only-never-use-in-production-this-should-be-much-longer",
+        "WP_JWT_ACCESS_TTL": 3600,
+        "WP_JWT_REFRESH_TTL": 86400
+      }
+    }
+  }
+}
