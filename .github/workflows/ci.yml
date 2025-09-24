@@ -106,8 +106,9 @@ jobs:
       - name: Install CS dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Register WordPress coding standards
-        run: vendor/bin/phpcs --config-set installed_paths vendor/wp-coding-standards/wpcs
+      # Let Composer's installer plugin register installed_paths for WPCS, PHPCSUtils and PHPCSExtra.
+      # If you must override, use all three paths, not just WPCS.
+      # - run: vendor/bin/phpcs --config-set installed_paths vendor/phpcsstandards/phpcsextra,vendor/phpcsstandards/phpcsutils,vendor/wp-coding-standards/wpcs
 
       - name: Run PHPCS
         run: vendor/bin/phpcs -d memory_limit=512M
