@@ -35,20 +35,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Auth_JWT {
 
-
-
-
-
-
-	const ISSUER              = 'wp-rest-auth-jwt';
-	const REFRESH_COOKIE_NAME = 'wp_jwt_refresh_token';
+	const ISSUER                 = 'wp-rest-auth-jwt';
+	const REFRESH_COOKIE_NAME    = 'wp_jwt_refresh_token';
+	private const REST_NAMESPACE = 'jwt/v1';
+	private const COOKIE_PATH    = '/wp-json/jwt/v1/';
 
 	/**
 	 * Register REST API routes for JWT authentication.
 	 */
 	public function register_routes(): void {
 		register_rest_route(
-			'jwt/v1',
+			self::REST_NAMESPACE,
 			'/token',
 			array(
 				'methods'             => array( 'POST' ),
@@ -69,7 +66,7 @@ class Auth_JWT {
 		);
 
 		register_rest_route(
-			'jwt/v1',
+			self::REST_NAMESPACE,
 			'/refresh',
 			array(
 				'methods'             => array( 'POST' ),
@@ -79,7 +76,7 @@ class Auth_JWT {
 		);
 
 		register_rest_route(
-			'jwt/v1',
+			self::REST_NAMESPACE,
 			'/logout',
 			array(
 				'methods'             => array( 'POST' ),
@@ -89,7 +86,7 @@ class Auth_JWT {
 		);
 
 		register_rest_route(
-			'jwt/v1',
+			self::REST_NAMESPACE,
 			'/verify',
 			array(
 				'methods'             => array( 'GET' ),
@@ -192,7 +189,7 @@ class Auth_JWT {
 			self::REFRESH_COOKIE_NAME,
 			$refresh_token,
 			$refresh_expires,
-			'/wp-json/jwt/v1/',
+			self::COOKIE_PATH,
 			true, // HTTPOnly.
 			true  // Secure.
 		);
@@ -269,7 +266,7 @@ class Auth_JWT {
 				self::REFRESH_COOKIE_NAME,
 				$new_refresh_token,
 				$refresh_expires,
-				'/wp-json/jwt/v1/',
+				self::COOKIE_PATH,
 				true, // HTTPOnly.
 				true  // Secure.
 			);
@@ -302,7 +299,7 @@ class Auth_JWT {
 		}
 
 		// Delete refresh token cookie.
-		wp_auth_jwt_delete_cookie( self::REFRESH_COOKIE_NAME, '/wp-json/jwt/v1/' );
+		wp_auth_jwt_delete_cookie( self::REFRESH_COOKIE_NAME, self::COOKIE_PATH );
 
 		return wp_auth_jwt_success_response( array(), 'Logout successful' );
 	}
