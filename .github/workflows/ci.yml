@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  php-tests:
-    name: PHP ${{ matrix.php }} on Ubuntu
+  unit-tests:
+    name: Unit tests - PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -43,13 +43,14 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Run PHPUnit (direct)
-        run: |
-          vendor/bin/phpunit --version
-          vendor/bin/phpunit --testsuite=unit --testdox
+      - name: Check PHP syntax
+        run: find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -exec php -l {} \;
 
-  wp-env-tests:
-    name: wp-env tests (Node + Docker)
+      - name: Run unit tests (PHP compatibility)
+        run: vendor/bin/phpunit -c phpunit-unit.xml --testdox
+
+  integration-tests:
+    name: Integration tests (wp-env + Docker)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
