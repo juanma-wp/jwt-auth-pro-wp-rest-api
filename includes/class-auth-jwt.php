@@ -328,7 +328,7 @@ class Auth_JWT {
 
 		$user = wp_get_current_user();
 
-		if ( ! $user || ! $user->ID ) {
+		if ( ! $user->exists() ) {
 			return wp_auth_jwt_error_response(
 				'not_authenticated',
 				'No valid token provided',
@@ -570,7 +570,7 @@ class Auth_JWT {
 	public function whoami( ?WP_REST_Request $request = null ): bool {
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Compatibility method signature.
 		$user = wp_get_current_user();
-		if ( ! $user || ! $user->ID ) {
+		if ( ! $user->exists() ) {
 			return false;
 		}
 		return true;
