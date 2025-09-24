@@ -174,7 +174,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		<?php
 	}
 
-	private function render_help_tab() {
+	private function render_help_tab(): void {
 		?>
 		<div class="help-tab">
 			<h2>Help & Documentation</h2>

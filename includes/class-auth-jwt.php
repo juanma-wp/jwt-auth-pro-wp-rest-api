@@ -115,7 +115,7 @@ class Auth_JWT {
 		return wp_auth_jwt_encode( $claims, WP_JWT_AUTH_SECRET );
 	}
 
-	public function issue_token( WP_REST_Request $request ) {
+	public function issue_token( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$username = $request->get_param( 'username' );
@@ -180,7 +180,7 @@ class Auth_JWT {
 		);
 	}
 
-	public function refresh_access_token( WP_REST_Request $request ) {
+	public function refresh_access_token( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$refresh_token = $_COOKIE[ self::REFRESH_COOKIE_NAME ] ?? '';
