@@ -29,5 +29,8 @@
         "WP_JWT_REFRESH_TTL": 86400
       }
     }
+  },
+  "mappings": {
+    "wp-content/plugins/wp-rest-auth-jwt/vendor": "./vendor"
   }
 }
