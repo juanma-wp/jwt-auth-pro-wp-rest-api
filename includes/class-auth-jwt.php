@@ -37,6 +37,7 @@ class Auth_JWT {
 
 
 
+
 	const ISSUER              = 'wp-rest-auth-jwt';
 	const REFRESH_COOKIE_NAME = 'wp_jwt_refresh_token';
 
@@ -106,7 +107,8 @@ class Auth_JWT {
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
 		add_filter(
 			'rest_pre_serve_request',
-			function ( $served, $result, $request, $server ) {
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Signature must accept 4 params for the filter.
+			function ( $served, $_result, $_request, $_server ) {
 				wp_auth_jwt_maybe_add_cors_headers();
 				return $served;
 			},
@@ -211,6 +213,7 @@ class Auth_JWT {
 	 * @return WP_REST_Response|WP_Error Response or error.
 	 */
 	public function refresh_access_token( WP_REST_Request $request ) {
+	 // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Required method signature for REST callback.
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$refresh_token = isset( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ) : '';
@@ -287,6 +290,7 @@ class Auth_JWT {
 	 * @return WP_REST_Response Success response.
 	 */
 	public function logout( WP_REST_Request $request ): WP_REST_Response {
+	 // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Required method signature for REST callback.
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$refresh_token = isset( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ) : '';
@@ -391,6 +395,7 @@ class Auth_JWT {
 
 		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct insert for plugin-managed JWT storage; values are parameterized.
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'jwt_refresh_tokens',
 			array(
@@ -465,6 +470,7 @@ class Auth_JWT {
 
 		$token_hash = wp_auth_jwt_hash_token( $new_refresh_token, WP_JWT_AUTH_SECRET );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct update for plugin-managed JWT storage; values are parameterized.
 		$result = $wpdb->update(
 			$wpdb->prefix . 'jwt_refresh_tokens',
 			array(
@@ -515,6 +521,7 @@ class Auth_JWT {
 	 */
 	public function get_user_refresh_tokens( int $user_id ): array {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct query for plugin-managed JWT storage; caching not applicable for short-lived token rows.
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}jwt_refresh_tokens WHERE user_id = %d AND token_type = 'jwt'",
@@ -534,6 +541,7 @@ class Auth_JWT {
 	 */
 	public function revoke_user_token( int $user_id, int $token_id ): bool {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct query for plugin-managed JWT storage; values are parameterized.
 		$updated = $wpdb->update(
 			$wpdb->prefix . 'jwt_refresh_tokens',
 			array( 'is_revoked' => 1 ),
@@ -558,6 +566,7 @@ class Auth_JWT {
 	 * @return bool True if authenticated, false otherwise.
 	 */
 	public function whoami( ?WP_REST_Request $request = null ): bool {
+	 // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Compatibility method signature.
 		$user = wp_get_current_user();
 		if ( ! $user || ! $user->ID ) {
 			return false;
@@ -571,6 +580,7 @@ class Auth_JWT {
 	public function clean_expired_tokens(): void {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful cleanup of expired JWT rows; not a candidate for persistent caching.
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}jwt_refresh_tokens WHERE expires_at < %d AND token_type = 'jwt'",

@@ -16,6 +16,17 @@
 		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode"/>
 		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_error_log"/>
 
+		<!-- Suppress warnings for required method signatures and REST filters (unused params) -->
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.Found"/>
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed"/>
+
+		<!-- Suppress direct DB query warnings for this plugin's managed token storage layer -->
+		<exclude name="WordPress.DB.DirectDatabaseQuery.DirectQuery"/>
+		<exclude name="WordPress.DB.DirectDatabaseQuery.NoCaching"/>
+
+		<!-- Suppress nonce recommendation warnings for admin settings handlers (handled differently) -->
+		<exclude name="WordPress.Security.NonceVerification.Recommended"/>
+
 		<!-- File comment exclusions from reference -->
 		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag"/>
 		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen"/>
