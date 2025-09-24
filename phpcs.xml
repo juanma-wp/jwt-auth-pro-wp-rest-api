@@ -11,6 +11,11 @@
 		<exclude name="WordPress.WP.I18n"/>
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals"/>
 
+		<!-- Allow usage required by JWT (RFC 7515) and gated debug logging -->
+		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode"/>
+		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode"/>
+		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_error_log"/>
+
 		<!-- File comment exclusions from reference -->
 		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag"/>
 		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen"/>

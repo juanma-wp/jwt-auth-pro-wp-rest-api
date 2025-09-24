@@ -61,7 +61,7 @@ function wp_auth_jwt_decode( string $jwt, string $secret ) {
 		return false;
 	}
 
-	list( $header64, $payload64, $signature64 ) = $segments;
+	list($header64, $payload64, $signature64) = $segments;
 
 	$header    = json_decode( wp_auth_jwt_base64url_decode( $header64 ), true );
 	$payload   = json_decode( wp_auth_jwt_base64url_decode( $payload64 ), true );
@@ -96,6 +96,7 @@ function wp_auth_jwt_decode( string $jwt, string $secret ) {
  * @return string Base64URL encoded string.
  */
 function wp_auth_jwt_base64url_encode( string $data ): string {
+	// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Required for JWT Base64URL encoding per RFC 7515.
 	return rtrim( strtr( base64_encode( $data ), '+/', '-_' ), '=' );
 }
 
@@ -106,6 +107,7 @@ function wp_auth_jwt_base64url_encode( string $data ): string {
  * @return string Decoded string.
  */
 function wp_auth_jwt_base64url_decode( string $data ): string {
+	// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Required for JWT Base64URL decoding per RFC 7515.
 	return base64_decode( str_pad( strtr( $data, '-_', '+/' ), strlen( $data ) % 4, '=', STR_PAD_RIGHT ) );
 }
 
@@ -346,6 +348,7 @@ function wp_auth_jwt_debug_log( $message, array $context = array() ): void {
 			if ( ! empty( $context ) ) {
 				$line .= ' ' . wp_json_encode( $context );
 			}
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Development/debug logging, gated by user setting or WP_DEBUG.
 			error_log( $prefix . $line );
 		}
 	} catch ( \Throwable $e ) {
