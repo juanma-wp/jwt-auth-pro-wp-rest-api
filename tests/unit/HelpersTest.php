@@ -6,259 +6,241 @@ use PHPUnit\Framework\TestCase;
  * Unit tests for JWT Helper functions
  */
 // Provide a minimal mock for admin settings if the plugin class is not loaded in unit context
-if (!class_exists('WP_REST_Auth_JWT_Admin_Settings')) {
-    class WP_REST_Auth_JWT_Admin_Settings
-    {
-        public static function get_general_settings()
-        {
-            return [
-                'cors_allowed_origins' => "https://example.com\nhttps://app.example.com"
-            ];
-        }
-    }
+if ( ! class_exists( 'WP_REST_Auth_JWT_Admin_Settings' ) ) {
+	class WP_REST_Auth_JWT_Admin_Settings {
+
+		public static function get_general_settings() {
+			return array(
+				'cors_allowed_origins' => "https://example.com\nhttps://app.example.com",
+			);
+		}
+	}
 }
 
-class HelpersTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+class HelpersTest extends TestCase {
 
-        // Load helpers
-        if (!function_exists('wp_auth_jwt_generate_token')) {
-            require_once dirname(__DIR__, 2) . '/includes/helpers.php';
-        }
+	protected function setUp(): void {
+		parent::setUp();
 
-        // Define constants for testing
-        if (!defined('WP_JWT_AUTH_SECRET')) {
-            define('WP_JWT_AUTH_SECRET', 'test-secret-key-for-testing-only-jwt');
-        }
-    }
+		// Load helpers
+		if ( ! function_exists( 'wp_auth_jwt_generate_token' ) ) {
+			require_once dirname( __DIR__, 2 ) . '/includes/helpers.php';
+		}
 
-    public function testTokenGeneration(): void
-    {
-        $token = wp_auth_jwt_generate_token(32);
+		// Define constants for testing
+		if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
+			define( 'WP_JWT_AUTH_SECRET', 'test-secret-key-for-testing-only-jwt' );
+		}
+	}
 
-        $this->assertIsString($token);
-        $this->assertEquals(32, strlen($token));
-        $this->assertMatchesRegularExpression('/^[a-f0-9]+$/', $token);
-    }
+	public function testTokenGeneration(): void {
+		$token = wp_auth_jwt_generate_token( 32 );
 
-    public function testTokenGenerationWithDefaultLength(): void
-    {
-        $token = wp_auth_jwt_generate_token();
+		$this->assertIsString( $token );
+		$this->assertEquals( 32, strlen( $token ) );
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]+$/', $token );
+	}
 
-        $this->assertIsString($token);
-        $this->assertEquals(64, strlen($token));
-    }
+	public function testTokenGenerationWithDefaultLength(): void {
+		$token = wp_auth_jwt_generate_token();
 
-    public function testTokenHashing(): void
-    {
-        $token = 'test-token-123';
-        $secret = 'test-secret';
+		$this->assertIsString( $token );
+		$this->assertEquals( 64, strlen( $token ) );
+	}
 
-        $hash = wp_auth_jwt_hash_token($token, $secret);
+	public function testTokenHashing(): void {
+		$token  = 'test-token-123';
+		$secret = 'test-secret';
 
-        $this->assertIsString($hash);
-        $this->assertEquals(64, strlen($hash)); // SHA256 produces 64 char hex string
+		$hash = wp_auth_jwt_hash_token( $token, $secret );
 
-        // Same input should produce same hash
-        $hash2 = wp_auth_jwt_hash_token($token, $secret);
-        $this->assertEquals($hash, $hash2);
+		$this->assertIsString( $hash );
+		$this->assertEquals( 64, strlen( $hash ) ); // SHA256 produces 64 char hex string
 
-        // Different secret should produce different hash
-        $hash3 = wp_auth_jwt_hash_token($token, 'different-secret');
-        $this->assertNotEquals($hash, $hash3);
-    }
+		// Same input should produce same hash
+		$hash2 = wp_auth_jwt_hash_token( $token, $secret );
+		$this->assertEquals( $hash, $hash2 );
 
-    public function testJWTEncoding(): void
-    {
-        $payload = [
-            'iss' => 'test-issuer',
-            'sub' => 'test-subject',
-            'aud' => 'test-audience',
-            'exp' => time() + 3600,
-            'iat' => time()
-        ];
+		// Different secret should produce different hash
+		$hash3 = wp_auth_jwt_hash_token( $token, 'different-secret' );
+		$this->assertNotEquals( $hash, $hash3 );
+	}
 
-        $token = wp_auth_jwt_encode($payload, WP_JWT_AUTH_SECRET);
+	public function testJWTEncoding(): void {
+		$payload = array(
+			'iss' => 'test-issuer',
+			'sub' => 'test-subject',
+			'aud' => 'test-audience',
+			'exp' => time() + 3600,
+			'iat' => time(),
+		);
 
-        $this->assertIsString($token);
-        $this->assertStringContainsString('.', $token);
+		$token = wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
 
-        // Should have 3 parts separated by dots
-        $parts = explode('.', $token);
-        $this->assertCount(3, $parts);
-    }
+		$this->assertIsString( $token );
+		$this->assertStringContainsString( '.', $token );
 
-    public function testJWTDecoding(): void
-    {
-        $payload = [
-            'iss' => 'test-issuer',
-            'sub' => 'test-subject',
-            'aud' => 'test-audience',
-            'exp' => time() + 3600,
-            'iat' => time()
-        ];
+		// Should have 3 parts separated by dots
+		$parts = explode( '.', $token );
+		$this->assertCount( 3, $parts );
+	}
 
-        $token = wp_auth_jwt_encode($payload, WP_JWT_AUTH_SECRET);
-        $decoded = wp_auth_jwt_decode($token, WP_JWT_AUTH_SECRET);
+	public function testJWTDecoding(): void {
+		$payload = array(
+			'iss' => 'test-issuer',
+			'sub' => 'test-subject',
+			'aud' => 'test-audience',
+			'exp' => time() + 3600,
+			'iat' => time(),
+		);
 
-        $this->assertIsArray($decoded);
-        $this->assertEquals($payload['iss'], $decoded['iss']);
-        $this->assertEquals($payload['sub'], $decoded['sub']);
-        $this->assertEquals($payload['aud'], $decoded['aud']);
-    }
+		$token   = wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
+		$decoded = wp_auth_jwt_decode( $token, WP_JWT_AUTH_SECRET );
 
-    public function testJWTDecodingWithWrongSecret(): void
-    {
-        $payload = [
-            'iss' => 'test-issuer',
-            'exp' => time() + 3600
-        ];
+		$this->assertIsArray( $decoded );
+		$this->assertEquals( $payload['iss'], $decoded['iss'] );
+		$this->assertEquals( $payload['sub'], $decoded['sub'] );
+		$this->assertEquals( $payload['aud'], $decoded['aud'] );
+	}
 
-        $token = wp_auth_jwt_encode($payload, WP_JWT_AUTH_SECRET);
-        $result = wp_auth_jwt_decode($token, 'wrong-secret');
+	public function testJWTDecodingWithWrongSecret(): void {
+		$payload = array(
+			'iss' => 'test-issuer',
+			'exp' => time() + 3600,
+		);
 
-        $this->assertFalse($result);
-    }
+		$token  = wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
+		$result = wp_auth_jwt_decode( $token, 'wrong-secret' );
 
-    public function testJWTDecodingWithExpiredToken(): void
-    {
-        $payload = [
-            'iss' => 'test-issuer',
-            'exp' => time() - 3600 // Expired 1 hour ago
-        ];
+		$this->assertFalse( $result );
+	}
 
-        $token = wp_auth_jwt_encode($payload, WP_JWT_AUTH_SECRET);
-        $result = wp_auth_jwt_decode($token, WP_JWT_AUTH_SECRET);
+	public function testJWTDecodingWithExpiredToken(): void {
+		$payload = array(
+			'iss' => 'test-issuer',
+			'exp' => time() - 3600, // Expired 1 hour ago
+		);
 
-        $this->assertFalse($result);
-    }
+		$token  = wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
+		$result = wp_auth_jwt_decode( $token, WP_JWT_AUTH_SECRET );
 
-    public function testIPAddressRetrieval(): void
-    {
-        $ip = wp_auth_jwt_get_ip_address();
+		$this->assertFalse( $result );
+	}
 
-        $this->assertIsString($ip);
-        // Should return default IP when no server vars are set
-        $this->assertEquals('0.0.0.0', $ip);
+	public function testIPAddressRetrieval(): void {
+		$ip = wp_auth_jwt_get_ip_address();
 
-        // Test with REMOTE_ADDR
-        $_SERVER['REMOTE_ADDR'] = '192.168.1.1';
-        $ip = wp_auth_jwt_get_ip_address();
-        $this->assertEquals('192.168.1.1', $ip);
+		$this->assertIsString( $ip );
+		// Should return default IP when no server vars are set
+		$this->assertEquals( '0.0.0.0', $ip );
 
-        // Test with X-Forwarded-For (should take first IP)
-        $_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.1, 192.168.1.1';
-        $ip = wp_auth_jwt_get_ip_address();
-        $this->assertEquals('203.0.113.1', $ip);
+		// Test with REMOTE_ADDR
+		$_SERVER['REMOTE_ADDR'] = '192.168.1.1';
+		$ip                     = wp_auth_jwt_get_ip_address();
+		$this->assertEquals( '192.168.1.1', $ip );
 
-        // Clean up
-        unset($_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR']);
-    }
+		// Test with X-Forwarded-For (should take first IP)
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.1, 192.168.1.1';
+		$ip                              = wp_auth_jwt_get_ip_address();
+		$this->assertEquals( '203.0.113.1', $ip );
 
-    public function testUserAgentRetrieval(): void
-    {
-        $ua = wp_auth_jwt_get_user_agent();
+		// Clean up
+		unset( $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
+	}
 
-        $this->assertIsString($ua);
-        $this->assertEquals('Unknown', $ua);
+	public function testUserAgentRetrieval(): void {
+		$ua = wp_auth_jwt_get_user_agent();
 
-        // Test with actual user agent
-        $_SERVER['HTTP_USER_AGENT'] = 'TestAgent/1.0';
-        $ua = wp_auth_jwt_get_user_agent();
-        $this->assertEquals('TestAgent/1.0', $ua);
+		$this->assertIsString( $ua );
+		$this->assertEquals( 'Unknown', $ua );
 
-        // Clean up
-        unset($_SERVER['HTTP_USER_AGENT']);
-    }
+		// Test with actual user agent
+		$_SERVER['HTTP_USER_AGENT'] = 'TestAgent/1.0';
+		$ua                         = wp_auth_jwt_get_user_agent();
+		$this->assertEquals( 'TestAgent/1.0', $ua );
 
-    public function testCookieSettings(): void
-    {
-        // Test cookie setting function exists
-        $this->assertTrue(function_exists('wp_auth_jwt_set_cookie'));
+		// Clean up
+		unset( $_SERVER['HTTP_USER_AGENT'] );
+	}
 
-        // Test cookie deletion function exists
-        $this->assertTrue(function_exists('wp_auth_jwt_delete_cookie'));
-    }
+	public function testCookieSettings(): void {
+		// Test cookie setting function exists
+		$this->assertTrue( function_exists( 'wp_auth_jwt_set_cookie' ) );
 
-    public function testSuccessResponse(): void
-    {
-        $response = wp_auth_jwt_success_response(['token' => 'test123'], 'Login successful');
+		// Test cookie deletion function exists
+		$this->assertTrue( function_exists( 'wp_auth_jwt_delete_cookie' ) );
+	}
 
-        $this->assertInstanceOf('WP_REST_Response', $response);
-        $this->assertEquals(200, $response->get_status());
+	public function testSuccessResponse(): void {
+		$response = wp_auth_jwt_success_response( array( 'token' => 'test123' ), 'Login successful' );
 
-        $data = $response->get_data();
-        $this->assertTrue($data['success']);
-        $this->assertEquals(['token' => 'test123'], $data['data']);
-        $this->assertEquals('Login successful', $data['message']);
-    }
+		$this->assertInstanceOf( 'WP_REST_Response', $response );
+		$this->assertEquals( 200, $response->get_status() );
 
-    public function testErrorResponse(): void
-    {
-        $error = wp_auth_jwt_error_response('invalid_token', 'The token is invalid', 401);
+		$data = $response->get_data();
+		$this->assertTrue( $data['success'] );
+		$this->assertEquals( array( 'token' => 'test123' ), $data['data'] );
+		$this->assertEquals( 'Login successful', $data['message'] );
+	}
 
-        $this->assertInstanceOf('WP_Error', $error);
-        $this->assertEquals('invalid_token', $error->get_error_code());
-        $this->assertEquals('The token is invalid', $error->get_error_message());
+	public function testErrorResponse(): void {
+		$error = wp_auth_jwt_error_response( 'invalid_token', 'The token is invalid', 401 );
 
-        $data = $error->get_error_data();
-        $this->assertEquals(401, $data['status']);
-    }
+		$this->assertInstanceOf( 'WP_Error', $error );
+		$this->assertEquals( 'invalid_token', $error->get_error_code() );
+		$this->assertEquals( 'The token is invalid', $error->get_error_message() );
 
-    public function testUserDataFormatting(): void
-    {
-        // Create mock user
-        $user = new stdClass();
-        $user->ID = 123;
-        $user->user_login = 'testuser';
-        $user->user_email = 'test@example.com';
-        $user->display_name = 'Test User';
-        $user->first_name = 'Test';
-        $user->last_name = 'User';
-        $user->user_registered = '2023-01-01 00:00:00';
-        $user->roles = ['subscriber'];
+		$data = $error->get_error_data();
+		$this->assertEquals( 401, $data['status'] );
+	}
 
-        // Mock get_avatar_url function
-        if (!function_exists('get_avatar_url')) {
-            function get_avatar_url($user_id)
-            {
-                return 'https://example.com/avatar.jpg';
-            }
-        }
+	public function testUserDataFormatting(): void {
+		// Create mock user
+		$user                  = new stdClass();
+		$user->ID              = 123;
+		$user->user_login      = 'testuser';
+		$user->user_email      = 'test@example.com';
+		$user->display_name    = 'Test User';
+		$user->first_name      = 'Test';
+		$user->last_name       = 'User';
+		$user->user_registered = '2023-01-01 00:00:00';
+		$user->roles           = array( 'subscriber' );
 
-        $formatted = wp_auth_jwt_format_user_data($user);
+		// Mock get_avatar_url function
+		if ( ! function_exists( 'get_avatar_url' ) ) {
+			function get_avatar_url( $user_id ) {
+				return 'https://example.com/avatar.jpg';
+			}
+		}
 
-        $this->assertIsArray($formatted);
-        $this->assertEquals(123, $formatted['id']);
-        $this->assertEquals('testuser', $formatted['username']);
-        $this->assertEquals('test@example.com', $formatted['email']);
-        $this->assertEquals('Test User', $formatted['display_name']);
-        $this->assertEquals('Test', $formatted['first_name']);
-        $this->assertEquals('User', $formatted['last_name']);
-        $this->assertEquals(['subscriber'], $formatted['roles']);
-        $this->assertEquals('https://example.com/avatar.jpg', $formatted['avatar_url']);
-    }
+		$formatted = wp_auth_jwt_format_user_data( $user );
 
-    public function testCORSOriginValidation(): void
-    {
-        // Test valid origin
-        $this->assertTrue(wp_auth_jwt_is_valid_origin('https://example.com'));
-        $this->assertTrue(wp_auth_jwt_is_valid_origin('https://app.example.com'));
+		$this->assertIsArray( $formatted );
+		$this->assertEquals( 123, $formatted['id'] );
+		$this->assertEquals( 'testuser', $formatted['username'] );
+		$this->assertEquals( 'test@example.com', $formatted['email'] );
+		$this->assertEquals( 'Test User', $formatted['display_name'] );
+		$this->assertEquals( 'Test', $formatted['first_name'] );
+		$this->assertEquals( 'User', $formatted['last_name'] );
+		$this->assertEquals( array( 'subscriber' ), $formatted['roles'] );
+		$this->assertEquals( 'https://example.com/avatar.jpg', $formatted['avatar_url'] );
+	}
 
-        // Test invalid origin
-        $this->assertFalse(wp_auth_jwt_is_valid_origin('https://malicious.com'));
-    }
+	public function testCORSOriginValidation(): void {
+		// Test valid origin
+		$this->assertTrue( wp_auth_jwt_is_valid_origin( 'https://example.com' ) );
+		$this->assertTrue( wp_auth_jwt_is_valid_origin( 'https://app.example.com' ) );
 
-    public function testDebugLogging(): void
-    {
-        // Test debug log function exists
-        $this->assertTrue(function_exists('wp_auth_jwt_debug_log'));
+		// Test invalid origin
+		$this->assertFalse( wp_auth_jwt_is_valid_origin( 'https://malicious.com' ) );
+	}
 
-        // Test function can be called without errors
-        wp_auth_jwt_debug_log('Test message', ['data' => 'test']);
-        $this->assertTrue(true); // Should not throw errors
-    }
+	public function testDebugLogging(): void {
+		// Test debug log function exists
+		$this->assertTrue( function_exists( 'wp_auth_jwt_debug_log' ) );
+
+		// Test function can be called without errors
+		wp_auth_jwt_debug_log( 'Test message', array( 'data' => 'test' ) );
+		$this->assertTrue( true ); // Should not throw errors
+	}
 }

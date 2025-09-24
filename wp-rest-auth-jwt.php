@@ -13,153 +13,142 @@
  * Perfect for SPAs and mobile apps that need stateless authentication.
  */
 
-if (!defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-define('WP_REST_AUTH_JWT_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('WP_REST_AUTH_JWT_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WP_REST_AUTH_JWT_VERSION', '1.0.0');
+define( 'WP_REST_AUTH_JWT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'WP_REST_AUTH_JWT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'WP_REST_AUTH_JWT_VERSION', '1.0.0' );
 
-class WP_REST_Auth_JWT
-{
+class WP_REST_Auth_JWT {
 
-    private $auth_jwt;
-    private $admin_settings;
 
-    public function __construct()
-    {
-        add_action('plugins_loaded', [$this, 'init']);
-        register_activation_hook(__FILE__, [$this, 'activate']);
-        register_deactivation_hook(__FILE__, [$this, 'deactivate']);
-    }
+	private $auth_jwt;
+	private $admin_settings;
 
-    public function init()
-    {
-        $this->load_dependencies();
-        $this->setup_constants();
-        $this->init_hooks();
-    }
+	public function __construct() {
+		add_action( 'plugins_loaded', array( $this, 'init' ) );
+		register_activation_hook( __FILE__, array( $this, 'activate' ) );
+		register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
+	}
 
-    private function load_dependencies()
-    {
-        require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/helpers.php';
-        require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-admin-settings.php';
-        require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-auth-jwt.php';
+	public function init() {
+		$this->load_dependencies();
+		$this->setup_constants();
+		$this->init_hooks();
+	}
 
-        // Initialize admin settings
-        if (is_admin()) {
-            $this->admin_settings = new WP_REST_Auth_JWT_Admin_Settings();
-        }
+	private function load_dependencies() {
+		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/helpers.php';
+		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-admin-settings.php';
+		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-auth-jwt.php';
 
-        $this->auth_jwt = new Auth_JWT();
-    }
+		// Initialize admin settings
+		if ( is_admin() ) {
+			$this->admin_settings = new WP_REST_Auth_JWT_Admin_Settings();
+		}
 
-    private function setup_constants()
-    {
-        $jwt_settings = WP_REST_Auth_JWT_Admin_Settings::get_jwt_settings();
+		$this->auth_jwt = new Auth_JWT();
+	}
 
-        // Setup JWT constants from admin settings or fallback to wp-config.php
-        if (!defined('WP_JWT_AUTH_SECRET')) {
-            $secret = $jwt_settings['secret_key'] ?? '';
-            if (!empty($secret)) {
-                define('WP_JWT_AUTH_SECRET', $secret);
-            } else {
-                // Check if it's defined in wp-config.php as fallback
-                if (!defined('WP_JWT_AUTH_SECRET')) {
-                    add_action('admin_notices', [$this, 'missing_config_notice']);
-                    return;
-                }
-            }
-        }
+	private function setup_constants() {
+		$jwt_settings = WP_REST_Auth_JWT_Admin_Settings::get_jwt_settings();
 
-        // Back-compat constant expected by some tests
-        if (!defined('WP_JWT_SECRET')) {
-            define('WP_JWT_SECRET', WP_JWT_AUTH_SECRET);
-        }
+		// Setup JWT constants from admin settings or fallback to wp-config.php
+		if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
+			$secret = $jwt_settings['secret_key'] ?? '';
+			if ( ! empty( $secret ) ) {
+				define( 'WP_JWT_AUTH_SECRET', $secret );
+			} else {
+				// Check if it's defined in wp-config.php as fallback
+				if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
+					add_action( 'admin_notices', array( $this, 'missing_config_notice' ) );
+					return;
+				}
+			}
+		}
 
-        // Set token expiration times from admin settings
-        if (!defined('WP_JWT_ACCESS_TTL')) {
-            define('WP_JWT_ACCESS_TTL', $jwt_settings['access_token_expiry'] ?? 3600);
-        }
+		// Back-compat constant expected by some tests
+		if ( ! defined( 'WP_JWT_SECRET' ) ) {
+			define( 'WP_JWT_SECRET', WP_JWT_AUTH_SECRET );
+		}
 
-        if (!defined('WP_JWT_REFRESH_TTL')) {
-            define('WP_JWT_REFRESH_TTL', $jwt_settings['refresh_token_expiry'] ?? 2592000);
-        }
-    }
+		// Set token expiration times from admin settings
+		if ( ! defined( 'WP_JWT_ACCESS_TTL' ) ) {
+			define( 'WP_JWT_ACCESS_TTL', $jwt_settings['access_token_expiry'] ?? 3600 );
+		}
 
-    private function init_hooks()
-    {
-        add_action('rest_api_init', [$this, 'register_rest_routes']);
-        add_filter('rest_authentication_errors', [$this, 'maybe_auth_bearer'], 20);
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
-    }
+		if ( ! defined( 'WP_JWT_REFRESH_TTL' ) ) {
+			define( 'WP_JWT_REFRESH_TTL', $jwt_settings['refresh_token_expiry'] ?? 2592000 );
+		}
+	}
 
-    public function register_rest_routes()
-    {
-        $this->auth_jwt->register_routes();
-    }
+	private function init_hooks() {
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		add_filter( 'rest_authentication_errors', array( $this, 'maybe_auth_bearer' ), 20 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+	}
 
-    public function maybe_auth_bearer($result)
-    {
-        if (!empty($result)) {
-            return $result;
-        }
+	public function register_rest_routes() {
+		$this->auth_jwt->register_routes();
+	}
 
-        $auth_header = $this->get_auth_header();
-        if (!$auth_header || stripos($auth_header, 'Bearer ') !== 0) {
-            return $result;
-        }
+	public function maybe_auth_bearer( $result ) {
+		if ( ! empty( $result ) ) {
+			return $result;
+		}
 
-        $token = trim(substr($auth_header, 7));
+		$auth_header = $this->get_auth_header();
+		if ( ! $auth_header || stripos( $auth_header, 'Bearer ' ) !== 0 ) {
+			return $result;
+		}
 
-        // Try JWT authentication
-        $jwt_result = $this->auth_jwt->authenticate_bearer($token);
-        if (!is_wp_error($jwt_result)) {
-            return $jwt_result;
-        }
+		$token = trim( substr( $auth_header, 7 ) );
 
-        return $jwt_result;
-    }
+		// Try JWT authentication
+		$jwt_result = $this->auth_jwt->authenticate_bearer( $token );
+		if ( ! is_wp_error( $jwt_result ) ) {
+			return $jwt_result;
+		}
 
-    private function get_auth_header()
-    {
-        $auth_header = '';
+		return $jwt_result;
+	}
 
-        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-            $auth_header = $_SERVER['HTTP_AUTHORIZATION'];
-        } elseif (isset($_SERVER['Authorization'])) {
-            $auth_header = $_SERVER['Authorization'];
-        } elseif (function_exists('apache_request_headers')) {
-            $headers = apache_request_headers();
-            $auth_header = $headers['Authorization'] ?? '';
-        }
+	private function get_auth_header() {
+		$auth_header = '';
 
-        return $auth_header;
-    }
+		if ( isset( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
+			$auth_header = $_SERVER['HTTP_AUTHORIZATION'];
+		} elseif ( isset( $_SERVER['Authorization'] ) ) {
+			$auth_header = $_SERVER['Authorization'];
+		} elseif ( function_exists( 'apache_request_headers' ) ) {
+			$headers     = apache_request_headers();
+			$auth_header = $headers['Authorization'] ?? '';
+		}
 
-    public function activate()
-    {
-        $this->create_refresh_tokens_table();
-    }
+		return $auth_header;
+	}
 
-    public function deactivate()
-    {
-        // Clean up refresh tokens on deactivation
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'jwt_refresh_tokens';
-        $wpdb->query("DELETE FROM {$table_name} WHERE expires_at < " . time());
-    }
+	public function activate() {
+		$this->create_refresh_tokens_table();
+	}
 
-    private function create_refresh_tokens_table()
-    {
-        global $wpdb;
+	public function deactivate() {
+		// Clean up refresh tokens on deactivation
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
+		$wpdb->query( "DELETE FROM {$table_name} WHERE expires_at < " . time() );
+	}
 
-        $table_name = $wpdb->prefix . 'jwt_refresh_tokens';
+	private function create_refresh_tokens_table() {
+		global $wpdb;
 
-        $charset_collate = $wpdb->get_charset_collate();
+		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 
-        $sql = "CREATE TABLE $table_name (
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE $table_name (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             user_id bigint(20) NOT NULL,
             token_hash varchar(255) NOT NULL,
@@ -178,44 +167,45 @@ class WP_REST_Auth_JWT
             KEY token_type (token_type)
         ) $charset_collate;";
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-    }
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
+	}
 
-    // Back-compat public wrapper expected by tests
-    public function create_jwt_tables()
-    {
-        $this->create_refresh_tokens_table();
-    }
+	// Back-compat public wrapper expected by tests
+	public function create_jwt_tables() {
+		$this->create_refresh_tokens_table();
+	}
 
-    public function missing_config_notice()
-    {
-        $settings_url = admin_url('options-general.php?page=wp-rest-auth-jwt');
-        echo '<div class="notice notice-error"><p>';
-        echo '<strong>WP REST Auth JWT:</strong> JWT Secret Key is required for the plugin to work. ';
-        echo '<a href="' . esc_url($settings_url) . '">Configure it in the plugin settings</a> ';
-        echo 'or define <code>WP_JWT_AUTH_SECRET</code> in your wp-config.php file.';
-        echo '</p></div>';
-    }
+	public function missing_config_notice() {
+		$settings_url = admin_url( 'options-general.php?page=wp-rest-auth-jwt' );
+		echo '<div class="notice notice-error"><p>';
+		echo '<strong>WP REST Auth JWT:</strong> JWT Secret Key is required for the plugin to work. ';
+		echo '<a href="' . esc_url( $settings_url ) . '">Configure it in the plugin settings</a> ';
+		echo 'or define <code>WP_JWT_AUTH_SECRET</code> in your wp-config.php file.';
+		echo '</p></div>';
+	}
 
-    public function enqueue_scripts()
-    {
-        if (is_admin()) {
-            wp_enqueue_script(
-                'wp-rest-auth-jwt-admin',
-                WP_REST_AUTH_JWT_PLUGIN_URL . 'assets/admin.js',
-                ['jquery'],
-                WP_REST_AUTH_JWT_VERSION,
-                true
-            );
+	public function enqueue_scripts() {
+		if ( is_admin() ) {
+			wp_enqueue_script(
+				'wp-rest-auth-jwt-admin',
+				WP_REST_AUTH_JWT_PLUGIN_URL . 'assets/admin.js',
+				array( 'jquery' ),
+				WP_REST_AUTH_JWT_VERSION,
+				true
+			);
 
-            wp_localize_script('wp-rest-auth-jwt-admin', 'wpRestAuthJWT', [
-                'ajaxUrl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('wp_rest_auth_jwt_nonce'),
-                'restUrl' => rest_url()
-            ]);
-        }
-    }
+			wp_localize_script(
+				'wp-rest-auth-jwt-admin',
+				'wpRestAuthJWT',
+				array(
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+					'nonce'   => wp_create_nonce( 'wp_rest_auth_jwt_nonce' ),
+					'restUrl' => rest_url(),
+				)
+			);
+		}
+	}
 }
 
 new WP_REST_Auth_JWT();

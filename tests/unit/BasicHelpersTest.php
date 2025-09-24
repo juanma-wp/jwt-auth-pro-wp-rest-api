@@ -6,54 +6,59 @@ use PHPUnit\Framework\TestCase;
  * Basic unit tests for core JWT helper functions
  * Tests only WordPress-independent functionality
  */
-class BasicHelpersTest extends TestCase
-{
-    public function testJWTEncoding(): void
-    {
-        $payload = ['user_id' => 1, 'exp' => time() + 3600];
-        $secret = 'test-secret';
+class BasicHelpersTest extends TestCase {
 
-        $token = wp_auth_jwt_encode($payload, $secret);
+	public function testJWTEncoding(): void {
+		$payload = array(
+			'user_id' => 1,
+			'exp'     => time() + 3600,
+		);
+		$secret  = 'test-secret';
 
-        $this->assertIsString($token);
-        $this->assertStringContainsString('.', $token);
+		$token = wp_auth_jwt_encode( $payload, $secret );
 
-        // JWT should have 3 parts separated by dots
-        $parts = explode('.', $token);
-        $this->assertCount(3, $parts);
-    }
+		$this->assertIsString( $token );
+		$this->assertStringContainsString( '.', $token );
 
-    public function testJWTDecoding(): void
-    {
-        $payload = ['user_id' => 123, 'exp' => time() + 3600];
-        $secret = 'test-secret';
+		// JWT should have 3 parts separated by dots
+		$parts = explode( '.', $token );
+		$this->assertCount( 3, $parts );
+	}
 
-        $token = wp_auth_jwt_encode($payload, $secret);
-        $decoded = wp_auth_jwt_decode($token, $secret);
+	public function testJWTDecoding(): void {
+		$payload = array(
+			'user_id' => 123,
+			'exp'     => time() + 3600,
+		);
+		$secret  = 'test-secret';
 
-        $this->assertEquals($payload['user_id'], $decoded['user_id']);
-        $this->assertEquals($payload['exp'], $decoded['exp']);
-    }
+		$token   = wp_auth_jwt_encode( $payload, $secret );
+		$decoded = wp_auth_jwt_decode( $token, $secret );
 
-    public function testJWTDecodingWithWrongSecret(): void
-    {
-        $payload = ['user_id' => 123, 'exp' => time() + 3600];
+		$this->assertEquals( $payload['user_id'], $decoded['user_id'] );
+		$this->assertEquals( $payload['exp'], $decoded['exp'] );
+	}
 
-        $token = wp_auth_jwt_encode($payload, 'secret1');
-        $decoded = wp_auth_jwt_decode($token, 'secret2');
+	public function testJWTDecodingWithWrongSecret(): void {
+		$payload = array(
+			'user_id' => 123,
+			'exp'     => time() + 3600,
+		);
 
-        $this->assertFalse($decoded);
-    }
+		$token   = wp_auth_jwt_encode( $payload, 'secret1' );
+		$decoded = wp_auth_jwt_decode( $token, 'secret2' );
 
-    public function testBase64UrlEncoding(): void
-    {
-        $data = 'test data with special chars +/=';
-        $encoded = wp_auth_jwt_base64url_encode($data);
-        $decoded = wp_auth_jwt_base64url_decode($encoded);
+		$this->assertFalse( $decoded );
+	}
 
-        $this->assertEquals($data, $decoded);
-        $this->assertStringNotContainsString('+', $encoded);
-        $this->assertStringNotContainsString('/', $encoded);
-        $this->assertStringNotContainsString('=', $encoded);
-    }
+	public function testBase64UrlEncoding(): void {
+		$data    = 'test data with special chars +/=';
+		$encoded = wp_auth_jwt_base64url_encode( $data );
+		$decoded = wp_auth_jwt_base64url_decode( $encoded );
+
+		$this->assertEquals( $data, $decoded );
+		$this->assertStringNotContainsString( '+', $encoded );
+		$this->assertStringNotContainsString( '/', $encoded );
+		$this->assertStringNotContainsString( '=', $encoded );
+	}
 }
