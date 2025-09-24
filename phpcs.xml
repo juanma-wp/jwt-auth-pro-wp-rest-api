@@ -9,8 +9,6 @@
 	<rule ref="WordPress">
 		<!-- Exclude problematic sniffs that cause PHP 8+ issues -->
 		<exclude name="WordPress.WP.I18n"/>
-		<exclude name="WordPress.WhiteSpace.PrecisionAlignment"/>
-		<exclude name="WordPress.WhiteSpace.DisallowInlineTabs"/>
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals"/>
 
 		<!-- File comment exclusions from reference -->
@@ -21,9 +19,10 @@
 		<exclude name="WordPress.Files.FileName"/>
 	</rule>
 
-	<!-- Exclude vendor and node_modules -->
+	<!-- Exclude vendor, node_modules and tests -->
 	<exclude-pattern>vendor/*</exclude-pattern>
 	<exclude-pattern>node_modules/*</exclude-pattern>
+	<exclude-pattern>tests/*</exclude-pattern>
 
 	<!-- Check PHP files -->
 	<arg name="extensions" value="php"/>
