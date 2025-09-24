@@ -11,6 +11,8 @@
  *
  * Simple, focused JWT authentication without the complexity of OAuth2.
  * Perfect for SPAs and mobile apps that need stateless authentication.
+ *
+ * @package WPRESTAuthJWT
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,30 +23,55 @@ define( 'WP_REST_AUTH_JWT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WP_REST_AUTH_JWT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WP_REST_AUTH_JWT_VERSION', '1.0.0' );
 
+/**
+ * Main plugin class for WP REST Auth JWT.
+ *
+ * @package WPRESTAuthJWT
+ */
 class WP_REST_Auth_JWT {
 
 
+	/**
+	 * Auth JWT instance.
+	 *
+	 * @var Auth_JWT
+	 */
 	private $auth_jwt;
+
+	/**
+	 * Admin settings instance.
+	 *
+	 * @var WP_REST_Auth_JWT_Admin_Settings
+	 */
 	private $admin_settings;
 
+	/**
+	 * Constructor.
+	 */
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
 		register_activation_hook( __FILE__, array( $this, 'activate' ) );
 		register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
 	}
 
+	/**
+	 * Initialize the plugin.
+	 */
 	public function init() {
 		$this->load_dependencies();
 		$this->setup_constants();
 		$this->init_hooks();
 	}
 
+	/**
+	 * Load plugin dependencies.
+	 */
 	private function load_dependencies() {
 		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/helpers.php';
 		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-admin-settings.php';
 		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-auth-jwt.php';
 
-		// Initialize admin settings
+		// Initialize admin settings.
 		if ( is_admin() ) {
 			$this->admin_settings = new WP_REST_Auth_JWT_Admin_Settings();
 		}
@@ -52,16 +79,19 @@ class WP_REST_Auth_JWT {
 		$this->auth_jwt = new Auth_JWT();
 	}
 
+	/**
+	 * Setup plugin constants.
+	 */
 	private function setup_constants() {
 		$jwt_settings = WP_REST_Auth_JWT_Admin_Settings::get_jwt_settings();
 
-		// Setup JWT constants from admin settings or fallback to wp-config.php
+		// Setup JWT constants from admin settings or fallback to wp-config.php.
 		if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
 			$secret = $jwt_settings['secret_key'] ?? '';
 			if ( ! empty( $secret ) ) {
 				define( 'WP_JWT_AUTH_SECRET', $secret );
 			} else {
-				// Check if it's defined in wp-config.php as fallback
+				// Check if it's defined in wp-config.php as fallback.
 				if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
 					add_action( 'admin_notices', array( $this, 'missing_config_notice' ) );
 					return;
@@ -69,12 +99,12 @@ class WP_REST_Auth_JWT {
 			}
 		}
 
-		// Back-compat constant expected by some tests
+		// Back-compat constant expected by some tests.
 		if ( ! defined( 'WP_JWT_SECRET' ) ) {
 			define( 'WP_JWT_SECRET', WP_JWT_AUTH_SECRET );
 		}
 
-		// Set token expiration times from admin settings
+		// Set token expiration times from admin settings.
 		if ( ! defined( 'WP_JWT_ACCESS_TTL' ) ) {
 			define( 'WP_JWT_ACCESS_TTL', $jwt_settings['access_token_expiry'] ?? 3600 );
 		}
@@ -84,16 +114,28 @@ class WP_REST_Auth_JWT {
 		}
 	}
 
+	/**
+	 * Initialize WordPress hooks.
+	 */
 	private function init_hooks() {
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'maybe_auth_bearer' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	}
 
+	/**
+	 * Register REST API routes.
+	 */
 	public function register_rest_routes() {
 		$this->auth_jwt->register_routes();
 	}
 
+	/**
+	 * Maybe authenticate with bearer token.
+	 *
+	 * @param mixed $result The current authentication result.
+	 * @return mixed Authentication result.
+	 */
 	public function maybe_auth_bearer( $result ) {
 		if ( ! empty( $result ) ) {
 			return $result;
@@ -106,7 +148,7 @@ class WP_REST_Auth_JWT {
 
 		$token = trim( substr( $auth_header, 7 ) );
 
-		// Try JWT authentication
+		// Try JWT authentication.
 		$jwt_result = $this->auth_jwt->authenticate_bearer( $token );
 		if ( ! is_wp_error( $jwt_result ) ) {
 			return $jwt_result;
@@ -115,13 +157,18 @@ class WP_REST_Auth_JWT {
 		return $jwt_result;
 	}
 
+	/**
+	 * Get the authorization header.
+	 *
+	 * @return string Authorization header value.
+	 */
 	private function get_auth_header() {
 		$auth_header = '';
 
 		if ( isset( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
-			$auth_header = $_SERVER['HTTP_AUTHORIZATION'];
+			$auth_header = sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) );
 		} elseif ( isset( $_SERVER['Authorization'] ) ) {
-			$auth_header = $_SERVER['Authorization'];
+			$auth_header = sanitize_text_field( wp_unslash( $_SERVER['Authorization'] ) );
 		} elseif ( function_exists( 'apache_request_headers' ) ) {
 			$headers     = apache_request_headers();
 			$auth_header = $headers['Authorization'] ?? '';
@@ -130,17 +177,26 @@ class WP_REST_Auth_JWT {
 		return $auth_header;
 	}
 
+	/**
+	 * Activate the plugin.
+	 */
 	public function activate() {
 		$this->create_refresh_tokens_table();
 	}
 
+	/**
+	 * Deactivate the plugin.
+	 */
 	public function deactivate() {
-		// Clean up refresh tokens on deactivation
+		// Clean up refresh tokens on deactivation.
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
-		$wpdb->query( "DELETE FROM {$table_name} WHERE expires_at < " . time() );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}jwt_refresh_tokens WHERE expires_at < %d", time() ) );
 	}
 
+	/**
+	 * Create the refresh tokens table.
+	 */
 	private function create_refresh_tokens_table() {
 		global $wpdb;
 
@@ -171,11 +227,16 @@ class WP_REST_Auth_JWT {
 		dbDelta( $sql );
 	}
 
-	// Back-compat public wrapper expected by tests
+	/**
+	 * Back-compat public wrapper expected by tests.
+	 */
 	public function create_jwt_tables() {
 		$this->create_refresh_tokens_table();
 	}
 
+	/**
+	 * Display missing configuration notice.
+	 */
 	public function missing_config_notice() {
 		$settings_url = admin_url( 'options-general.php?page=wp-rest-auth-jwt' );
 		echo '<div class="notice notice-error"><p>';
@@ -185,6 +246,9 @@ class WP_REST_Auth_JWT {
 		echo '</p></div>';
 	}
 
+	/**
+	 * Enqueue scripts and styles.
+	 */
 	public function enqueue_scripts() {
 		if ( is_admin() ) {
 			wp_enqueue_script(
