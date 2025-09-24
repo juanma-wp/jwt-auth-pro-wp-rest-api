@@ -9,10 +9,9 @@
 /tests/coverage/
 
 # Composer
-composer.lock
+# composer.lock - committed for reliable CI builds
 
 # npm
-package-lock.json
 yarn.lock
 
 # IDE
