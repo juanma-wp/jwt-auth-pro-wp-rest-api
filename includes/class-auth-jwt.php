@@ -395,7 +395,13 @@ class Auth_JWT {
 		return $result !== false;
 	}
 
-	private function validate_refresh_token( string $refresh_token ) {
+	/**
+	 * Validate refresh token.
+	 *
+	 * @param string $refresh_token The refresh token to validate.
+	 * @return array|null Token data or null if invalid.
+	 */
+	private function validate_refresh_token( string $refresh_token ): ?array {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';

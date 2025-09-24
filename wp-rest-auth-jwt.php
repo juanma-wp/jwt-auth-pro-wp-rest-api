@@ -77,7 +77,7 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Initialize the plugin.
 	 */
-	public function init() {
+	public function init(): void {
 		$this->load_dependencies();
 		$this->setup_constants();
 		$this->init_hooks();
@@ -86,7 +86,7 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Load plugin dependencies.
 	 */
-	private function load_dependencies() {
+	private function load_dependencies(): void {
 		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/helpers.php';
 		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-admin-settings.php';
 		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-auth-jwt.php';
@@ -102,7 +102,7 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Setup plugin constants.
 	 */
-	private function setup_constants() {
+	private function setup_constants(): void {
 		$jwt_settings = WP_REST_Auth_JWT_Admin_Settings::get_jwt_settings();
 
 		// Setup JWT constants from admin settings or fallback to wp-config.php.
@@ -137,7 +137,7 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Initialize WordPress hooks.
 	 */
-	private function init_hooks() {
+	private function init_hooks(): void {
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'maybe_auth_bearer' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -146,10 +146,16 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Register REST API routes.
 	 */
-	public function register_rest_routes() {
+	public function register_rest_routes(): void {
 		$this->auth_jwt->register_routes();
 	}
 
+	/**
+	 * Maybe authenticate with bearer token.
+	 *
+	 * @param mixed $result The current authentication result.
+	 * @return mixed Authentication result.
+	 */
 	/**
 	 * Maybe authenticate with bearer token.
 	 *
@@ -182,7 +188,7 @@ class WP_REST_Auth_JWT {
 	 *
 	 * @return string Authorization header value.
 	 */
-	private function get_auth_header() {
+	private function get_auth_header(): string {
 		$auth_header = '';
 
 		if ( isset( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
@@ -200,14 +206,14 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Activate the plugin.
 	 */
-	public function activate() {
+	public function activate(): void {
 		$this->create_refresh_tokens_table();
 	}
 
 	/**
 	 * Deactivate the plugin.
 	 */
-	public function deactivate() {
+	public function deactivate(): void {
 		// Clean up refresh tokens on deactivation.
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
@@ -217,7 +223,7 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Create the refresh tokens table.
 	 */
-	private function create_refresh_tokens_table() {
+	private function create_refresh_tokens_table(): void {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
@@ -250,14 +256,14 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Back-compat public wrapper expected by tests.
 	 */
-	public function create_jwt_tables() {
+	public function create_jwt_tables(): void {
 		$this->create_refresh_tokens_table();
 	}
 
 	/**
 	 * Display missing configuration notice.
 	 */
-	public function missing_config_notice() {
+	public function missing_config_notice(): void {
 		$settings_url = admin_url( 'options-general.php?page=wp-rest-auth-jwt' );
 		echo '<div class="notice notice-error"><p>';
 		echo '<strong>WP REST Auth JWT:</strong> JWT Secret Key is required for the plugin to work. ';
@@ -269,7 +275,7 @@ class WP_REST_Auth_JWT {
 	/**
 	 * Enqueue scripts and styles.
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts(): void {
 		if ( is_admin() ) {
 			wp_enqueue_script(
 				'wp-rest-auth-jwt-admin',
