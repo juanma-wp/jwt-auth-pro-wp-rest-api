@@ -106,7 +106,6 @@ class Auth_JWT {
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
 		add_filter(
 			'rest_pre_serve_request',
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Signature must accept 4 params for the filter.
 			function ( $served, $_result, $_request, $_server ) {
 				wp_auth_jwt_maybe_add_cors_headers();
 				return $served;
@@ -119,10 +118,11 @@ class Auth_JWT {
 	/**
 	 * Compatibility: generate an access token for a user id.
 	 *
-	 * @param int $user_id User ID to generate token for.
+	 * @param int   $user_id      User ID to generate token for.
+	 * @param array $extra_claims Optional extra claims to merge into the token.
 	 * @return string Generated JWT access token.
 	 */
-	public function generate_access_token( int $user_id ): string {
+	public function generate_access_token( int $user_id, array $extra_claims = array() ): string {
 		$now    = time();
 		$claims = array(
 			'iss' => self::ISSUER,
@@ -131,6 +131,9 @@ class Auth_JWT {
 			'exp' => $now + WP_JWT_ACCESS_TTL,
 			'jti' => wp_auth_jwt_generate_token( 16 ),
 		);
+		if ( ! empty( $extra_claims ) ) {
+			$claims = array_merge( $claims, $extra_claims );
+		}
 		return wp_auth_jwt_encode( $claims, WP_JWT_AUTH_SECRET );
 	}
 
@@ -167,15 +170,9 @@ class Auth_JWT {
 		// Generate access token (JWT).
 		$now           = time();
 		$access_claims = array(
-			'iss'   => self::ISSUER,
-			'sub'   => (string) $user->ID,
-			'iat'   => $now,
-			'exp'   => $now + WP_JWT_ACCESS_TTL,
 			'roles' => array_values( $user->roles ),
-			'jti'   => wp_auth_jwt_generate_token( 16 ),
 		);
-
-		$access_token = wp_auth_jwt_encode( $access_claims, WP_JWT_AUTH_SECRET );
+		$access_token  = $this->generate_access_token( (int) $user->ID, $access_claims );
 
 		// Generate refresh token.
 		$refresh_token   = wp_auth_jwt_generate_token( 64 );
@@ -212,7 +209,6 @@ class Auth_JWT {
 	 * @return WP_REST_Response|WP_Error Response or error.
 	 */
 	public function refresh_access_token( WP_REST_Request $request ) {
-		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Required method signature for REST callback.
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$refresh_token = isset( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ) : '';
@@ -243,15 +239,9 @@ class Auth_JWT {
 		// Generate new access token.
 		$now           = time();
 		$access_claims = array(
-			'iss'   => self::ISSUER,
-			'sub'   => (string) $user->ID,
-			'iat'   => $now,
-			'exp'   => $now + WP_JWT_ACCESS_TTL,
 			'roles' => array_values( $user->roles ),
-			'jti'   => wp_auth_jwt_generate_token( 16 ),
 		);
-
-		$access_token = wp_auth_jwt_encode( $access_claims, WP_JWT_AUTH_SECRET );
+		$access_token  = $this->generate_access_token( (int) $user->ID, $access_claims );
 
 		// Optionally rotate refresh token for better security.
 		if ( apply_filters( 'wp_auth_jwt_rotate_refresh_token', true ) ) {
@@ -289,7 +279,6 @@ class Auth_JWT {
 	 * @return WP_REST_Response Success response.
 	 */
 	public function logout( WP_REST_Request $request ): WP_REST_Response {
-		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Required method signature for REST callback.
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$refresh_token = isset( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ) : '';
@@ -565,7 +554,6 @@ class Auth_JWT {
 	 * @return bool True if authenticated, false otherwise.
 	 */
 	public function whoami( ?WP_REST_Request $request = null ): bool {
-		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Compatibility method signature.
 		$user = wp_get_current_user();
 		if ( ! $user->exists() ) {
 			return false;
