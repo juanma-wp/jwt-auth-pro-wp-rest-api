@@ -106,6 +106,6 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=WordPress --extensions=php .
+        run: vendor/bin/phpcs -d memory_limit=512M --standard=WordPress --extensions=php .
 
 

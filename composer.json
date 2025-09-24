@@ -26,8 +26,8 @@
         }
     },
     "scripts": {
-        "lint": "phpcs --standard=WordPress --extensions=php .",
-        "lint-fix": "phpcbf --standard=WordPress --extensions=php ."
+        "lint": "phpcs -d memory_limit=512M --standard=WordPress --extensions=php . --ignore=vendor,node_modules",
+        "lint-fix": "phpcbf -d memory_limit=512M --standard=WordPress --extensions=php . --ignore=vendor,node_modules"
     },
     "config": {
         "allow-plugins": {
