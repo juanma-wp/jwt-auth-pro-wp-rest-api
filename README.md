@@ -1,5 +1,7 @@
 # WP REST Auth JWT
 
+[![CI](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/ci.yml/badge.svg)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/ci.yml)
+
 🔐 **Simple, secure JWT authentication for WordPress REST API**
 
 A focused, lightweight plugin providing JWT authentication with HTTPOnly refresh tokens for WordPress REST API. Perfect for SPAs, mobile apps, and headless WordPress implementations.
