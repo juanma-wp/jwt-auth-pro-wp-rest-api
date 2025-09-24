@@ -185,7 +185,7 @@ function wp_auth_jwt_set_cookie(
 	int $expires,
 	string $path = '/',
 	bool $httponly = true,
-	bool $secure = null
+	?bool $secure = null
 ): bool {
 	$secure   = $secure ?? is_ssl();
 	$samesite = apply_filters( 'wp_auth_jwt_cookie_samesite', 'Strict' );
@@ -350,5 +350,7 @@ function wp_auth_jwt_debug_log( $message, array $context = array() ): void {
 		}
 	} catch ( \Throwable $e ) {
 		// Never let logging break the app/tests.
+		// Intentionally empty - we want to silently fail logging errors.
+		unset( $e );
 	}
 }

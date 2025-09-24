@@ -34,7 +34,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 	}
 
-	public function add_admin_menu() {
+	public function add_admin_menu(): void {
 		add_options_page(
 			'WP REST Auth JWT Settings',
 			'WP REST Auth JWT',
@@ -44,7 +44,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		);
 	}
 
-	public function register_settings() {
+	public function register_settings(): void {
 		// Register setting groups
 		register_setting(
 			self::OPTION_GROUP,
@@ -119,7 +119,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		);
 	}
 
-	public function enqueue_admin_scripts( $hook ) {
+	public function enqueue_admin_scripts( string $hook ): void {
 		if ( $hook !== 'settings_page_wp-rest-auth-jwt' ) {
 			return;
 		}
@@ -142,7 +142,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		);
 	}
 
-	public function admin_page() {
+	public function admin_page(): void {
 		$active_tab = $_GET['tab'] ?? 'jwt';
 		?>
 		<div class="wrap">
@@ -281,20 +281,20 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	}
 
 	// Section callbacks
-	public function jwt_settings_section() {
+	public function jwt_settings_section(): void {
 		echo '<p>Configure JWT authentication settings. JWT tokens provide stateless authentication for your WordPress REST API.</p>';
 	}
 
-	public function general_settings_section() {
+	public function general_settings_section(): void {
 		echo '<p>General plugin settings and security options.</p>';
 	}
 
 	// Field callbacks
-	public function jwt_secret_key_field() {
+	public function jwt_secret_key_field(): void {
 		$settings = get_option( self::OPTION_JWT_SETTINGS, array() );
 		$value    = $settings['secret_key'] ?? '';
 		?>
-		<input type="password" id="jwt_secret_key" name="<?php echo self::OPTION_JWT_SETTINGS; ?>[secret_key]" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
+		<input type="password" id="jwt_secret_key" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[secret_key]" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
 		<button type="button" id="generate_jwt_secret" class="button">Generate New Secret</button>
 		<button type="button" id="toggle_jwt_secret" class="button">Show/Hide</button>
 		<p class="description">A secure random string used to sign JWT tokens. Generate a new one or enter your own (minimum 32 characters recommended).</p>
@@ -319,47 +319,67 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		<?php
 	}
 
-	public function jwt_access_token_expiry_field() {
+	/**
+	 * Render the JWT access token expiry field.
+	 */
+	public function jwt_access_token_expiry_field(): void {
 		$settings = get_option( self::OPTION_JWT_SETTINGS, array() );
 		$value    = $settings['access_token_expiry'] ?? 3600;
 		?>
-		<input type="number" id="jwt_access_token_expiry" name="<?php echo self::OPTION_JWT_SETTINGS; ?>[access_token_expiry]" value="<?php echo esc_attr( $value ); ?>" min="300" max="86400" />
+		<input type="number" id="jwt_access_token_expiry" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[access_token_expiry]" value="<?php echo esc_attr( $value ); ?>" min="300" max="86400" />
 		<p class="description">How long access tokens remain valid in seconds. Default: 3600 (1 hour). Range: 300-86400 seconds.</p>
 		<?php
 	}
 
-	public function jwt_refresh_token_expiry_field() {
+	/**
+	 * Render the JWT refresh token expiry field.
+	 */
+	public function jwt_refresh_token_expiry_field(): void {
 		$settings = get_option( self::OPTION_JWT_SETTINGS, array() );
 		$value    = $settings['refresh_token_expiry'] ?? 2592000;
 		?>
-		<input type="number" id="jwt_refresh_token_expiry" name="<?php echo self::OPTION_JWT_SETTINGS; ?>[refresh_token_expiry]" value="<?php echo esc_attr( $value ); ?>" min="3600" max="31536000" />
+		<input type="number" id="jwt_refresh_token_expiry" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[refresh_token_expiry]" value="<?php echo esc_attr( $value ); ?>" min="3600" max="31536000" />
 		<p class="description">How long refresh tokens remain valid in seconds. Default: 2592000 (30 days). Range: 3600-31536000 seconds.</p>
 		<?php
 	}
 
-	public function enable_debug_logging_field() {
+	/**
+	 * Render the debug logging enable field.
+	 */
+	public function enable_debug_logging_field(): void {
 		$settings = get_option( self::OPTION_GENERAL_SETTINGS, array() );
 		$checked  = isset( $settings['enable_debug_logging'] ) && $settings['enable_debug_logging'];
 		?>
 		<label>
-			<input type="checkbox" name="<?php echo self::OPTION_GENERAL_SETTINGS; ?>[enable_debug_logging]" value="1" <?php checked( $checked ); ?> />
+			<input type="checkbox" name="<?php echo esc_attr( self::OPTION_GENERAL_SETTINGS ); ?>[enable_debug_logging]" value="1" <?php checked( $checked ); ?> />
 			Enable detailed logging for authentication events
 		</label>
 		<p class="description">Logs will be written to your WordPress debug log. Ensure WP_DEBUG_LOG is enabled.</p>
 		<?php
 	}
 
-	public function cors_allowed_origins_field() {
+	/**
+	 * Render the CORS allowed origins field.
+	 */
+	public function cors_allowed_origins_field(): void {
 		$settings = get_option( self::OPTION_GENERAL_SETTINGS, array() );
 		$value    = $settings['cors_allowed_origins'] ?? "http://localhost:3000\nhttp://localhost:5173\nhttp://localhost:5174\nhttp://localhost:5175";
 		?>
-		<textarea name="<?php echo self::OPTION_GENERAL_SETTINGS; ?>[cors_allowed_origins]" class="large-text" rows="5"><?php echo esc_textarea( $value ); ?></textarea>
+		<textarea name="<?php echo esc_attr( self::OPTION_GENERAL_SETTINGS ); ?>[cors_allowed_origins]" class="large-text" rows="5"><?php echo esc_textarea( $value ); ?></textarea>
 		<p class="description">One origin per line. Use * to allow all origins (not recommended for production).</p>
 		<?php
 	}
 
-	// Sanitization callbacks
-	public function sanitize_jwt_settings( $input ) {
+	/**
+	 * Sanitization callbacks.
+	 */
+	/**
+	 * Sanitize JWT settings input.
+	 *
+	 * @param array $input Raw input values.
+	 * @return array Sanitized values.
+	 */
+	public function sanitize_jwt_settings( array $input ): array {
 		$sanitized = array();
 
 		if ( isset( $input['secret_key'] ) ) {
@@ -384,7 +404,13 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		return $sanitized;
 	}
 
-	public function sanitize_general_settings( $input ) {
+	/**
+	 * Sanitize general settings input.
+	 *
+	 * @param array $input Raw input values.
+	 * @return array Sanitized values.
+	 */
+	public function sanitize_general_settings( array $input ): array {
 		$sanitized = array();
 
 		$sanitized['enable_debug_logging'] = isset( $input['enable_debug_logging'] ) && $input['enable_debug_logging'];
@@ -397,8 +423,15 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		return $sanitized;
 	}
 
-	// Helper methods to get settings
-	public static function get_jwt_settings() {
+	/**
+	 * Helper methods to get settings.
+	 */
+	/**
+	 * Get JWT settings with default values.
+	 *
+	 * @return array JWT settings.
+	 */
+	public static function get_jwt_settings(): array {
 		return get_option(
 			self::OPTION_JWT_SETTINGS,
 			array(
@@ -409,7 +442,12 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		);
 	}
 
-	public static function get_general_settings() {
+	/**
+	 * Get general settings with default values.
+	 *
+	 * @return array General settings.
+	 */
+	public static function get_general_settings(): array {
 		return get_option(
 			self::OPTION_GENERAL_SETTINGS,
 			array(

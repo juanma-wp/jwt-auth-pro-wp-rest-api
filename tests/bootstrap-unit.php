@@ -32,6 +32,13 @@ if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
 	define( 'WP_JWT_AUTH_SECRET', 'test-secret-for-unit-testing' );
 }
 
+// Mock WordPress functions for unit tests
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	function wp_json_encode( $data, $options = 0, $depth = 512 ) {
+		return json_encode( $data, $options, $depth );
+	}
+}
+
 // Load only the helpers.php file for basic function testing
 require_once dirname( __DIR__ ) . '/includes/helpers.php';
 
