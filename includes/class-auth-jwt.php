@@ -388,11 +388,10 @@ class Auth_JWT {
 	public function store_refresh_token( int $user_id, string $refresh_token, int $expires_at ): bool {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
 
 		$result = $wpdb->insert(
-			$table_name,
+			$wpdb->prefix . 'jwt_refresh_tokens',
 			array(
 				'user_id'    => $user_id,
 				'token_hash' => $token_hash,
@@ -429,13 +428,12 @@ class Auth_JWT {
 	private function validate_refresh_token( string $refresh_token ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
 		$now        = time();
 
 		$token_data = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE token_hash = %s AND expires_at > %d AND is_revoked = 0 AND token_type = 'jwt'",
+				"SELECT * FROM {$wpdb->prefix}jwt_refresh_tokens WHERE token_hash = %s AND expires_at > %d AND is_revoked = 0 AND token_type = 'jwt'",
 				$token_hash,
 				$now
 			),
@@ -464,11 +462,10 @@ class Auth_JWT {
 	private function update_refresh_token( int $token_id, string $new_refresh_token, int $expires_at ): bool {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 		$token_hash = wp_auth_jwt_hash_token( $new_refresh_token, WP_JWT_AUTH_SECRET );
 
 		$result = $wpdb->update(
-			$table_name,
+			$wpdb->prefix . 'jwt_refresh_tokens',
 			array(
 				'token_hash' => $token_hash,
 				'expires_at' => $expires_at,
@@ -493,11 +490,10 @@ class Auth_JWT {
 	public function revoke_refresh_token( string $refresh_token ): bool {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
 
 		$result = $wpdb->update(
-			$table_name,
+			$wpdb->prefix . 'jwt_refresh_tokens',
 			array( 'is_revoked' => 1 ),
 			array(
 				'token_hash' => $token_hash,
@@ -518,15 +514,14 @@ class Auth_JWT {
 	 */
 	public function get_user_refresh_tokens( int $user_id ): array {
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 		$results    = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE user_id = %d AND token_type = 'jwt'",
+				"SELECT * FROM {$wpdb->prefix}jwt_refresh_tokens WHERE user_id = %d AND token_type = 'jwt'",
 				$user_id
 			),
 			ARRAY_A
 		);
-		return $results ?: array();
+		return $results ? $results : array();
 	}
 
 	/**
@@ -538,9 +533,8 @@ class Auth_JWT {
 	 */
 	public function revoke_user_token( int $user_id, int $token_id ): bool {
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 		$updated    = $wpdb->update(
-			$table_name,
+			$wpdb->prefix . 'jwt_refresh_tokens',
 			array( 'is_revoked' => 1 ),
 			array(
 				'id'         => $token_id,
@@ -550,7 +544,7 @@ class Auth_JWT {
 			array( '%d' ),
 			array( '%d', '%d', '%s' )
 		);
-		return $updated !== false;
+		return false !== $updated;
 	}
 
 	/**
@@ -562,7 +556,7 @@ class Auth_JWT {
 	 * @param WP_REST_Request|null $request Optional request object.
 	 * @return bool True if authenticated, false otherwise.
 	 */
-	public function whoami( WP_REST_Request $request = null ): bool {
+	public function whoami( ?WP_REST_Request $request = null ): bool {
 		$user = wp_get_current_user();
 		if ( ! $user || ! $user->ID ) {
 			return false;
@@ -576,11 +570,9 @@ class Auth_JWT {
 	public function clean_expired_tokens(): void {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
-
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$table_name} WHERE expires_at < %d AND token_type = 'jwt'",
+				"DELETE FROM {$wpdb->prefix}jwt_refresh_tokens WHERE expires_at < %d AND token_type = 'jwt'",
 				time()
 			)
 		);
