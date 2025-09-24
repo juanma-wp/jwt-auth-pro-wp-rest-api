@@ -106,6 +106,9 @@ jobs:
       - name: Install CS dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
+      - name: Register WordPress coding standards
+        run: vendor/bin/phpcs --config-set installed_paths vendor/wp-coding-standards/wpcs
+
       - name: Run PHPCS
         run: vendor/bin/phpcs -d memory_limit=512M --standard=WordPress --extensions=php .
 
