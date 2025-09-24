@@ -115,7 +115,13 @@ class Auth_JWT {
 		return wp_auth_jwt_encode( $claims, WP_JWT_AUTH_SECRET );
 	}
 
-	public function issue_token( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	/**
+	 * Issue a new access token.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
+	public function issue_token( WP_REST_Request $request ) {
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$username = $request->get_param( 'username' );
@@ -180,7 +186,13 @@ class Auth_JWT {
 		);
 	}
 
-	public function refresh_access_token( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	/**
+	 * Refresh an access token using a refresh token.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
+	public function refresh_access_token( WP_REST_Request $request ) {
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$refresh_token = $_COOKIE[ self::REFRESH_COOKIE_NAME ] ?? '';
@@ -250,7 +262,13 @@ class Auth_JWT {
 		);
 	}
 
-	public function logout( WP_REST_Request $request ) {
+	/**
+	 * Logout and revoke refresh token.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response Success response.
+	 */
+	public function logout( WP_REST_Request $request ): WP_REST_Response {
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		$refresh_token = $_COOKIE[ self::REFRESH_COOKIE_NAME ] ?? '';
@@ -265,6 +283,12 @@ class Auth_JWT {
 		return wp_auth_jwt_success_response( array(), 'Logout successful' );
 	}
 
+	/**
+	 * Verify a JWT token.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
 	public function verify_token( WP_REST_Request $request ) {
 		wp_auth_jwt_maybe_add_cors_headers();
 
@@ -297,6 +321,12 @@ class Auth_JWT {
 		);
 	}
 
+	/**
+	 * Authenticate using a bearer token.
+	 *
+	 * @param string $token The JWT token.
+	 * @return WP_User|WP_Error User object or error.
+	 */
 	public function authenticate_bearer( string $token ) {
 		$payload = wp_auth_jwt_decode( $token, WP_JWT_AUTH_SECRET );
 
@@ -467,7 +497,13 @@ class Auth_JWT {
 	}
 
 	// Compatibility: whoami-like endpoint for tests
-	public function whoami( WP_REST_Request $request = null ) {
+	/**
+	 * Check if user is authenticated.
+	 *
+	 * @param WP_REST_Request|null $request Optional request object.
+	 * @return bool True if authenticated, false otherwise.
+	 */
+	public function whoami( WP_REST_Request $request = null ): bool {
 		$user = wp_get_current_user();
 		if ( ! $user || ! $user->ID ) {
 			return false;

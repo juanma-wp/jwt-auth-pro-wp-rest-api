@@ -64,12 +64,6 @@ class WP_REST_Auth_JWT {
 	 */
 	private $auth_jwt;
 
-	/**
-	 * Admin settings instance.
-	 *
-	 * @var WP_REST_Auth_JWT_Admin_Settings
-	 */
-	private $admin_settings;
 
 	/**
 	 * Constructor.
@@ -99,7 +93,7 @@ class WP_REST_Auth_JWT {
 
 		// Initialize admin settings.
 		if ( is_admin() ) {
-			$this->admin_settings = new WP_REST_Auth_JWT_Admin_Settings();
+			new WP_REST_Auth_JWT_Admin_Settings();
 		}
 
 		$this->auth_jwt = new Auth_JWT();
