@@ -5,14 +5,40 @@
  * Description: Simple, secure JWT authentication for WordPress REST API with HttpOnly refresh tokens
  * Version: 1.0.0
  * Author: WordPress Developer
+ * Author URI: https://github.com/juanma-wp/wp-rest-auth-jwt
+ * Plugin URI: https://github.com/juanma-wp/wp-rest-auth-jwt
+ * Text Domain: wp-rest-auth-jwt
+ * Domain Path: /languages
  * Requires at least: 5.6
+ * Tested up to: 6.8
  * Requires PHP: 7.4
+ * Network: false
  * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * Simple, focused JWT authentication without the complexity of OAuth2.
- * Perfect for SPAs and mobile apps that need stateless authentication.
+ * WP REST Auth JWT - Simple, secure JWT authentication for WordPress REST API
  *
- * @package WPRESTAuthJWT
+ * This plugin provides JWT (JSON Web Token) authentication for WordPress REST API
+ * endpoints, designed specifically for Single Page Applications (SPAs) and mobile apps
+ * that need stateless authentication without the complexity of OAuth2.
+ *
+ * Features:
+ * - JWT access tokens with configurable expiration
+ * - HTTP-only refresh tokens for enhanced security
+ * - User authentication and authorization
+ * - Token refresh and revocation
+ * - CORS support for cross-origin requests
+ * - Built-in security best practices
+ * - WordPress coding standards compliant
+ *
+ * @package   WPRESTAuthJWT
+ * @author    WordPress Developer
+ * @copyright 2025 WordPress Developer
+ * @license   GPL-2.0-or-later
+ * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
+ * @since     1.0.0
+ *
+ * @wordpress-plugin
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,10 +1,23 @@
 <?php
 
 /**
- * PHPUnit bootstrap for Unit Tests
+ * PHPUnit Bootstrap for Unit Tests
  *
- * This bootstrap is designed for testing isolated PHP functions without WordPress dependencies.
- * It only loads the minimum required to test core JWT helper functions.
+ * This bootstrap file is designed for testing isolated PHP functions without WordPress
+ * dependencies. It loads only the minimum required components to test core JWT helper
+ * functions and other standalone utilities.
+ *
+ * Unit tests using this bootstrap should focus on testing individual functions and
+ * methods without relying on WordPress core functionality, database connections,
+ * or complex integrations.
+ *
+ * @package   WPRESTAuthJWT
+ * @author    WordPress Developer
+ * @copyright 2025 WordPress Developer
+ * @license   GPL-2.0-or-later
+ * @since     1.0.0
+ *
+ * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
  */
 
 // Load Composer autoloader

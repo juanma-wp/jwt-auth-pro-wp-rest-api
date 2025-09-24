@@ -2,9 +2,20 @@
 
 /**
  * Helper functions for WP REST Auth JWT
- * Simple, focused utilities for JWT authentication.
  *
- * @package WPRESTAuthJWT
+ * This file contains utility functions for JWT token operations, security helpers,
+ * HTTP handling, and other common functionality used throughout the plugin.
+ *
+ * All functions in this file are prefixed with 'wp_auth_jwt_' to prevent naming
+ * conflicts with other WordPress plugins or themes.
+ *
+ * @package   WPRESTAuthJWT
+ * @author    WordPress Developer
+ * @copyright 2025 WordPress Developer
+ * @license   GPL-2.0-or-later
+ * @since     1.0.0
+ *
+ * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

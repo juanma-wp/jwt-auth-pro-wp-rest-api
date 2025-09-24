@@ -1,10 +1,24 @@
 <?php
 
 /**
- * PHPUnit bootstrap for Integration Tests
+ * PHPUnit Bootstrap for Integration Tests
  *
- * This bootstrap is designed for full WordPress integration testing using wp-env.
- * It loads WordPress test framework and the plugin in a real WordPress environment.
+ * This bootstrap file is designed for full WordPress integration testing using wp-env.
+ * It loads the WordPress test framework and initializes the plugin within a complete
+ * WordPress environment, allowing for testing of database operations, REST API
+ * endpoints, user authentication, and other WordPress-dependent functionality.
+ *
+ * Integration tests using this bootstrap can test the full plugin functionality
+ * including WordPress hooks, database queries, REST API responses, and user
+ * authentication flows.
+ *
+ * @package   WPRESTAuthJWT
+ * @author    WordPress Developer
+ * @copyright 2025 WordPress Developer
+ * @license   GPL-2.0-or-later
+ * @since     1.0.0
+ *
+ * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
  */
 
 // Define testing environment constants

@@ -1,8 +1,26 @@
 <?php
 
 /**
- * Simple JWT Authentication class with refresh token support
- * Focused, clean implementation without OAuth2 complexity
+ * JWT Authentication Handler Class
+ *
+ * This class handles all JWT token operations including authentication, token generation,
+ * validation, and refresh token management. It provides REST API endpoints for user
+ * authentication and token management operations.
+ *
+ * The class implements a secure JWT authentication system with:
+ * - Access tokens for API authentication
+ * - HTTP-only refresh tokens for enhanced security
+ * - Token validation and expiration handling
+ * - User session management
+ * - Database storage for refresh tokens
+ *
+ * @package   WPRESTAuthJWT
+ * @author    WordPress Developer
+ * @copyright 2025 WordPress Developer
+ * @license   GPL-2.0-or-later
+ * @since     1.0.0
+ *
+ * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,7 +1,21 @@
 <?php
 /**
  * Admin Settings for WP REST Auth JWT
- * Simple, focused configuration for JWT authentication
+ *
+ * This class handles the WordPress admin interface for configuring JWT authentication
+ * settings. It provides options for JWT token configuration, CORS settings, security
+ * options, and other plugin-related settings through the WordPress settings API.
+ *
+ * The class creates admin pages, registers settings, validates input, and provides
+ * methods to retrieve configuration values used throughout the plugin.
+ *
+ * @package   WPRESTAuthJWT
+ * @author    WordPress Developer
+ * @copyright 2025 WordPress Developer
+ * @license   GPL-2.0-or-later
+ * @since     1.0.0
+ *
+ * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
