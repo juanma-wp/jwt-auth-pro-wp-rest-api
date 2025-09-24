@@ -40,40 +40,10 @@ if ( ! defined( 'WP_JWT_REFRESH_TTL' ) ) {
 	define( 'WP_JWT_REFRESH_TTL', 2592000 );
 }
 
-// Mock WordPress functions for unit tests
+// Mock only essential WordPress functions needed by helpers.php
 if ( ! function_exists( 'wp_json_encode' ) ) {
 	function wp_json_encode( $data, $options = 0, $depth = 512 ) {
 		return json_encode( $data, $options, $depth );
-	}
-}
-
-if ( ! function_exists( 'wp_authenticate' ) ) {
-	function wp_authenticate( $username, $password ) {
-		return new stdClass();
-	}
-}
-
-if ( ! function_exists( 'is_wp_error' ) ) {
-	function is_wp_error( $thing ) {
-		return $thing instanceof WP_Error;
-	}
-}
-
-if ( ! function_exists( 'wp_unslash' ) ) {
-	function wp_unslash( $value ) {
-		return stripslashes( $value );
-	}
-}
-
-if ( ! function_exists( 'sanitize_text_field' ) ) {
-	function sanitize_text_field( $str ) {
-		return trim( strip_tags( $str ) );
-	}
-}
-
-if ( ! function_exists( 'apply_filters' ) ) {
-	function apply_filters( $hook_name, $value, ...$args ) {
-		return $value;
 	}
 }
 
