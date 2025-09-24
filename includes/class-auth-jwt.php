@@ -27,12 +27,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * JWT Authentication Handler Class.
+ *
+ * Handles all JWT token operations including authentication, token generation,
+ * validation, and refresh token management.
+ */
 class Auth_JWT {
 
 
 	const ISSUER              = 'wp-rest-auth-jwt';
 	const REFRESH_COOKIE_NAME = 'wp_jwt_refresh_token';
 
+	/**
+	 * Register REST API routes for JWT authentication.
+	 */
 	public function register_routes(): void {
 		register_rest_route(
 			'jwt/v1',
@@ -89,6 +98,9 @@ class Auth_JWT {
 		add_action( 'rest_api_init', array( $this, 'add_cors_support' ) );
 	}
 
+	/**
+	 * Add CORS support for REST API requests.
+	 */
 	public function add_cors_support(): void {
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
 		add_filter(
@@ -102,7 +114,12 @@ class Auth_JWT {
 		);
 	}
 
-	// Compatibility: generate an access token for a user id
+	/**
+	 * Compatibility: generate an access token for a user id.
+	 *
+	 * @param int $user_id User ID to generate token for.
+	 * @return string Generated JWT access token.
+	 */
 	public function generate_access_token( int $user_id ): string {
 		$now    = time();
 		$claims = array(
@@ -360,6 +377,14 @@ class Auth_JWT {
 		return $user;
 	}
 
+	/**
+	 * Store a refresh token in the database.
+	 *
+	 * @param int    $user_id      User ID to associate with token.
+	 * @param string $refresh_token Raw refresh token.
+	 * @param int    $expires_at   Token expiration timestamp.
+	 * @return bool True on success, false on failure.
+	 */
 	public function store_refresh_token( int $user_id, string $refresh_token, int $expires_at ): bool {
 		global $wpdb;
 
@@ -399,9 +424,9 @@ class Auth_JWT {
 	 * Validate refresh token.
 	 *
 	 * @param string $refresh_token The refresh token to validate.
-	 * @return array|null Token data or null if invalid.
+	 * @return array|WP_Error Token data or error if invalid.
 	 */
-	private function validate_refresh_token( string $refresh_token ): ?array {
+	private function validate_refresh_token( string $refresh_token ) {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
@@ -428,6 +453,14 @@ class Auth_JWT {
 		return $token_data;
 	}
 
+	/**
+	 * Update an existing refresh token with new values.
+	 *
+	 * @param int    $token_id          Token record ID.
+	 * @param string $new_refresh_token New refresh token value.
+	 * @param int    $expires_at        New expiration timestamp.
+	 * @return bool True on success, false on failure.
+	 */
 	private function update_refresh_token( int $token_id, string $new_refresh_token, int $expires_at ): bool {
 		global $wpdb;
 
@@ -451,6 +484,12 @@ class Auth_JWT {
 		return $result !== false;
 	}
 
+	/**
+	 * Revoke a refresh token by marking it as revoked.
+	 *
+	 * @param string $refresh_token Token to revoke.
+	 * @return bool True on success, false on failure.
+	 */
 	public function revoke_refresh_token( string $refresh_token ): bool {
 		global $wpdb;
 
@@ -471,7 +510,12 @@ class Auth_JWT {
 		return $result !== false;
 	}
 
-	// Compatibility: expose simple getters for tests
+	/**
+	 * Compatibility: expose simple getters for tests.
+	 *
+	 * @param int $user_id User ID to get tokens for.
+	 * @return array List of refresh tokens for the user.
+	 */
 	public function get_user_refresh_tokens( int $user_id ): array {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
@@ -485,6 +529,13 @@ class Auth_JWT {
 		return $results ?: array();
 	}
 
+	/**
+	 * Revoke a specific token for a user.
+	 *
+	 * @param int $user_id  User ID that owns the token.
+	 * @param int $token_id Token record ID to revoke.
+	 * @return bool True on success, false on failure.
+	 */
 	public function revoke_user_token( int $user_id, int $token_id ): bool {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
@@ -502,7 +553,9 @@ class Auth_JWT {
 		return $updated !== false;
 	}
 
-	// Compatibility: whoami-like endpoint for tests
+	/**
+	 * Compatibility: whoami-like endpoint for tests.
+	 */
 	/**
 	 * Check if user is authenticated.
 	 *
@@ -517,6 +570,9 @@ class Auth_JWT {
 		return true;
 	}
 
+	/**
+	 * Clean up expired tokens from the database.
+	 */
 	public function clean_expired_tokens(): void {
 		global $wpdb;
 

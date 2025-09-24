@@ -7,8 +7,16 @@ use PHPUnit\Framework\TestCase;
  */
 class JWTAuthTest extends TestCase {
 
+	/**
+	 * Auth JWT instance for testing.
+	 *
+	 * @var Auth_JWT
+	 */
 	private $auth_jwt;
 
+	/**
+	 * Set up test environment.
+	 */
 	protected function setUp(): void {
 		parent::setUp();
 
@@ -36,16 +44,25 @@ class JWTAuthTest extends TestCase {
 		$this->auth_jwt = new Auth_JWT();
 	}
 
+	/**
+	 * Test JWT auth class exists and can be instantiated.
+	 */
 	public function testJWTAuthClassExists(): void {
 		$this->assertTrue( class_exists( 'Auth_JWT' ) );
 		$this->assertInstanceOf( 'Auth_JWT', $this->auth_jwt );
 	}
 
+	/**
+	 * Test REST routes registration method exists.
+	 */
 	public function testRestRoutesRegistration(): void {
 		// Test that JWT routes registration method exists
 		$this->assertTrue( method_exists( $this->auth_jwt, 'register_routes' ) );
 	}
 
+	/**
+	 * Test token issuance endpoint exists.
+	 */
 	public function testTokenIssuanceEndpoint(): void {
 		$this->assertTrue( method_exists( $this->auth_jwt, 'issue_token' ) );
 
@@ -61,18 +78,30 @@ class JWTAuthTest extends TestCase {
 		$this->assertTrue( method_exists( $this->auth_jwt, 'issue_token' ) );
 	}
 
+	/**
+	 * Test token refresh endpoint exists.
+	 */
 	public function testTokenRefreshEndpoint(): void {
 		$this->assertTrue( method_exists( $this->auth_jwt, 'refresh_access_token' ) );
 	}
 
+	/**
+	 * Test logout endpoint exists.
+	 */
 	public function testLogoutEndpoint(): void {
 		$this->assertTrue( method_exists( $this->auth_jwt, 'logout' ) );
 	}
 
+	/**
+	 * Test whoami endpoint exists.
+	 */
 	public function testWhoamiEndpoint(): void {
 		$this->assertTrue( method_exists( $this->auth_jwt, 'whoami' ) );
 	}
 
+	/**
+	 * Test bearer token authentication functionality.
+	 */
 	public function testBearerTokenAuthentication(): void {
 		$this->assertTrue( method_exists( $this->auth_jwt, 'authenticate_bearer' ) );
 
@@ -81,6 +110,9 @@ class JWTAuthTest extends TestCase {
 		$this->assertInstanceOf( 'WP_Error', $result );
 	}
 
+	/**
+	 * Test refresh token storage methods exist.
+	 */
 	public function testRefreshTokenStorage(): void {
 		// Test refresh token storage methods exist
 		$this->assertTrue( method_exists( $this->auth_jwt, 'get_user_refresh_tokens' ) );
@@ -88,12 +120,18 @@ class JWTAuthTest extends TestCase {
 		$this->assertTrue( method_exists( $this->auth_jwt, 'clean_expired_tokens' ) );
 	}
 
+	/**
+	 * Test token cleanup functionality.
+	 */
 	public function testTokenCleanupFunctionality(): void {
 		// Test expired token cleanup
 		$this->auth_jwt->clean_expired_tokens();
 		$this->assertTrue( true ); // Should not throw errors
 	}
 
+	/**
+	 * Test user token management functionality.
+	 */
 	public function testUserTokenManagement(): void {
 		$user_id = 123;
 
@@ -106,6 +144,9 @@ class JWTAuthTest extends TestCase {
 		$this->assertIsBool( $result );
 	}
 
+	/**
+	 * Test CORS support functionality.
+	 */
 	public function testCORSSupport(): void {
 		$this->assertTrue( method_exists( $this->auth_jwt, 'add_cors_support' ) );
 
@@ -114,6 +155,9 @@ class JWTAuthTest extends TestCase {
 		$this->assertTrue( true ); // Should not throw errors
 	}
 
+	/**
+	 * Test JWT constants are properly defined.
+	 */
 	public function testJWTConstants(): void {
 		// Test JWT constants are available
 		$this->assertTrue( defined( 'WP_JWT_AUTH_SECRET' ) );
@@ -126,15 +170,21 @@ class JWTAuthTest extends TestCase {
 		$this->assertNotEmpty( WP_JWT_AUTH_SECRET );
 	}
 
+	/**
+	 * Test class constants are properly defined.
+	 */
 	public function testClassConstants(): void {
 		// Test class constants
 		$this->assertTrue( defined( 'Auth_JWT::REFRESH_COOKIE_NAME' ) );
-		$this->assertEquals( 'wp_jwt_refresh_token', Auth_JWT::REFRESH_COOKIE_NAME );
+		$this->assertSame( 'wp_jwt_refresh_token', Auth_JWT::REFRESH_COOKIE_NAME );
 
 		$this->assertTrue( defined( 'Auth_JWT::ISSUER' ) );
-		$this->assertEquals( 'wp-rest-auth-jwt', Auth_JWT::ISSUER );
+		$this->assertSame( 'wp-rest-auth-jwt', Auth_JWT::ISSUER );
 	}
 
+	/**
+	 * Test JWT helper functions are available.
+	 */
 	public function testJWTHelperFunctionsAvailable(): void {
 		// Test that JWT helper functions are available
 		$this->assertTrue( function_exists( 'wp_auth_jwt_encode' ) );
@@ -143,6 +193,9 @@ class JWTAuthTest extends TestCase {
 		$this->assertTrue( function_exists( 'wp_auth_jwt_hash_token' ) );
 	}
 
+	/**
+	 * Test JWT workflow integration.
+	 */
 	public function testJWTWorkflowIntegration(): void {
 		// Test a basic JWT workflow using helper functions
 		$secret = WP_JWT_AUTH_SECRET;
@@ -160,10 +213,13 @@ class JWTAuthTest extends TestCase {
 
 		$decoded = wp_auth_jwt_decode( $token, $secret );
 		$this->assertIsArray( $decoded );
-		$this->assertEquals( 123, $decoded['sub'] );
-		$this->assertEquals( Auth_JWT::ISSUER, $decoded['iss'] );
+		$this->assertSame( 123, $decoded['sub'] );
+		$this->assertSame( Auth_JWT::ISSUER, $decoded['iss'] );
 	}
 
+	/**
+	 * Test token validation structure.
+	 */
 	public function testTokenValidation(): void {
 		// Test valid JWT token structure
 		$token = $this->createValidJWTToken();
@@ -173,8 +229,8 @@ class JWTAuthTest extends TestCase {
 
 		// Verify header
 		$header = json_decode( $this->base64UrlDecode( $parts[0] ), true );
-		$this->assertEquals( 'JWT', $header['typ'] );
-		$this->assertEquals( 'HS256', $header['alg'] );
+		$this->assertSame( 'JWT', $header['typ'] );
+		$this->assertSame( 'HS256', $header['alg'] );
 
 		// Verify payload structure
 		$payload = json_decode( $this->base64UrlDecode( $parts[1] ), true );
@@ -183,6 +239,9 @@ class JWTAuthTest extends TestCase {
 		$this->assertArrayHasKey( 'iat', $payload );
 	}
 
+	/**
+	 * Test access token generation.
+	 */
 	public function testAccessTokenGeneration(): void {
 		// Mock WordPress user functions
 		$this->mockWordPressFunctions();
@@ -199,15 +258,21 @@ class JWTAuthTest extends TestCase {
 		$this->assertCount( 3, $parts );
 	}
 
+	/**
+	 * Test refresh token generation.
+	 */
 	public function testRefreshTokenGeneration(): void {
 		// Test refresh token generation
 		$refresh_token = wp_auth_jwt_generate_token( 64 );
 
 		$this->assertIsString( $refresh_token );
-		$this->assertEquals( 64, strlen( $refresh_token ) );
+		$this->assertSame( 64, strlen( $refresh_token ) );
 		$this->assertMatchesRegularExpression( '/^[a-f0-9]+$/', $refresh_token );
 	}
 
+	/**
+	 * Test token expiration handling.
+	 */
 	public function testTokenExpiration(): void {
 		// Create expired token
 		$expired_payload = array(
@@ -223,8 +288,16 @@ class JWTAuthTest extends TestCase {
 		$this->assertFalse( $result, 'Expired token should not be valid' );
 	}
 
-	// Helper methods
+	/**
+	 * Helper methods.
+	 */
 
+	/**
+	 * Create a valid JWT token for testing.
+	 *
+	 * @param int $user_id User ID for the token.
+	 * @return string JWT token.
+	 */
 	private function createValidJWTToken( $user_id = 123 ): string {
 		$payload = array(
 			'iss'  => Auth_JWT::ISSUER,
@@ -241,6 +314,12 @@ class JWTAuthTest extends TestCase {
 		return wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
 	}
 
+	/**
+	 * Create a mock request object.
+	 *
+	 * @param array $params Request parameters.
+	 * @return stdClass Mock request object.
+	 */
 	private function createMockRequest( array $params = array() ): stdClass {
 		$request = new stdClass();
 		foreach ( $params as $key => $value ) {
@@ -249,10 +328,19 @@ class JWTAuthTest extends TestCase {
 		return $request;
 	}
 
+	/**
+	 * Base64 URL decode utility.
+	 *
+	 * @param string $data Data to decode.
+	 * @return string Decoded data.
+	 */
 	private function base64UrlDecode( $data ): string {
 		return base64_decode( str_pad( strtr( $data, '-_', '+/' ), strlen( $data ) % 4, '=', STR_PAD_RIGHT ) );
 	}
 
+	/**
+	 * Mock WordPress functions for unit testing.
+	 */
 	private function mockWordPressFunctions(): void {
 		// Mock WordPress user functions for testing
 		if ( ! function_exists( 'get_userdata' ) ) {

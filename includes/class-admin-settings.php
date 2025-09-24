@@ -22,18 +22,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Admin settings class for WP REST Auth JWT plugin.
+ */
 class WP_REST_Auth_JWT_Admin_Settings {
 
 	const OPTION_GROUP            = 'wp_rest_auth_jwt_settings';
 	const OPTION_JWT_SETTINGS     = 'wp_rest_auth_jwt_settings';
 	const OPTION_GENERAL_SETTINGS = 'wp_rest_auth_jwt_general_settings';
 
+	/**
+	 * Constructor. Initialize admin hooks.
+	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 	}
 
+	/**
+	 * Add admin menu page.
+	 */
 	public function add_admin_menu(): void {
 		add_options_page(
 			'WP REST Auth JWT Settings',
@@ -44,8 +53,11 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		);
 	}
 
+	/**
+	 * Register WordPress settings and fields.
+	 */
 	public function register_settings(): void {
-		// Register setting groups
+		// Register setting groups.
 		register_setting(
 			self::OPTION_GROUP,
 			self::OPTION_JWT_SETTINGS,
@@ -62,7 +74,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			)
 		);
 
-		// JWT Settings Section
+		// JWT Settings Section.
 		add_settings_section(
 			'jwt_settings',
 			'JWT Authentication Settings',
@@ -94,7 +106,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			'jwt_settings'
 		);
 
-		// General Settings Section
+		// General Settings Section.
 		add_settings_section(
 			'general_settings',
 			'General Settings',
@@ -119,8 +131,13 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		);
 	}
 
+	/**
+	 * Enqueue admin scripts and styles.
+	 *
+	 * @param string $hook Current admin page hook.
+	 */
 	public function enqueue_admin_scripts( string $hook ): void {
-		if ( $hook !== 'settings_page_wp-rest-auth-jwt' ) {
+		if ( 'settings_page_wp-rest-auth-jwt' !== $hook ) {
 			return;
 		}
 
@@ -142,30 +159,33 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		);
 	}
 
+	/**
+	 * Render the admin settings page.
+	 */
 	public function admin_page(): void {
-		$active_tab = $_GET['tab'] ?? 'jwt';
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'jwt';
 		?>
 		<div class="wrap">
 			<h1>🔐 WP REST Auth JWT Settings</h1>
 			<p class="description">Simple, secure JWT authentication for WordPress REST API</p>
 
 			<nav class="nav-tab-wrapper">
-				<a href="?page=wp-rest-auth-jwt&tab=jwt" class="nav-tab <?php echo $active_tab == 'jwt' ? 'nav-tab-active' : ''; ?>">JWT Settings</a>
-				<a href="?page=wp-rest-auth-jwt&tab=general" class="nav-tab <?php echo $active_tab == 'general' ? 'nav-tab-active' : ''; ?>">General Settings</a>
-				<a href="?page=wp-rest-auth-jwt&tab=help" class="nav-tab <?php echo $active_tab == 'help' ? 'nav-tab-active' : ''; ?>">Help & Documentation</a>
+				<a href="?page=wp-rest-auth-jwt&tab=jwt" class="nav-tab <?php echo 'jwt' === $active_tab ? 'nav-tab-active' : ''; ?>">JWT Settings</a>
+				<a href="?page=wp-rest-auth-jwt&tab=general" class="nav-tab <?php echo 'general' === $active_tab ? 'nav-tab-active' : ''; ?>">General Settings</a>
+				<a href="?page=wp-rest-auth-jwt&tab=help" class="nav-tab <?php echo 'help' === $active_tab ? 'nav-tab-active' : ''; ?>">Help & Documentation</a>
 			</nav>
 
 			<form method="post" action="options.php">
 				<?php
 				settings_fields( self::OPTION_GROUP );
 
-				if ( $active_tab == 'jwt' ) {
+				if ( 'jwt' === $active_tab ) {
 					do_settings_sections( 'wp-rest-auth-jwt-settings' );
 					submit_button();
-				} elseif ( $active_tab == 'general' ) {
+				} elseif ( 'general' === $active_tab ) {
 					do_settings_sections( 'wp-rest-auth-jwt-general' );
 					submit_button();
-				} elseif ( $active_tab == 'help' ) {
+				} elseif ( 'help' === $active_tab ) {
 					$this->render_help_tab();
 				}
 				?>
@@ -174,6 +194,9 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		<?php
 	}
 
+	/**
+	 * Render the help and documentation tab.
+	 */
 	private function render_help_tab(): void {
 		?>
 		<div class="help-tab">
@@ -280,16 +303,31 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		<?php
 	}
 
-	// Section callbacks
+	/**
+	 * Section callbacks.
+	 */
+
+	/**
+	 * Render JWT settings section description.
+	 */
 	public function jwt_settings_section(): void {
 		echo '<p>Configure JWT authentication settings. JWT tokens provide stateless authentication for your WordPress REST API.</p>';
 	}
 
+	/**
+	 * Render general settings section description.
+	 */
 	public function general_settings_section(): void {
 		echo '<p>General plugin settings and security options.</p>';
 	}
 
-	// Field callbacks
+	/**
+	 * Field callbacks.
+	 */
+
+	/**
+	 * Render the JWT secret key field.
+	 */
 	public function jwt_secret_key_field(): void {
 		$settings = get_option( self::OPTION_JWT_SETTINGS, array() );
 		$value    = $settings['secret_key'] ?? '';
@@ -312,7 +350,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 
 			$('#toggle_jwt_secret').click(function() {
 				const field = $('#jwt_secret_key');
-				field.attr('type', field.attr('type') === 'password' ? 'text' : 'password');
+				field.attr('type', 'password' === field.attr('type') ? 'text' : 'password');
 			});
 		});
 		</script>

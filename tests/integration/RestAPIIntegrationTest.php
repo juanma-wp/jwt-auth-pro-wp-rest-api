@@ -7,9 +7,27 @@ use WPRestAuthJWT\Tests\Helpers\TestCase;
  */
 class RestAPIIntegrationTest extends WP_UnitTestCase {
 
+	/**
+	 * Auth JWT instance.
+	 *
+	 * @var Auth_JWT
+	 */
 	private $auth_jwt;
+
+	/**
+	 * REST server instance.
+	 *
+	 * @var WP_REST_Server
+	 */
 	private $server;
 
+	/**
+	 * Check if endpoints support a specific HTTP method.
+	 *
+	 * @param array  $endpoints Array of endpoint configurations.
+	 * @param string $method    HTTP method to check.
+	 * @return bool True if method is supported.
+	 */
 	private function endpointsSupportMethod( array $endpoints, string $method ): bool {
 		foreach ( $endpoints as $ep ) {
 			if ( ! isset( $ep['methods'] ) ) {
@@ -51,6 +69,9 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 		return false;
 	}
 
+	/**
+	 * Set up test environment.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
@@ -68,6 +89,9 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 		$this->auth_jwt->register_routes();
 	}
 
+	/**
+	 * Tear down test environment.
+	 */
 	public function tearDown(): void {
 		global $wp_rest_server;
 		$wp_rest_server = null;
@@ -75,6 +99,9 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 		parent::tearDown();
 	}
 
+	/**
+	 * Test that JWT routes are properly registered.
+	 */
 	public function testJWTRoutesRegistered(): void {
 		$routes = $this->server->get_routes();
 
@@ -85,30 +112,45 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( '/jwt/v1/logout', $routes );
 	}
 
+	/**
+	 * Test token endpoint HTTP methods.
+	 */
 	public function testTokenEndpointMethods(): void {
 		$routes    = $this->server->get_routes();
 		$endpoints = $routes['/jwt/v1/token'];
 		$this->assertTrue( $this->endpointsSupportMethod( $endpoints, 'POST' ) );
 	}
 
+	/**
+	 * Test refresh endpoint HTTP methods.
+	 */
 	public function testRefreshEndpointMethods(): void {
 		$routes    = $this->server->get_routes();
 		$endpoints = $routes['/jwt/v1/refresh'];
 		$this->assertTrue( $this->endpointsSupportMethod( $endpoints, 'POST' ) );
 	}
 
+	/**
+	 * Test verify endpoint HTTP methods.
+	 */
 	public function testVerifyEndpointMethods(): void {
 		$routes    = $this->server->get_routes();
 		$endpoints = $routes['/jwt/v1/verify'];
 		$this->assertTrue( $this->endpointsSupportMethod( $endpoints, 'GET' ) );
 	}
 
+	/**
+	 * Test logout endpoint HTTP methods.
+	 */
 	public function testLogoutEndpointMethods(): void {
 		$routes    = $this->server->get_routes();
 		$endpoints = $routes['/jwt/v1/logout'];
 		$this->assertTrue( $this->endpointsSupportMethod( $endpoints, 'POST' ) );
 	}
 
+	/**
+	 * Test token endpoint with invalid credentials.
+	 */
 	public function testTokenEndpointWithInvalidCredentials(): void {
 		$request = new WP_REST_Request( 'POST', '/jwt/v1/token' );
 		$request->set_param( 'username', 'nonexistent' );
@@ -116,10 +158,13 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 403, $response->get_status() );
+		$this->assertSame( 403, $response->get_status() );
 		$this->assertInstanceOf( 'WP_Error', $response->as_error() );
 	}
 
+	/**
+	 * Test token endpoint with valid credentials.
+	 */
 	public function testTokenEndpointWithValidCredentials(): void {
 		// Create a test user
 		$user_id = $this->factory->user->create(
@@ -136,14 +181,14 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 200, $response->get_status() );
 
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'data', $data );
 		$this->assertArrayHasKey( 'access_token', $data['data'] );
 		$this->assertArrayHasKey( 'token_type', $data['data'] );
 		$this->assertArrayHasKey( 'expires_in', $data['data'] );
-		$this->assertEquals( 'Bearer', $data['data']['token_type'] );
+		$this->assertSame( 'Bearer', $data['data']['token_type'] );
 	}
 
 	public function testVerifyEndpointWithValidToken(): void {
@@ -163,12 +208,12 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 200, $response->get_status() );
 
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'data', $data );
 		$this->assertArrayHasKey( 'user', $data['data'] );
-		$this->assertEquals( $user_id, $data['data']['user']['id'] );
+		$this->assertSame( $user_id, $data['data']['user']['id'] );
 	}
 
 	public function testVerifyEndpointWithInvalidToken(): void {
@@ -177,7 +222,7 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 401, $response->get_status() );
+		$this->assertSame( 401, $response->get_status() );
 		$this->assertInstanceOf( 'WP_Error', $response->as_error() );
 	}
 
@@ -260,7 +305,7 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 		$result = $this->auth_jwt->authenticate_bearer( $token );
 
 		if ( ! is_wp_error( $result ) ) {
-			$this->assertEquals( $user_id, $result->ID );
+			$this->assertSame( $user_id, $result->ID );
 		} else {
 			// In test environment, database operations might not work
 			// Just verify the method exists and handles errors properly
@@ -274,7 +319,7 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 
 		// Should fail without token
-		$this->assertEquals( 401, $response->get_status() );
+		$this->assertSame( 401, $response->get_status() );
 	}
 
 	public function testTokenExpiration(): void {
@@ -293,7 +338,7 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 401, $response->get_status() );
+		$this->assertSame( 401, $response->get_status() );
 		$this->assertInstanceOf( 'WP_Error', $response->as_error() );
 	}
 
@@ -318,6 +363,6 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 
 		// In test environment, might return errors due to missing database
 		// Just verify they're handled consistently
-		$this->assertEquals( is_wp_error( $result1 ), is_wp_error( $result2 ) );
+		$this->assertSame( is_wp_error( $result1 ), is_wp_error( $result2 ) );
 	}
 }
