@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress-JWT">
+	<description>WordPress Coding Standards for JWT plugin</description>
+
+	<!-- Files to check -->
+	<file>.</file>
+
+	<!-- Use WordPress coding standard -->
+	<rule ref="WordPress">
+		<!-- Exclude problematic sniffs that cause PHP 8+ issues -->
+		<exclude name="WordPress.WP.I18n"/>
+		<exclude name="WordPress.WhiteSpace.PrecisionAlignment"/>
+		<exclude name="WordPress.WhiteSpace.DisallowInlineTabs"/>
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals"/>
+
+		<!-- File comment exclusions from reference -->
+		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag"/>
+		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen"/>
+
+		<!-- Allow test files to use different naming conventions -->
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+
+	<!-- Exclude vendor and node_modules -->
+	<exclude-pattern>vendor/*</exclude-pattern>
+	<exclude-pattern>node_modules/*</exclude-pattern>
+
+	<!-- Check PHP files -->
+	<arg name="extensions" value="php"/>
+
+	<!-- WordPress and PHP version configuration -->
+	<config name="minimum_supported_wp_version" value="5.0"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<!-- Show progress -->
+	<arg value="ps"/>
+
+	<!-- Use colors -->
+	<arg name="colors"/>
+</ruleset>
