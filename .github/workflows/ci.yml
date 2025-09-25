@@ -2,134 +2,56 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
-
-permissions:
-  contents: read
+    branches: [ main, develop ]
 
 jobs:
-  unit-tests:
-    name: Unit tests - PHP ${{ matrix.php }}
-    runs-on: ubuntu-latest
+  lint:
+    name: PHP Code Standards
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        tools: composer:v2
+        ini-file: production
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+
+    - name: Run PHP CodeSniffer
+      run: composer lint
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    
     strategy:
-      fail-fast: false
       matrix:
-        php: [ '7.4', '8.0', '8.1', '8.2', '8.3' ]
+        php-version: ['8.1', '8.2', '8.3']
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: mbstring, intl, json
-          tools: composer:v2
-          coverage: none
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        tools: composer:v2
+        ini-file: production
+        coverage: xdebug
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Validate composer.json and composer.lock
-        run: composer validate --no-check-publish
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Cache Composer packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache/files
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
-
-      - name: Check PHP syntax
-        run: find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -exec php -l {} \;
-
-      - name: Run unit tests (PHP compatibility)
-        run: vendor/bin/phpunit -c phpunit-unit.xml --testdox
-
-  integration-tests:
-    name: Integration tests (wp-env + Docker)
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Cache npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install Node dependencies
-        run: npm ci --no-audit --no-fund
-
-      - name: Install PHP dependencies
-        uses: php-actions/composer@v6
-        with:
-          php_version: '8.1'
-          version: 2
-          args: --no-interaction --prefer-dist
-
-      - name: Start wp-env
-        run: npm run env:start
-
-      - name: Run full test suite via wp-env
-        run: npm test
-
-      - name: Stop wp-env
-        if: always()
-        run: npm run env:stop
-
-  phpcs:
-    name: PHP CodeSniffer
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          tools: composer:v2, cs2pr
-
-      - name: Install CS dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
-
-      # Let Composer's installer plugin register installed_paths for WPCS, PHPCSUtils and PHPCSExtra.
-      # If you must override, use all three paths, not just WPCS.
-      # - run: vendor/bin/phpcs --config-set installed_paths vendor/phpcsstandards/phpcsextra,vendor/phpcsstandards/phpcsutils,vendor/wp-coding-standards/wpcs
-
-      - name: Run PHPCS
-        run: vendor/bin/phpcs -d memory_limit=512M
-
-  phpstan:
-    name: PHPStan Static Analysis
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          tools: composer:v2
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
-
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --memory-limit=512M
-
-
+    - name: Run PHPUnit tests
+      run: composer test

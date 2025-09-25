@@ -233,7 +233,7 @@ function wp_auth_jwt_delete_cookie( string $name, string $path = '/' ): bool {
  * @return bool Whether origin is valid.
  */
 function wp_auth_jwt_is_valid_origin( string $origin ): bool {
-	$general_settings = WP_REST_Auth_JWT_Admin_Settings::get_general_settings();
+	$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
 	$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
 
 	if ( empty( $allowed_origins ) ) {
