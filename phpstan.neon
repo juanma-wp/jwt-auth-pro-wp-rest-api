@@ -17,8 +17,11 @@ parameters:
 		- '#Call to method [a-zA-Z_]+\(\) on an unknown class wpdb\.#'
 		- '#Variable \$wpdb might not be defined\.#'
 		- '#Function php_sapi_name not found\.#'
-	checkMissingIterableValueType: false
-	checkGenericClassInNonGenericObjectType: false
+		# Ignore missing array and generic typehints (previously handled by deprecated config options)
+		-
+			identifier: missingType.iterableValue
+		-
+			identifier: missingType.generics
 	reportUnmatchedIgnoredErrors: false
 includes:
 	- vendor/szepeviktor/phpstan-wordpress/extension.neon
