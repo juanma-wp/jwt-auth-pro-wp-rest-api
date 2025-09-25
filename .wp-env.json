@@ -12,9 +12,9 @@
     "WP_DEBUG_LOG": true,
     "WP_DEBUG_DISPLAY": false,
     "SCRIPT_DEBUG": true,
-    "WP_JWT_AUTH_SECRET": "development-secret-key-for-testing-only-never-use-in-production-this-should-be-much-longer",
-    "WP_JWT_ACCESS_TTL": 3600,
-    "WP_JWT_REFRESH_TTL": 86400
+    "JWT_AUTH_PRO_SECRET": "development-secret-key-for-testing-only-never-use-in-production-this-should-be-much-longer",
+    "JWT_AUTH_ACCESS_TTL": 3600,
+    "JWT_AUTH_REFRESH_TTL": 86400
   },
   "port": 8888,
   "testsPort": 8889,
@@ -24,13 +24,13 @@
         "WP_DEBUG": true,
         "WP_DEBUG_LOG": true,
         "WP_DEBUG_DISPLAY": false,
-        "WP_JWT_AUTH_SECRET": "development-secret-key-for-testing-only-never-use-in-production-this-should-be-much-longer",
-        "WP_JWT_ACCESS_TTL": 3600,
-        "WP_JWT_REFRESH_TTL": 86400
+        "JWT_AUTH_PRO_SECRET": "development-secret-key-for-testing-only-never-use-in-production-this-should-be-much-longer",
+        "JWT_AUTH_ACCESS_TTL": 3600,
+        "JWT_AUTH_REFRESH_TTL": 86400
       }
     }
   },
   "mappings": {
-    "wp-content/plugins/wp-rest-auth-jwt/vendor": "./vendor"
+    "wp-content/plugins/jwt-auth-pro-wp-rest-api/vendor": "./vendor"
   }
 }

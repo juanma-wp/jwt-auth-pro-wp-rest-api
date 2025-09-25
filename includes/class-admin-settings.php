@@ -1,21 +1,22 @@
 <?php
 /**
- * Admin Settings for WP REST Auth JWT
+ * Admin Settings for JWT Auth Pro
  *
  * This class handles the WordPress admin interface for configuring JWT authentication
- * settings. It provides options for JWT token configuration, CORS settings, security
+ * settings with advanced security features including refresh token management.
+ * It provides options for JWT token configuration, CORS settings, security
  * options, and other plugin-related settings through the WordPress settings API.
  *
  * The class creates admin pages, registers settings, validates input, and provides
  * methods to retrieve configuration values used throughout the plugin.
  *
- * @package   WPRESTAuthJWT
+ * @package   JWTAuthPro
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later
  * @since     1.0.0
  *
- * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
+ * @link      https://github.com/juanma-wp/jwt-auth-pro
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,13 +24,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Admin settings class for WP REST Auth JWT plugin.
+ * Admin settings class for JWT Auth Pro plugin.
  */
-class WP_REST_Auth_JWT_Admin_Settings {
+class JWT_Auth_Pro_Admin_Settings {
 
-	const OPTION_GROUP            = 'wp_rest_auth_jwt_settings';
-	const OPTION_JWT_SETTINGS     = 'wp_rest_auth_jwt_settings';
-	const OPTION_GENERAL_SETTINGS = 'wp_rest_auth_jwt_general_settings';
+	const OPTION_GROUP            = 'jwt_auth_pro_settings';
+	const OPTION_JWT_SETTINGS     = 'jwt_auth_pro_settings';
+	const OPTION_GENERAL_SETTINGS = 'jwt_auth_pro_general_settings';
 
 	/**
 	 * Constructor. Initialize admin hooks.
@@ -45,10 +46,10 @@ class WP_REST_Auth_JWT_Admin_Settings {
 	 */
 	public function add_admin_menu(): void {
 		add_options_page(
-			'WP REST Auth JWT Settings',
-			'WP REST Auth JWT',
+			'JWT Auth Pro Settings',
+			'JWT Auth Pro',
 			'manage_options',
-			'wp-rest-auth-jwt',
+			'jwt-auth-pro-wp-rest-api',
 			array( $this, 'admin_page' )
 		);
 	}
@@ -79,14 +80,14 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			'jwt_settings',
 			'JWT Authentication Settings',
 			array( $this, 'jwt_settings_section' ),
-			'wp-rest-auth-jwt-settings'
+			'jwt-auth-pro-wp-rest-api-settings'
 		);
 
 		add_settings_field(
 			'jwt_secret_key',
 			'JWT Secret Key',
 			array( $this, 'jwt_secret_key_field' ),
-			'wp-rest-auth-jwt-settings',
+			'jwt-auth-pro-wp-rest-api-settings',
 			'jwt_settings'
 		);
 
@@ -94,7 +95,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			'jwt_access_token_expiry',
 			'Access Token Expiry (seconds)',
 			array( $this, 'jwt_access_token_expiry_field' ),
-			'wp-rest-auth-jwt-settings',
+			'jwt-auth-pro-wp-rest-api-settings',
 			'jwt_settings'
 		);
 
@@ -102,7 +103,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			'jwt_refresh_token_expiry',
 			'Refresh Token Expiry (seconds)',
 			array( $this, 'jwt_refresh_token_expiry_field' ),
-			'wp-rest-auth-jwt-settings',
+			'jwt-auth-pro-wp-rest-api-settings',
 			'jwt_settings'
 		);
 
@@ -111,14 +112,14 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			'general_settings',
 			'General Settings',
 			array( $this, 'general_settings_section' ),
-			'wp-rest-auth-jwt-general'
+			'jwt-auth-pro-wp-rest-api-general'
 		);
 
 		add_settings_field(
 			'enable_debug_logging',
 			'Enable Debug Logging',
 			array( $this, 'enable_debug_logging_field' ),
-			'wp-rest-auth-jwt-general',
+			'jwt-auth-pro-wp-rest-api-general',
 			'general_settings'
 		);
 
@@ -126,7 +127,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			'cors_allowed_origins',
 			'CORS Allowed Origins',
 			array( $this, 'cors_allowed_origins_field' ),
-			'wp-rest-auth-jwt-general',
+			'jwt-auth-pro-wp-rest-api-general',
 			'general_settings'
 		);
 	}
@@ -137,12 +138,12 @@ class WP_REST_Auth_JWT_Admin_Settings {
 	 * @param string $hook Current admin page hook.
 	 */
 	public function enqueue_admin_scripts( string $hook ): void {
-		if ( 'settings_page_wp-rest-auth-jwt' !== $hook ) {
+		if ( 'settings_page_jwt-auth-pro-wp-rest-api' !== $hook ) {
 			return;
 		}
 
 		wp_enqueue_script(
-			'wp-rest-auth-jwt-admin',
+			'jwt-auth-pro-wp-rest-api-admin',
 			plugin_dir_url( __DIR__ ) . 'assets/admin.js',
 			array( 'jquery' ),
 			'1.0.0',
@@ -150,7 +151,7 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		);
 
 		wp_localize_script(
-			'wp-rest-auth-jwt-admin',
+			'jwt-auth-pro-wp-rest-api-admin',
 			'wpRestAuthJWT',
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
@@ -165,14 +166,16 @@ class WP_REST_Auth_JWT_Admin_Settings {
 	public function admin_page(): void {
 		// Check for valid admin page access.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-rest-auth-jwt' ) );
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'jwt-auth-pro-wp-rest-api' ) );
 		}
 
 		// For tab navigation, we'll validate the tab parameter directly instead of requiring nonce.
 		$allowed_tabs = array( 'jwt', 'general', 'help' );
 		$active_tab   = 'jwt'; // Default tab.
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Tab navigation in admin doesn't require nonce.
 		if ( isset( $_GET['tab'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Tab navigation in admin doesn't require nonce.
 			$requested_tab = sanitize_text_field( wp_unslash( $_GET['tab'] ) );
 			if ( in_array( $requested_tab, $allowed_tabs, true ) ) {
 				$active_tab = $requested_tab;
@@ -180,13 +183,13 @@ class WP_REST_Auth_JWT_Admin_Settings {
 		}
 		?>
 		<div class="wrap">
-			<h1>🔐 REST Auth JWT Settings</h1>
-			<p class="description">Simple, secure JWT authentication for WordPress REST API</p>
+			<h1>🚀 JWT Auth Pro Settings</h1>
+			<p class="description">Modern JWT authentication with secure refresh tokens for WordPress REST API</p>
 
 			<nav class="nav-tab-wrapper">
-				<a href="?page=wp-rest-auth-jwt&tab=jwt" class="nav-tab <?php echo 'jwt' === $active_tab ? 'nav-tab-active' : ''; ?>">JWT Settings</a>
-				<a href="?page=wp-rest-auth-jwt&tab=general" class="nav-tab <?php echo 'general' === $active_tab ? 'nav-tab-active' : ''; ?>">General Settings</a>
-				<a href="?page=wp-rest-auth-jwt&tab=help" class="nav-tab <?php echo 'help' === $active_tab ? 'nav-tab-active' : ''; ?>">Help & Documentation</a>
+				<a href="?page=jwt-auth-pro-wp-rest-api&tab=jwt" class="nav-tab <?php echo 'jwt' === $active_tab ? 'nav-tab-active' : ''; ?>">JWT Settings</a>
+				<a href="?page=jwt-auth-pro-wp-rest-api&tab=general" class="nav-tab <?php echo 'general' === $active_tab ? 'nav-tab-active' : ''; ?>">General Settings</a>
+				<a href="?page=jwt-auth-pro-wp-rest-api&tab=help" class="nav-tab <?php echo 'help' === $active_tab ? 'nav-tab-active' : ''; ?>">Help & Documentation</a>
 			</nav>
 
 			<form method="post" action="options.php">
@@ -194,10 +197,10 @@ class WP_REST_Auth_JWT_Admin_Settings {
 				settings_fields( self::OPTION_GROUP );
 
 				if ( 'jwt' === $active_tab ) {
-					do_settings_sections( 'wp-rest-auth-jwt-settings' );
+					do_settings_sections( 'jwt-auth-pro-wp-rest-api-settings' );
 					submit_button();
 				} elseif ( 'general' === $active_tab ) {
-					do_settings_sections( 'wp-rest-auth-jwt-general' );
+					do_settings_sections( 'jwt-auth-pro-wp-rest-api-general' );
 					submit_button();
 				} elseif ( 'help' === $active_tab ) {
 					$this->render_help_tab();
@@ -217,14 +220,15 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			<h2>Help & Documentation</h2>
 
 			<div class="help-section">
-				<h3>🔐 What is JWT Authentication?</h3>
-				<p>JSON Web Tokens (JWT) provide a simple, stateless way to authenticate users with your WordPress REST API. Perfect for:</p>
+				<h3>🚀 What makes JWT Auth Pro different?</h3>
+				<p>JWT Auth Pro implements modern OAuth 2.0 security best practices with refresh tokens - unlike basic JWT plugins that use single long-lived tokens. Perfect for:</p>
 				<ul>
 					<li><strong>Single Page Applications (SPAs)</strong> - React, Vue, Angular apps</li>
-					<li><strong>Mobile Applications</strong> - iOS, Android apps</li>
-					<li><strong>API Integrations</strong> - Third-party services</li>
-					<li><strong>Headless WordPress</strong> - Decoupled architectures</li>
+					<li><strong>Mobile Applications</strong> - iOS, Android apps with secure token storage</li>
+					<li><strong>API Integrations</strong> - Third-party services requiring enterprise security</li>
+					<li><strong>Headless WordPress</strong> - Decoupled architectures with enhanced security</li>
 				</ul>
+				<p><strong>Key Security Advantage:</strong> Short-lived access tokens (1 hour) + secure refresh tokens (30 days) = Better security than single long-lived JWT tokens!</p>
 			</div>
 
 			<div class="help-section">
@@ -296,7 +300,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 				</ul>
 
 				<h4>Debug Information:</h4>
-				<p><strong>Plugin Version:</strong> <?php echo esc_html( WP_REST_AUTH_JWT_VERSION ); ?></p>
+				<p><strong>Plugin Version:</strong> <?php echo esc_html( JWT_AUTH_PRO_VERSION ); ?></p>
 				<p><strong>WordPress Version:</strong> <?php echo esc_html( get_bloginfo( 'version' ) ); ?></p>
 				<p><strong>PHP Version:</strong> <?php echo esc_html( PHP_VERSION ); ?></p>
 				<p><strong>SSL Enabled:</strong> <?php echo is_ssl() ? '✅ Yes' : '❌ No (HTTPOnly cookies may not work)'; ?></p>

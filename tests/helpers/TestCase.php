@@ -45,16 +45,16 @@ class TestCase extends BaseTestCase {
 	 * Setup test constants
 	 */
 	protected function setupTestConstants(): void {
-		if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
-			define( 'WP_JWT_AUTH_SECRET', 'test-secret-key-for-testing-purposes-only-jwt-never-use-in-production' );
+		if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
+			define( 'JWT_AUTH_PRO_SECRET', 'test-secret-key-for-testing-purposes-only-jwt-never-use-in-production' );
 		}
 
-		if ( ! defined( 'WP_JWT_ACCESS_TTL' ) ) {
-			define( 'WP_JWT_ACCESS_TTL', 3600 );
+		if ( ! defined( 'JWT_AUTH_ACCESS_TTL' ) ) {
+			define( 'JWT_AUTH_ACCESS_TTL', 3600 );
 		}
 
-		if ( ! defined( 'WP_JWT_REFRESH_TTL' ) ) {
-			define( 'WP_JWT_REFRESH_TTL', 86400 );
+		if ( ! defined( 'JWT_AUTH_REFRESH_TTL' ) ) {
+			define( 'JWT_AUTH_REFRESH_TTL', 86400 );
 		}
 
 		if ( ! defined( 'ABSPATH' ) ) {
@@ -110,7 +110,7 @@ class TestCase extends BaseTestCase {
 		$headerEncoded  = $this->base64UrlEncode( $header );
 		$payloadEncoded = $this->base64UrlEncode( $payload );
 
-		$signature        = hash_hmac( 'sha256', $headerEncoded . '.' . $payloadEncoded, WP_JWT_AUTH_SECRET, true );
+		$signature        = hash_hmac( 'sha256', $headerEncoded . '.' . $payloadEncoded, JWT_AUTH_PRO_SECRET, true );
 		$signatureEncoded = $this->base64UrlEncode( $signature );
 
 		return $headerEncoded . '.' . $payloadEncoded . '.' . $signatureEncoded;

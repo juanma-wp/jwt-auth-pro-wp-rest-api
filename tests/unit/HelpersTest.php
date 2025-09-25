@@ -32,8 +32,8 @@ class HelpersTest extends TestCase {
 		}
 
 		// Define constants for testing
-		if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
-			define( 'WP_JWT_AUTH_SECRET', 'test-secret-key-for-testing-only-jwt' );
+		if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
+			define( 'JWT_AUTH_PRO_SECRET', 'test-secret-key-for-testing-only-jwt' );
 		}
 	}
 
@@ -91,7 +91,7 @@ class HelpersTest extends TestCase {
 			'iat' => time(),
 		);
 
-		$token = wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
+		$token = wp_auth_jwt_encode( $payload, JWT_AUTH_PRO_SECRET );
 
 		$this->assertIsString( $token );
 		$this->assertStringContainsString( '.', $token );
@@ -113,8 +113,8 @@ class HelpersTest extends TestCase {
 			'iat' => time(),
 		);
 
-		$token   = wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
-		$decoded = wp_auth_jwt_decode( $token, WP_JWT_AUTH_SECRET );
+		$token   = wp_auth_jwt_encode( $payload, JWT_AUTH_PRO_SECRET );
+		$decoded = wp_auth_jwt_decode( $token, JWT_AUTH_PRO_SECRET );
 
 		$this->assertIsArray( $decoded );
 		$this->assertSame( $payload['iss'], $decoded['iss'] );
@@ -131,7 +131,7 @@ class HelpersTest extends TestCase {
 			'exp' => time() + 3600,
 		);
 
-		$token  = wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
+		$token  = wp_auth_jwt_encode( $payload, JWT_AUTH_PRO_SECRET );
 		$result = wp_auth_jwt_decode( $token, 'wrong-secret' );
 
 		$this->assertFalse( $result );
@@ -146,8 +146,8 @@ class HelpersTest extends TestCase {
 			'exp' => time() - 3600, // Expired 1 hour ago
 		);
 
-		$token  = wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
-		$result = wp_auth_jwt_decode( $token, WP_JWT_AUTH_SECRET );
+		$token  = wp_auth_jwt_encode( $payload, JWT_AUTH_PRO_SECRET );
+		$result = wp_auth_jwt_decode( $token, JWT_AUTH_PRO_SECRET );
 
 		$this->assertFalse( $result );
 	}

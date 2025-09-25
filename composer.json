@@ -1,6 +1,6 @@
 {
-  "name": "wp-rest-auth/jwt",
-  "description": "Simple, secure JWT authentication for WordPress REST API",
+  "name": "jwt-auth-pro-wp-rest-api/secure-refresh-tokens",
+  "description": "Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps",
   "type": "wordpress-plugin",
   "keywords": [
     "wordpress",
@@ -8,7 +8,11 @@
     "authentication",
     "rest-api",
     "spa",
-    "mobile"
+    "mobile",
+    "refresh-tokens",
+    "security",
+    "oauth2",
+    "modern"
   ],
   "license": "GPL-2.0-or-later",
   "authors": [
@@ -34,7 +38,7 @@
   },
   "autoload": {
     "psr-4": {
-      "WPRESTAuthJWT\\": "includes/"
+      "JWTAuthPro\\": "includes/"
     }
   },
   "scripts": {

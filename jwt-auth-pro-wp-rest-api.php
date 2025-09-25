@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Plugin Name: REST Auth JWT
- * Description: Simple, secure JWT authentication for WordPress REST API with HttpOnly refresh tokens
+ * Plugin Name: JWT Auth Pro for WP REST API - Secure Refresh Tokens
+ * Description: Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps
  * Version: 1.0.0
  * Author: WordPress Developer
- * Author URI: https://github.com/juanma-wp/wp-rest-auth-jwt
- * Plugin URI: https://github.com/juanma-wp/wp-rest-auth-jwt
- * Text Domain: wp-rest-auth-jwt
+ * Author URI: https://github.com/juanma-wp/jwt-auth-pro
+ * Plugin URI: https://github.com/juanma-wp/jwt-auth-pro
+ * Text Domain: jwt-auth-pro-wp-rest-api
  * Domain Path: /languages
  * Requires at least: 5.6
  * Tested up to: 6.8
@@ -15,26 +15,29 @@
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * WP REST Auth JWT - Simple, secure JWT authentication for WordPress REST API
+ * JWT Auth Pro - Advanced JWT authentication with secure refresh token architecture
  *
- * This plugin provides JWT (JSON Web Token) authentication for WordPress REST API
- * endpoints, designed specifically for Single Page Applications (SPAs) and mobile apps
- * that need stateless authentication without the complexity of OAuth2.
+ * Unlike basic JWT plugins that use single long-lived tokens, JWT Auth Pro implements
+ * modern OAuth 2.0 best practices with short-lived access tokens and secure refresh tokens.
+ * This dramatically improves security for Single Page Applications (SPAs) and mobile apps.
  *
- * Features:
- * - JWT access tokens with configurable expiration
- * - HTTP-only refresh tokens for enhanced security
- * - User authentication and authorization
- * - Token refresh and revocation
- * - CORS support for cross-origin requests
- * - Built-in security best practices
- * - WordPress coding standards compliant
+ * Key Security Advantages:
+ * - Short-lived JWT access tokens (configurable, default 1 hour)
+ * - Secure HTTP-only refresh tokens stored in database
+ * - Automatic token rotation and revocation capabilities
+ * - Protection against XSS attacks via HTTP-only cookies
+ * - Complete token lifecycle management with user session tracking
+ * - CORS support optimized for modern web applications
+ * - WordPress security standards compliant
  *
- * @package   WPRESTAuthJWT
+ * Perfect for developers building modern applications that require enterprise-grade
+ * JWT security without the complexity of full OAuth 2.0 implementations.
+ *
+ * @package   JWTAuthPro
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later
- * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
+ * @link      https://github.com/juanma-wp/jwt-auth-pro
  * @since     1.0.0
  *
  * @wordpress-plugin
@@ -44,16 +47,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'WP_REST_AUTH_JWT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'WP_REST_AUTH_JWT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'WP_REST_AUTH_JWT_VERSION', '1.0.0' );
+define( 'JWT_AUTH_PRO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'JWT_AUTH_PRO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'JWT_AUTH_PRO_VERSION', '1.0.0' );
 
 /**
- * Main plugin class for WP REST Auth JWT.
+ * Main plugin class for JWT Auth Pro.
  *
- * @package WPRESTAuthJWT
+ * @package JWTAuthPro
  */
-class WP_REST_Auth_JWT {
+class JWT_Auth_Pro {
 
 
 
@@ -87,13 +90,13 @@ class WP_REST_Auth_JWT {
 	 * Load plugin dependencies.
 	 */
 	private function load_dependencies(): void {
-		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/helpers.php';
-		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-admin-settings.php';
-		require_once WP_REST_AUTH_JWT_PLUGIN_DIR . 'includes/class-auth-jwt.php';
+		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/helpers.php';
+		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-admin-settings.php';
+		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-auth-jwt.php';
 
 		// Initialize admin settings.
 		if ( is_admin() ) {
-			new WP_REST_Auth_JWT_Admin_Settings();
+			new JWT_Auth_Pro_Admin_Settings();
 		}
 
 		$this->auth_jwt = new Auth_JWT();
@@ -103,13 +106,13 @@ class WP_REST_Auth_JWT {
 	 * Setup plugin constants.
 	 */
 	private function setup_constants(): void {
-		$jwt_settings = WP_REST_Auth_JWT_Admin_Settings::get_jwt_settings();
+		$jwt_settings = JWT_Auth_Pro_Admin_Settings::get_jwt_settings();
 
 		// Setup JWT constants from admin settings or fallback to wp-config.php.
-		if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
+		if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
 			$secret = $jwt_settings['secret_key'] ?? '';
 			if ( ! empty( $secret ) ) {
-				define( 'WP_JWT_AUTH_SECRET', $secret );
+				define( 'JWT_AUTH_PRO_SECRET', $secret );
 			} else {
 				// Check if it's defined in wp-config.php as fallback.
 				add_action( 'admin_notices', array( $this, 'missing_config_notice' ) );
@@ -117,18 +120,13 @@ class WP_REST_Auth_JWT {
 			}
 		}
 
-		// Back-compat constant expected by some tests.
-		if ( ! defined( 'WP_JWT_SECRET' ) ) {
-			define( 'WP_JWT_SECRET', WP_JWT_AUTH_SECRET );
-		}
-
 		// Set token expiration times from admin settings.
-		if ( ! defined( 'WP_JWT_ACCESS_TTL' ) ) {
-			define( 'WP_JWT_ACCESS_TTL', $jwt_settings['access_token_expiry'] ?? 3600 );
+		if ( ! defined( 'JWT_AUTH_ACCESS_TTL' ) ) {
+			define( 'JWT_AUTH_ACCESS_TTL', $jwt_settings['access_token_expiry'] ?? 3600 );
 		}
 
-		if ( ! defined( 'WP_JWT_REFRESH_TTL' ) ) {
-			define( 'WP_JWT_REFRESH_TTL', $jwt_settings['refresh_token_expiry'] ?? 2592000 );
+		if ( ! defined( 'JWT_AUTH_REFRESH_TTL' ) ) {
+			define( 'JWT_AUTH_REFRESH_TTL', $jwt_settings['refresh_token_expiry'] ?? 2592000 );
 		}
 	}
 
@@ -214,9 +212,9 @@ class WP_REST_Auth_JWT {
 	public function deactivate(): void {
 		// Clean up refresh tokens on deactivation.
 		// Direct database query required for cleanup - no WordPress equivalent exists.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}jwt_refresh_tokens WHERE expires_at < %d", time() ) );
 	}
 
@@ -264,11 +262,11 @@ class WP_REST_Auth_JWT {
 	 * Display missing configuration notice.
 	 */
 	public function missing_config_notice(): void {
-		$settings_url = admin_url( 'options-general.php?page=wp-rest-auth-jwt' );
+		$settings_url = admin_url( 'options-general.php?page=jwt-auth-pro-wp-rest-api' );
 		echo '<div class="notice notice-error"><p>';
-		echo '<strong>WP REST Auth JWT:</strong> JWT Secret Key is required for the plugin to work. ';
+		echo '<strong>JWT Auth Pro:</strong> JWT Secret Key is required for the plugin to work. ';
 		echo '<a href="' . esc_url( $settings_url ) . '">Configure it in the plugin settings</a> ';
-		echo 'or define <code>WP_JWT_AUTH_SECRET</code> in your wp-config.php file.';
+		echo 'or define <code>JWT_AUTH_PRO_SECRET</code> in your wp-config.php file.';
 		echo '</p></div>';
 	}
 
@@ -278,19 +276,19 @@ class WP_REST_Auth_JWT {
 	public function enqueue_scripts(): void {
 		if ( is_admin() ) {
 			wp_enqueue_script(
-				'wp-rest-auth-jwt-admin',
-				WP_REST_AUTH_JWT_PLUGIN_URL . 'assets/admin.js',
+				'jwt-auth-pro-admin',
+				JWT_AUTH_PRO_PLUGIN_URL . 'assets/admin.js',
 				array( 'jquery' ),
-				WP_REST_AUTH_JWT_VERSION,
+				JWT_AUTH_PRO_VERSION,
 				true
 			);
 
 			wp_localize_script(
-				'wp-rest-auth-jwt-admin',
-				'wpRestAuthJWT',
+				'jwt-auth-pro-admin',
+				'jwtAuthPro',
 				array(
 					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-					'nonce'   => wp_create_nonce( 'wp_rest_auth_jwt_nonce' ),
+					'nonce'   => wp_create_nonce( 'jwt_auth_pro_nonce' ),
 					'restUrl' => rest_url(),
 				)
 			);
@@ -298,4 +296,4 @@ class WP_REST_Auth_JWT {
 	}
 }
 
-new WP_REST_Auth_JWT();
+new JWT_Auth_Pro();

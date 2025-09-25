@@ -1,20 +1,40 @@
-=== REST Auth JWT ===
-Contributors: wordpress-developer
-Tags: jwt, authentication, rest-api, token, security
-Requires at least: 5.6
-Tested up to: 6.8
-Requires PHP: 7.4
-Stable tag: 1.0.0
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+# JWT Auth Pro - Secure Refresh Tokens
 
-Simple, secure JWT authentication for WordPress REST API.
+[![CI](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/ci.yml)
 
-== Description ==
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) [![WordPress](https://img.shields.io/badge/WordPress-%3E%3D5.6-blue.svg)](https://wordpress.org) [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-blue.svg)](https://php.net)
 
-🔐 **Simple, secure JWT authentication for WordPress REST API**
+Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps
 
-A focused, lightweight plugin providing JWT authentication with HTTPOnly refresh tokens for WordPress REST API. Perfect for SPAs, mobile apps, and headless WordPress implementations.
+
+## 🚀 Why JWT Auth Pro?
+
+Unlike basic JWT plugins that use **single long-lived tokens**, JWT Auth Pro implements **modern OAuth 2.0 security best practices** with short-lived access tokens and secure refresh tokens.
+
+### ⚡ Security Comparison
+
+| Feature | Basic JWT Plugins | JWT Auth Pro |
+|---------|-------------------|--------------|
+| **Token Lifetime** | Long (hours/days) ❌ | Short (1 hour) ✅ |
+| **Refresh Tokens** | None ❌ | Secure HTTP-only ✅ |
+| **XSS Protection** | Limited ❌ | HTTP-only cookies ✅ |
+| **Token Revocation** | Manual only ❌ | Automatic rotation ✅ |
+| **Session Management** | None ❌ | Database tracking ✅ |
+| **Security Metadata** | None ❌ | IP + User Agent ✅ |
+
+### 🔒 **The Problem with Basic JWT Plugins:**
+- **Long-lived tokens** (24h+) = Higher security risk
+- **No refresh mechanism** = Tokens live until expiry
+- **XSS vulnerable** = Tokens stored in localStorage
+- **No revocation** = Can't invalidate compromised tokens
+
+### ✅ **JWT Auth Pro Solution:**
+- **Short-lived access tokens** (1h default) = Minimal attack window
+- **Secure refresh tokens** = HTTP-only cookies, XSS protected
+- **Automatic token rotation** = Fresh tokens on each refresh
+- **Complete session control** = Revoke any user session instantly
+
+🔐 **The most secure JWT authentication plugin for WordPress.**
 
 ## ✨ Features
 
@@ -78,9 +98,9 @@ const posts = await fetch('/wp-json/wp/v2/posts', {
 
 ### Via wp-config.php (Recommended for production)
 ```php
-define('WP_JWT_AUTH_SECRET', 'your-super-secret-key-here');
-define('WP_JWT_ACCESS_TTL', 3600);      // 1 hour
-define('WP_JWT_REFRESH_TTL', 2592000);  // 30 days
+define('JWT_AUTH_PRO_SECRET', 'your-super-secret-key-here');
+define('JWT_AUTH_ACCESS_TTL', 3600);      // 1 hour
+define('JWT_AUTH_REFRESH_TTL', 2592000);  // 30 days
 ```
 
 ### Via WordPress Admin
@@ -107,82 +127,7 @@ Perfect for:
 
 ## 🛠️ Advanced Usage
 
-### JavaScript Client Example
-```javascript
-class JWTAuth {
-    constructor(baseUrl) {
-        this.baseUrl = baseUrl;
-        this.accessToken = null;
-    }
-
-    async login(username, password) {
-        const response = await fetch(`${this.baseUrl}/wp-json/jwt/v1/token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include', // Important for HTTPOnly cookies
-            body: JSON.stringify({ username, password })
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            this.accessToken = data.data.access_token;
-            return data;
-        }
-        throw new Error('Login failed');
-    }
-
-    async apiCall(endpoint, options = {}) {
-        const response = await fetch(`${this.baseUrl}${endpoint}`, {
-            ...options,
-            headers: {
-                ...options.headers,
-                'Authorization': `Bearer ${this.accessToken}`
-            }
-        });
-
-        if (response.status === 401) {
-            // Try to refresh token
-            await this.refreshToken();
-            // Retry original request
-            return this.apiCall(endpoint, options);
-        }
-
-        return response;
-    }
-
-    async refreshToken() {
-        const response = await fetch(`${this.baseUrl}/wp-json/jwt/v1/refresh`, {
-            method: 'POST',
-            credentials: 'include' // HTTPOnly cookie sent automatically
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            this.accessToken = data.data.access_token;
-            return data;
-        }
-
-        // Refresh failed, need to login again
-        this.accessToken = null;
-        throw new Error('Please login again');
-    }
-
-    async logout() {
-        await fetch(`${this.baseUrl}/wp-json/jwt/v1/logout`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        this.accessToken = null;
-    }
-}
-
-// Usage
-const auth = new JWTAuth('https://your-wordpress-site.com');
-await auth.login('username', 'password');
-
-// Make authenticated API calls
-const posts = await auth.apiCall('/wp-json/wp/v2/posts');
-```
+See `DOCS/advanced-usage.md` for the full JavaScript client example, and `DOCS/cors-and-cookies.md` for cross-origin and cookie configuration guidance.
 
 ## 🧪 Testing (wp-env)
 
@@ -228,6 +173,16 @@ GPL v2 or later
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📚 References
+
+- **OAuth 2.0 Security Best Current Practice (IETF)**: [datatracker draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics)
+- **OAuth 2.0 for Browser-Based Apps (IETF)**: [datatracker draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps)
+- **OAuth 2.0 Token Revocation (RFC 7009)**: [RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009)
+- **JWT storage guidance (OWASP)**: [OWASP JWT Cheat Sheet — Where to store JWTs](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#where-to-store-jwts)
+- **Session management guidance (OWASP)**: [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
+- **HttpOnly cookies not readable by JS (MDN)**: [MDN Set-Cookie — HttpOnly](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#httponly)
+- **Refresh token rotation & reuse detection (Auth0)**: [Auth0 Docs — Refresh Token Rotation](https://auth0.com/docs/secure/tokens/refresh-tokens/refresh-token-rotation)
 
 ---
 

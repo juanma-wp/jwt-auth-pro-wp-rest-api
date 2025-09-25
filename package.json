@@ -1,5 +1,5 @@
 {
-  "name": "wp-rest-auth-jwt",
+  "name": "jwt-auth-pro-wp-rest-api",
   "version": "1.0.0",
   "description": "Simple, secure JWT authentication for WordPress REST API",
   "private": true,
@@ -13,9 +13,10 @@
     "env:logs": "wp-env logs",
     "env:reset": "wp-env destroy && wp-env start",
     "env:update": "wp-env start --update",
-    "test": "wp-env run tests-cli --env-cwd=wp-content/plugins/wp-rest-auth-jwt vendor/bin/phpunit --testdox",
-    "test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/wp-rest-auth-jwt vendor/bin/phpunit --testsuite=unit --testdox",
-    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/wp-rest-auth-jwt vendor/bin/phpunit --testsuite=integration --testdox"
+    "composer:install": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer install --no-interaction --prefer-dist'",
+    "test": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testdox",
+    "test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=unit --testdox",
+    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=integration --testdox"
   },
   "devDependencies": {
     "@wordpress/env": "^10.31.0"
@@ -26,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/juanma-wp/wp-rest-auth-jwt"
+    "url": "https://github.com/juanma-wp/jwt-auth-pro-wp-rest-api"
   },
   "keywords": [
     "wordpress",

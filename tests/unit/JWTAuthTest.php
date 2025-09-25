@@ -31,14 +31,14 @@ class JWTAuthTest extends TestCase {
 		}
 
 		// Define constants for testing
-		if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
-			define( 'WP_JWT_AUTH_SECRET', 'test-secret-key-for-testing-only-jwt' );
+		if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
+			define( 'JWT_AUTH_PRO_SECRET', 'test-secret-key-for-testing-only-jwt' );
 		}
-		if ( ! defined( 'WP_JWT_ACCESS_TTL' ) ) {
-			define( 'WP_JWT_ACCESS_TTL', 3600 );
+		if ( ! defined( 'JWT_AUTH_ACCESS_TTL' ) ) {
+			define( 'JWT_AUTH_ACCESS_TTL', 3600 );
 		}
-		if ( ! defined( 'WP_JWT_REFRESH_TTL' ) ) {
-			define( 'WP_JWT_REFRESH_TTL', 86400 );
+		if ( ! defined( 'JWT_AUTH_REFRESH_TTL' ) ) {
+			define( 'JWT_AUTH_REFRESH_TTL', 86400 );
 		}
 
 		$this->auth_jwt = new Auth_JWT();
@@ -160,14 +160,14 @@ class JWTAuthTest extends TestCase {
 	 */
 	public function testJWTConstants(): void {
 		// Test JWT constants are available
-		$this->assertTrue( defined( 'WP_JWT_AUTH_SECRET' ) );
-		$this->assertTrue( defined( 'WP_JWT_ACCESS_TTL' ) );
-		$this->assertTrue( defined( 'WP_JWT_REFRESH_TTL' ) );
+		$this->assertTrue( defined( 'JWT_AUTH_PRO_SECRET' ) );
+		$this->assertTrue( defined( 'JWT_AUTH_ACCESS_TTL' ) );
+		$this->assertTrue( defined( 'JWT_AUTH_REFRESH_TTL' ) );
 
 		// Test values are reasonable
-		$this->assertGreaterThan( 0, WP_JWT_ACCESS_TTL );
-		$this->assertGreaterThan( 0, WP_JWT_REFRESH_TTL );
-		$this->assertNotEmpty( WP_JWT_AUTH_SECRET );
+		$this->assertGreaterThan( 0, JWT_AUTH_ACCESS_TTL );
+		$this->assertGreaterThan( 0, JWT_AUTH_REFRESH_TTL );
+		$this->assertNotEmpty( JWT_AUTH_PRO_SECRET );
 	}
 
 	/**
@@ -198,7 +198,7 @@ class JWTAuthTest extends TestCase {
 	 */
 	public function testJWTWorkflowIntegration(): void {
 		// Test a basic JWT workflow using helper functions
-		$secret = WP_JWT_AUTH_SECRET;
+		$secret = JWT_AUTH_PRO_SECRET;
 		$claims = array(
 			'iss' => Auth_JWT::ISSUER,
 			'aud' => 'test-audience',
@@ -282,8 +282,8 @@ class JWTAuthTest extends TestCase {
 			'sub' => 123,
 		);
 
-		$expired_token = wp_auth_jwt_encode( $expired_payload, WP_JWT_AUTH_SECRET );
-		$result        = wp_auth_jwt_decode( $expired_token, WP_JWT_AUTH_SECRET );
+		$expired_token = wp_auth_jwt_encode( $expired_payload, JWT_AUTH_PRO_SECRET );
+		$result        = wp_auth_jwt_decode( $expired_token, JWT_AUTH_PRO_SECRET );
 
 		$this->assertFalse( $result, 'Expired token should not be valid' );
 	}
@@ -311,7 +311,7 @@ class JWTAuthTest extends TestCase {
 			),
 		);
 
-		return wp_auth_jwt_encode( $payload, WP_JWT_AUTH_SECRET );
+		return wp_auth_jwt_encode( $payload, JWT_AUTH_PRO_SECRET );
 	}
 
 	/**

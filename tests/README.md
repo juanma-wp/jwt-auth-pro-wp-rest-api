@@ -88,7 +88,7 @@ The test environment is configured via `.wp-env.json`:
   "plugins": ["."],
   "config": {
     "WP_DEBUG": true,
-    "WP_JWT_AUTH_SECRET": "test-secret"
+    "JWT_AUTH_PRO_SECRET": "test-secret"
   },
   "port": 8888,
   "testsPort": 8889

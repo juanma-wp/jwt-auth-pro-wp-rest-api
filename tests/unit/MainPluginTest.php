@@ -2,7 +2,7 @@
 /**
  * Main Plugin Unit Tests
  *
- * Unit tests for the main WP_REST_Auth_JWT plugin class.
+ * Unit tests for the main JWT_Auth_Pro plugin class.
  * Tests plugin initialization, constants, dependency loading,
  * and core functionality.
  *
@@ -25,7 +25,7 @@ class MainPluginTest extends TestCase {
 	/**
 	 * Plugin instance for testing.
 	 *
-	 * @var WP_REST_Auth_JWT
+	 * @var JWT_Auth_Pro
 	 */
 	private $plugin;
 
@@ -36,27 +36,27 @@ class MainPluginTest extends TestCase {
 		parent::setUp();
 
 		// Load the main plugin class.
-		if ( ! class_exists( 'WP_REST_Auth_JWT' ) ) {
-			require_once dirname( __DIR__, 2 ) . '/wp-rest-auth-jwt.php';
+		if ( ! class_exists( 'JWT_Auth_Pro' ) ) {
+			require_once dirname( __DIR__, 2 ) . '/jwt-auth-pro-wp-rest-api.php';
 		}
 
 		// Define constants for testing.
-		if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
-			define( 'WP_JWT_AUTH_SECRET', 'test-secret-key-for-testing-only-jwt' );
+		if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
+			define( 'JWT_AUTH_PRO_SECRET', 'test-secret-key-for-testing-only-jwt' );
 		}
-		if ( ! defined( 'WP_REST_AUTH_JWT_PLUGIN_DIR' ) ) {
-			define( 'WP_REST_AUTH_JWT_PLUGIN_DIR', dirname( __DIR__, 2 ) . '/' );
+		if ( ! defined( 'JWT_AUTH_PRO_PLUGIN_DIR' ) ) {
+			define( 'JWT_AUTH_PRO_PLUGIN_DIR', dirname( __DIR__, 2 ) . '/' );
 		}
 
-		$this->plugin = new WP_REST_Auth_JWT();
+		$this->plugin = new JWT_Auth_Pro();
 	}
 
 	/**
 	 * Test that plugin class exists and can be instantiated.
 	 */
 	public function testPluginClassExists(): void {
-		$this->assertTrue( class_exists( 'WP_REST_Auth_JWT' ) );
-		$this->assertInstanceOf( 'WP_REST_Auth_JWT', $this->plugin );
+		$this->assertTrue( class_exists( 'JWT_Auth_Pro' ) );
+		$this->assertInstanceOf( 'JWT_Auth_Pro', $this->plugin );
 	}
 
 	/**
@@ -76,11 +76,11 @@ class MainPluginTest extends TestCase {
 	 */
 	public function testPluginConstants(): void {
 		// Test plugin constants.
-		$this->assertTrue( defined( 'WP_REST_AUTH_JWT_VERSION' ) );
-		$this->assertSame( '1.0.0', WP_REST_AUTH_JWT_VERSION );
+		$this->assertTrue( defined( 'JWT_AUTH_PRO_VERSION' ) );
+		$this->assertSame( '1.0.0', JWT_AUTH_PRO_VERSION );
 
-		$this->assertTrue( defined( 'WP_REST_AUTH_JWT_PLUGIN_DIR' ) );
-		$this->assertNotEmpty( WP_REST_AUTH_JWT_PLUGIN_DIR );
+		$this->assertTrue( defined( 'JWT_AUTH_PRO_PLUGIN_DIR' ) );
+		$this->assertNotEmpty( JWT_AUTH_PRO_PLUGIN_DIR );
 	}
 
 	/**
@@ -107,8 +107,8 @@ class MainPluginTest extends TestCase {
 		$this->assertTrue( method_exists( $this->plugin, 'setup_constants' ) );
 
 		// Test constants are properly set up.
-		$this->assertTrue( defined( 'WP_JWT_SECRET' ) );
-		$this->assertNotEmpty( WP_JWT_SECRET );
+		$this->assertTrue( defined( 'JWT_AUTH_PRO_SECRET' ) );
+		$this->assertNotEmpty( JWT_AUTH_PRO_SECRET );
 	}
 
 	/**
@@ -227,7 +227,7 @@ class MainPluginTest extends TestCase {
 			$property->setAccessible( true );
 			$admin_settings = $property->getValue( $this->plugin );
 			// May be null if not in admin context.
-			$this->assertTrue( null === $admin_settings || $admin_settings instanceof WP_REST_Auth_JWT_Admin_Settings );
+			$this->assertTrue( null === $admin_settings || $admin_settings instanceof JWT_Auth_Pro_Admin_Settings );
 		}
 	}
 
@@ -236,8 +236,8 @@ class MainPluginTest extends TestCase {
 	 */
 	public function testSecretGeneration(): void {
 		// Test that secret is generated if not exists.
-		$this->assertTrue( defined( 'WP_JWT_SECRET' ) );
-		$secret = WP_JWT_SECRET;
+		$this->assertTrue( defined( 'JWT_AUTH_PRO_SECRET' ) );
+		$secret = JWT_AUTH_PRO_SECRET;
 
 		$this->assertNotEmpty( $secret );
 		$this->assertIsString( $secret );
@@ -260,7 +260,7 @@ class MainPluginTest extends TestCase {
 	public function testPluginSingleton(): void {
 		// The plugin should be instantiated as a singleton through the main file.
 		// We can't test this directly in unit tests, but we can verify the structure.
-		$this->assertInstanceOf( 'WP_REST_Auth_JWT', $this->plugin );
+		$this->assertInstanceOf( 'JWT_Auth_Pro', $this->plugin );
 	}
 
 	/**

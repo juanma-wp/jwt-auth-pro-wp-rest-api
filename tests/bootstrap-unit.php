@@ -11,13 +11,13 @@
  * methods without relying on WordPress core functionality, database connections,
  * or complex integrations.
  *
- * @package   WPRESTAuthJWT
+ * @package   JWTAuthProWPRestAPI
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later
  * @since     1.0.0
  *
- * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
+ * @link      https://github.com/juanma-wp/jwt-auth-pro-wp-rest-api
  */
 
 // Load Composer autoloader
@@ -28,16 +28,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', '/tmp/' );
 }
 
-if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
-	define( 'WP_JWT_AUTH_SECRET', 'test-secret-for-unit-testing' );
+if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
+	define( 'JWT_AUTH_PRO_SECRET', 'test-secret-for-unit-testing' );
 }
 
-if ( ! defined( 'WP_JWT_ACCESS_TTL' ) ) {
-	define( 'WP_JWT_ACCESS_TTL', 3600 );
+if ( ! defined( 'JWT_AUTH_ACCESS_TTL' ) ) {
+	define( 'JWT_AUTH_ACCESS_TTL', 3600 );
 }
 
-if ( ! defined( 'WP_JWT_REFRESH_TTL' ) ) {
-	define( 'WP_JWT_REFRESH_TTL', 2592000 );
+if ( ! defined( 'JWT_AUTH_REFRESH_TTL' ) ) {
+	define( 'JWT_AUTH_REFRESH_TTL', 2592000 );
 }
 
 // Mock only essential WordPress functions needed by helpers.php
@@ -50,5 +50,5 @@ if ( ! function_exists( 'wp_json_encode' ) ) {
 // Load only the helpers.php file for basic function testing
 require_once dirname( __DIR__ ) . '/includes/helpers.php';
 
-echo "WP REST Auth JWT Unit Test environment loaded successfully!\n";
+echo "JWT Auth Pro WP REST API Unit Test environment loaded successfully!\n";
 echo 'PHP version: ' . PHP_VERSION . "\n\n";

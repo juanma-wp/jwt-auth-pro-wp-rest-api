@@ -19,7 +19,7 @@
     <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">./includes/</directory>
-            <file>./wp-rest-auth-jwt.php</file>
+            <file>./jwt-auth-pro-wp-rest-api.php</file>
         </include>
     </coverage>
 </phpunit>

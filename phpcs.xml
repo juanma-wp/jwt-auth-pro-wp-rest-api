@@ -39,6 +39,8 @@
 	<exclude-pattern>vendor/*</exclude-pattern>
 	<exclude-pattern>node_modules/*</exclude-pattern>
 	<exclude-pattern>tests/*</exclude-pattern>
+	<exclude-pattern>wp-plugins-cache/*</exclude-pattern>
+	<exclude-pattern>wp-plugins-extracted/*</exclude-pattern>
 
 	<!-- Check PHP files -->
 	<arg name="extensions" value="php"/>

@@ -128,13 +128,13 @@ class Auth_JWT {
 			'iss' => self::ISSUER,
 			'sub' => (string) $user_id,
 			'iat' => $now,
-			'exp' => $now + WP_JWT_ACCESS_TTL,
+			'exp' => $now + JWT_AUTH_ACCESS_TTL,
 			'jti' => wp_auth_jwt_generate_token( 16 ),
 		);
 		if ( ! empty( $extra_claims ) ) {
 			$claims = array_merge( $claims, $extra_claims );
 		}
-		return wp_auth_jwt_encode( $claims, WP_JWT_AUTH_SECRET );
+		return wp_auth_jwt_encode( $claims, JWT_AUTH_PRO_SECRET );
 	}
 
 	/**
@@ -176,7 +176,7 @@ class Auth_JWT {
 
 		// Generate refresh token.
 		$refresh_token   = wp_auth_jwt_generate_token( 64 );
-		$refresh_expires = $now + WP_JWT_REFRESH_TTL;
+		$refresh_expires = $now + JWT_AUTH_REFRESH_TTL;
 
 		// Store refresh token.
 		$this->store_refresh_token( $user->ID, $refresh_token, $refresh_expires );
@@ -195,7 +195,7 @@ class Auth_JWT {
 			array(
 				'access_token' => $access_token,
 				'token_type'   => 'Bearer',
-				'expires_in'   => WP_JWT_ACCESS_TTL,
+				'expires_in'   => JWT_AUTH_ACCESS_TTL,
 				'user'         => wp_auth_jwt_format_user_data( $user ),
 			),
 			'Authentication successful'
@@ -246,7 +246,7 @@ class Auth_JWT {
 		// Optionally rotate refresh token for better security.
 		if ( apply_filters( 'wp_auth_jwt_rotate_refresh_token', true ) ) {
 			$new_refresh_token = wp_auth_jwt_generate_token( 64 );
-			$refresh_expires   = $now + WP_JWT_REFRESH_TTL;
+			$refresh_expires   = $now + JWT_AUTH_REFRESH_TTL;
 
 			// Update refresh token.
 			$this->update_refresh_token( $token_data['id'], $new_refresh_token, $refresh_expires );
@@ -266,7 +266,7 @@ class Auth_JWT {
 			array(
 				'access_token' => $access_token,
 				'token_type'   => 'Bearer',
-				'expires_in'   => WP_JWT_ACCESS_TTL,
+				'expires_in'   => JWT_AUTH_ACCESS_TTL,
 			),
 			'Token refreshed successfully'
 		);
@@ -338,7 +338,7 @@ class Auth_JWT {
 	 * @return WP_User|WP_Error User object or error.
 	 */
 	public function authenticate_bearer( string $token ) {
-		$payload = wp_auth_jwt_decode( $token, WP_JWT_AUTH_SECRET );
+		$payload = wp_auth_jwt_decode( $token, JWT_AUTH_PRO_SECRET );
 
 		if ( ! $payload ) {
 			return new WP_Error(
@@ -381,7 +381,7 @@ class Auth_JWT {
 	public function store_refresh_token( int $user_id, string $refresh_token, int $expires_at ): bool {
 		global $wpdb;
 
-		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
+		$token_hash = wp_auth_jwt_hash_token( $refresh_token, JWT_AUTH_PRO_SECRET );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct insert for plugin-managed JWT storage; values are parameterized.
 		$result = $wpdb->insert(
@@ -422,7 +422,7 @@ class Auth_JWT {
 	private function validate_refresh_token( string $refresh_token ) {
 		global $wpdb;
 
-		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
+		$token_hash = wp_auth_jwt_hash_token( $refresh_token, JWT_AUTH_PRO_SECRET );
 		$now        = time();
 
 		$cache_key  = 'jwt_token_' . md5( $token_hash );
@@ -467,7 +467,7 @@ class Auth_JWT {
 	private function update_refresh_token( int $token_id, string $new_refresh_token, int $expires_at ): bool {
 		global $wpdb;
 
-		$token_hash = wp_auth_jwt_hash_token( $new_refresh_token, WP_JWT_AUTH_SECRET );
+		$token_hash = wp_auth_jwt_hash_token( $new_refresh_token, JWT_AUTH_PRO_SECRET );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct update for plugin-managed JWT storage; values are parameterized.
 		$result = $wpdb->update(
@@ -496,7 +496,7 @@ class Auth_JWT {
 	public function revoke_refresh_token( string $refresh_token ): bool {
 		global $wpdb;
 
-		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
+		$token_hash = wp_auth_jwt_hash_token( $refresh_token, JWT_AUTH_PRO_SECRET );
 
 		// Clear cache first.
 		$cache_key = 'jwt_token_' . md5( $token_hash );

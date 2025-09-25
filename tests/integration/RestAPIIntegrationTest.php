@@ -242,7 +242,7 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 
 		// Mock the login process for testing
 		$refresh_token = wp_auth_jwt_generate_token( 64 );
-		$this->auth_jwt->store_refresh_token( $user_id, $refresh_token, time() + WP_JWT_REFRESH_TTL );
+		$this->auth_jwt->store_refresh_token( $user_id, $refresh_token, time() + JWT_AUTH_REFRESH_TTL );
 
 		// Test refresh endpoint
 		$request = new WP_REST_Request( 'POST', '/jwt/v1/refresh' );
@@ -331,7 +331,7 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 			'sub' => 123,
 		);
 
-		$expired_token = wp_auth_jwt_encode( $expired_payload, WP_JWT_AUTH_SECRET );
+		$expired_token = wp_auth_jwt_encode( $expired_payload, JWT_AUTH_PRO_SECRET );
 
 		$request = new WP_REST_Request( 'GET', '/jwt/v1/verify' );
 		$request->set_header( 'Authorization', 'Bearer ' . $expired_token );

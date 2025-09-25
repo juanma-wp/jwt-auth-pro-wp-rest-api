@@ -12,13 +12,13 @@
  * including WordPress hooks, database queries, REST API responses, and user
  * authentication flows.
  *
- * @package   WPRESTAuthJWT
+ * @package   JWTAuthProWPRestAPI
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later
  * @since     1.0.0
  *
- * @link      https://github.com/juanma-wp/wp-rest-auth-jwt
+ * @link      https://github.com/juanma-wp/jwt-auth-pro-wp-rest-api
  */
 
 // Define testing environment constants
@@ -56,20 +56,20 @@ if ( file_exists( $_tests_dir . '/includes/functions.php' ) ) {
  */
 function _manually_load_jwt_plugin() {
 	// Define test constants for JWT
-	if ( ! defined( 'WP_JWT_AUTH_SECRET' ) ) {
-		define( 'WP_JWT_AUTH_SECRET', 'test-secret-key-for-testing-purposes-only-never-use-in-production-environment-this-should-be-long-and-random' );
+	if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
+		define( 'JWT_AUTH_PRO_SECRET', 'test-secret-key-for-testing-purposes-only-never-use-in-production-environment-this-should-be-long-and-random' );
 	}
 
-	if ( ! defined( 'WP_JWT_ACCESS_TTL' ) ) {
-		define( 'WP_JWT_ACCESS_TTL', 3600 );
+	if ( ! defined( 'JWT_AUTH_ACCESS_TTL' ) ) {
+		define( 'JWT_AUTH_ACCESS_TTL', 3600 );
 	}
 
-	if ( ! defined( 'WP_JWT_REFRESH_TTL' ) ) {
-		define( 'WP_JWT_REFRESH_TTL', 86400 );
+	if ( ! defined( 'JWT_AUTH_REFRESH_TTL' ) ) {
+		define( 'JWT_AUTH_REFRESH_TTL', 86400 );
 	}
 
 	// Load the plugin
-	require dirname( __DIR__ ) . '/wp-rest-auth-jwt.php';
+	require dirname( __DIR__ ) . '/jwt-auth-pro-wp-rest-api.php';
 }
 
 if ( function_exists( 'tests_add_filter' ) ) {
@@ -153,7 +153,7 @@ if ( function_exists( 'add_filter' ) ) {
 	);
 }
 
-echo "WP REST Auth JWT Integration Test environment loaded successfully!\n";
+echo "JWT Auth Pro WP REST API Integration Test environment loaded successfully!\n";
 echo 'WordPress version: ' . ( defined( 'WP_VERSION' ) ? esc_html( WP_VERSION ) : 'Unknown' ) . "\n";
 echo 'PHP version: ' . esc_html( PHP_VERSION ) . "\n";
 echo 'Test directory: ' . esc_html( $_tests_dir ) . "\n";
