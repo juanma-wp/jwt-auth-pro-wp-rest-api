@@ -73,8 +73,8 @@ Unlike basic JWT plugins that use **single long-lived tokens**, JWT Auth Pro imp
 **Via wp-config.php (Recommended for production):**
 ```php
 define('JWT_AUTH_PRO_SECRET', 'your-super-secret-key-here');
-define('JWT_AUTH_ACCESS_TTL', 3600);      // 1 hour
-define('JWT_AUTH_REFRESH_TTL', 2592000);  // 30 days
+define('JWT_AUTH_PRO_ACCESS_TTL', 3600);      // 1 hour
+define('JWT_AUTH_PRO_REFRESH_TTL', 2592000);  // 30 days
 ```
 
 **Via WordPress Admin:**

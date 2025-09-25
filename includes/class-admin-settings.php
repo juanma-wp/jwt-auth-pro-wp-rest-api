@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Admin Settings for JWT Auth Pro
  *
@@ -27,6 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Admin settings class for JWT Auth Pro plugin.
  */
 class JWT_Auth_Pro_Admin_Settings {
+
 
 	const OPTION_GROUP            = 'jwt_auth_pro_settings';
 	const OPTION_JWT_SETTINGS     = 'jwt_auth_pro_settings';
@@ -347,30 +349,57 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	 * Render the JWT secret key field.
 	 */
 	public function jwt_secret_key_field(): void {
-		$settings = get_option( self::OPTION_JWT_SETTINGS, array() );
-		$value    = $settings['secret_key'] ?? '';
+		$settings        = get_option( self::OPTION_JWT_SETTINGS, array() );
+		$database_secret = $settings['secret_key'] ?? '';
+
+		// Check if JWT_AUTH_PRO_SECRET is defined in wp-config.php.
+		$config_secret = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : '';
+		$using_config  = ! empty( $config_secret );
+
+		// Show the active secret (config takes priority).
+		$active_secret = $using_config ? $config_secret : $database_secret;
+
+		if ( $using_config ) {
+			?>
+			<input type="password" id="jwt_secret_key" value="<?php echo esc_attr( $active_secret ); ?>" class="regular-text" readonly />
+			<button type="button" id="toggle_jwt_secret" class="button">Show/Hide</button>
+			<p class="description">
+				<strong>✅ JWT Secret Key is defined in wp-config.php</strong><br>
+				This secret key from your wp-config.php file takes priority over database settings.
+				To use a different secret, remove the <code>JWT_AUTH_PRO_SECRET</code> constant from wp-config.php.
+			</p>
+			<?php
+		} else {
+			?>
+			<input type="password" id="jwt_secret_key" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[secret_key]" value="<?php echo esc_attr( $database_secret ); ?>" class="regular-text" />
+			<button type="button" id="generate_jwt_secret" class="button">Generate New Secret</button>
+			<button type="button" id="toggle_jwt_secret" class="button">Show/Hide</button>
+			<p class="description">
+				A secure random string used to sign JWT tokens. Generate a new one or enter your own (minimum 32 characters recommended).<br>
+				<strong>Tip:</strong> For better security, define <code>JWT_AUTH_PRO_SECRET</code> in your wp-config.php file instead.
+			</p>
+			<?php
+		}
 		?>
-		<input type="password" id="jwt_secret_key" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[secret_key]" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
-		<button type="button" id="generate_jwt_secret" class="button">Generate New Secret</button>
-		<button type="button" id="toggle_jwt_secret" class="button">Show/Hide</button>
-		<p class="description">A secure random string used to sign JWT tokens. Generate a new one or enter your own (minimum 32 characters recommended).</p>
 
 		<script>
-		jQuery(document).ready(function($) {
-			$('#generate_jwt_secret').click(function() {
-				const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-				let secret = '';
-				for (let i = 0; i < 64; i++) {
-					secret += chars.charAt(Math.floor(Math.random() * chars.length));
-				}
-				$('#jwt_secret_key').val(secret);
-			});
+			jQuery(document).ready(function($) {
+				// Only bind generate secret if button exists (not readonly)
+				$('#generate_jwt_secret').click(function() {
+					const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+					let secret = '';
+					for (let i = 0; i < 64; i++) {
+						secret += chars.charAt(Math.floor(Math.random() * chars.length));
+					}
+					$('#jwt_secret_key').val(secret);
+				});
 
-			$('#toggle_jwt_secret').click(function() {
-				const field = $('#jwt_secret_key');
-				field.attr('type', 'password' === field.attr('type') ? 'text' : 'password');
+				// Toggle show/hide for both readonly and editable fields
+				$('#toggle_jwt_secret').click(function() {
+					const field = $('#jwt_secret_key');
+					field.attr('type', 'password' === field.attr('type') ? 'text' : 'password');
+				});
 			});
-		});
 		</script>
 		<?php
 	}
@@ -379,24 +408,66 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	 * Render the JWT access token expiry field.
 	 */
 	public function jwt_access_token_expiry_field(): void {
-		$settings = get_option( self::OPTION_JWT_SETTINGS, array() );
-		$value    = $settings['access_token_expiry'] ?? 3600;
-		?>
-		<input type="number" id="jwt_access_token_expiry" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[access_token_expiry]" value="<?php echo esc_attr( $value ); ?>" min="300" max="86400" />
-		<p class="description">How long access tokens remain valid in seconds. Default: 3600 (1 hour). Range: 300-86400 seconds.</p>
-		<?php
+		$settings       = get_option( self::OPTION_JWT_SETTINGS, array() );
+		$database_value = $settings['access_token_expiry'] ?? 3600;
+
+		// Check if JWT_AUTH_PRO_ACCESS_TTL is defined in wp-config.php.
+		$config_value = defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ? JWT_AUTH_PRO_ACCESS_TTL : null;
+		$using_config = null !== $config_value;
+
+		// Show the active value (config takes priority).
+		$active_value = $using_config ? $config_value : $database_value;
+
+		if ( $using_config ) {
+			?>
+			<input type="number" id="jwt_access_token_expiry" value="<?php echo esc_attr( $active_value ); ?>" min="300" max="86400" readonly />
+			<p class="description">
+				<strong>✅ Access Token TTL is defined in wp-config.php (<?php echo esc_html( $active_value ); ?> seconds = <?php echo esc_html( human_time_diff( 0, $active_value ) ); ?>)</strong><br>
+				This value from your wp-config.php file takes priority over database settings.
+			</p>
+			<?php
+		} else {
+			?>
+			<input type="number" id="jwt_access_token_expiry" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[access_token_expiry]" value="<?php echo esc_attr( $database_value ); ?>" min="300" max="86400" />
+			<p class="description">
+				How long access tokens remain valid in seconds. Default: 3600 (1 hour). Range: 300-86400 seconds.<br>
+				<strong>Tip:</strong> Define <code>JWT_AUTH_PRO_ACCESS_TTL</code> in wp-config.php for better control.
+			</p>
+			<?php
+		}
 	}
 
 	/**
 	 * Render the JWT refresh token expiry field.
 	 */
 	public function jwt_refresh_token_expiry_field(): void {
-		$settings = get_option( self::OPTION_JWT_SETTINGS, array() );
-		$value    = $settings['refresh_token_expiry'] ?? 2592000;
-		?>
-		<input type="number" id="jwt_refresh_token_expiry" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[refresh_token_expiry]" value="<?php echo esc_attr( $value ); ?>" min="3600" max="31536000" />
-		<p class="description">How long refresh tokens remain valid in seconds. Default: 2592000 (30 days). Range: 3600-31536000 seconds.</p>
-		<?php
+		$settings       = get_option( self::OPTION_JWT_SETTINGS, array() );
+		$database_value = $settings['refresh_token_expiry'] ?? 2592000;
+
+		// Check if JWT_AUTH_PRO_REFRESH_TTL is defined in wp-config.php.
+		$config_value = defined( 'JWT_AUTH_PRO_REFRESH_TTL' ) ? JWT_AUTH_PRO_REFRESH_TTL : null;
+		$using_config = null !== $config_value;
+
+		// Show the active value (config takes priority).
+		$active_value = $using_config ? $config_value : $database_value;
+
+		if ( $using_config ) {
+			?>
+			<input type="number" id="jwt_refresh_token_expiry" value="<?php echo esc_attr( $active_value ); ?>" min="3600" max="31536000" readonly />
+			<p class="description">
+				<strong>✅ Refresh Token TTL is defined in wp-config.php (<?php echo esc_html( $active_value ); ?> seconds = <?php echo esc_html( human_time_diff( 0, $active_value ) ); ?>)</strong><br>
+				This value from your wp-config.php file takes priority over database settings.
+			</p>
+			<?php
+		} else {
+			?>
+			<input type="number" id="jwt_refresh_token_expiry" name="<?php echo esc_attr( self::OPTION_JWT_SETTINGS ); ?>[refresh_token_expiry]" value="<?php echo esc_attr( $database_value ); ?>" min="3600" max="31536000" />
+			<p class="description">
+				How long refresh tokens remain valid in seconds. Default: 2592000 (30 days). Range: 3600-31536000 seconds.<br>
+				<strong>Tip:</strong> Define <code>JWT_AUTH_PRO_REFRESH_TTL</code> in wp-config.php for better control.
+			</p>
+			<?php
+		}
 	}
 
 	/**

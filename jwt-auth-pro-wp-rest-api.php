@@ -121,12 +121,12 @@ class JWT_Auth_Pro {
 		}
 
 		// Set token expiration times from admin settings.
-		if ( ! defined( 'JWT_AUTH_ACCESS_TTL' ) ) {
-			define( 'JWT_AUTH_ACCESS_TTL', $jwt_settings['access_token_expiry'] ?? 3600 );
+		if ( ! defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ) {
+			define( 'JWT_AUTH_PRO_ACCESS_TTL', $jwt_settings['access_token_expiry'] ?? 3600 );
 		}
 
-		if ( ! defined( 'JWT_AUTH_REFRESH_TTL' ) ) {
-			define( 'JWT_AUTH_REFRESH_TTL', $jwt_settings['refresh_token_expiry'] ?? 2592000 );
+		if ( ! defined( 'JWT_AUTH_PRO_REFRESH_TTL' ) ) {
+			define( 'JWT_AUTH_PRO_REFRESH_TTL', $jwt_settings['refresh_token_expiry'] ?? 2592000 );
 		}
 	}
 

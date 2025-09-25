@@ -128,7 +128,7 @@ class Auth_JWT {
 			'iss' => self::ISSUER,
 			'sub' => (string) $user_id,
 			'iat' => $now,
-			'exp' => $now + JWT_AUTH_ACCESS_TTL,
+			'exp' => $now + JWT_AUTH_PRO_ACCESS_TTL,
 			'jti' => wp_auth_jwt_generate_token( 16 ),
 		);
 		if ( ! empty( $extra_claims ) ) {
@@ -176,7 +176,7 @@ class Auth_JWT {
 
 		// Generate refresh token.
 		$refresh_token   = wp_auth_jwt_generate_token( 64 );
-		$refresh_expires = $now + JWT_AUTH_REFRESH_TTL;
+		$refresh_expires = $now + JWT_AUTH_PRO_REFRESH_TTL;
 
 		// Store refresh token.
 		$this->store_refresh_token( $user->ID, $refresh_token, $refresh_expires );
@@ -195,7 +195,7 @@ class Auth_JWT {
 			array(
 				'access_token' => $access_token,
 				'token_type'   => 'Bearer',
-				'expires_in'   => JWT_AUTH_ACCESS_TTL,
+				'expires_in'   => JWT_AUTH_PRO_ACCESS_TTL,
 				'user'         => wp_auth_jwt_format_user_data( $user ),
 			),
 			'Authentication successful'
@@ -246,7 +246,7 @@ class Auth_JWT {
 		// Optionally rotate refresh token for better security.
 		if ( apply_filters( 'wp_auth_jwt_rotate_refresh_token', true ) ) {
 			$new_refresh_token = wp_auth_jwt_generate_token( 64 );
-			$refresh_expires   = $now + JWT_AUTH_REFRESH_TTL;
+			$refresh_expires   = $now + JWT_AUTH_PRO_REFRESH_TTL;
 
 			// Update refresh token.
 			$this->update_refresh_token( $token_data['id'], $new_refresh_token, $refresh_expires );
@@ -266,7 +266,7 @@ class Auth_JWT {
 			array(
 				'access_token' => $access_token,
 				'token_type'   => 'Bearer',
-				'expires_in'   => JWT_AUTH_ACCESS_TTL,
+				'expires_in'   => JWT_AUTH_PRO_ACCESS_TTL,
 			),
 			'Token refreshed successfully'
 		);
