@@ -4,9 +4,9 @@
  * Plugin Name: JWT Auth Pro for WP REST API - Secure Refresh Tokens
  * Description: Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps
  * Version: 1.0.0
- * Author: WordPress Developer
- * Author URI: https://github.com/juanma-wp/jwt-auth-pro
- * Plugin URI: https://github.com/juanma-wp/jwt-auth-pro
+ * Author: Juan Manuel Garrido
+ * Author URI: https://juanma.codes
+ * Plugin URI: https://github.com/juanma-wp/jwt-auth-pro-wp-rest-api
  * Text Domain: jwt-auth-pro-wp-rest-api
  * Domain Path: /languages
  * Requires at least: 5.6
@@ -34,10 +34,10 @@
  * JWT security without the complexity of full OAuth 2.0 implementations.
  *
  * @package   JWTAuthPro
- * @author    WordPress Developer
- * @copyright 2025 WordPress Developer
+ * @author    Juan Manuel Garrido
+ * @copyright 2025 Juan Manuel Garrido
  * @license   GPL-2.0-or-later
- * @link      https://github.com/juanma-wp/jwt-auth-pro
+ * @link      https://github.com/juanma-wp/jwt-auth-pro-wp-rest-api
  * @since     1.0.0
  *
  * @wordpress-plugin
