@@ -1,6 +1,9 @@
 # JWT Auth Pro - Secure Refresh Tokens
 
-[![CI](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/ci.yml)
+[![Unit Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/unit-tests.yml)
+[![Integration Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/integration-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/integration-tests.yml)
+[![PHPCS](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpcs.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpcs.yml)
+[![PHPStan](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpstan.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpstan.yml)
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) [![WordPress](https://img.shields.io/badge/WordPress-%3E%3D5.6-blue.svg)](https://wordpress.org) [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-blue.svg)](https://php.net)
 
