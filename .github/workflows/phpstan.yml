@@ -1,30 +1,35 @@
-name: PHPStan
+name: PHPStan Static Analysis
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
-
-permissions:
-  contents: read
+    branches: [ main, develop ]
 
 jobs:
   phpstan:
     name: PHPStan Static Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          tools: composer:v2
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        tools: composer:v2
+        ini-file: production
+        # Conservative memory settings for reliable CI runs
+        ini-values: memory_limit=512M, opcache.enable=1, opcache.memory_consumption=32
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction --no-dev
 
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --memory-limit=512M
+    - name: Run PHPStan (Memory Optimized)
+      run: vendor/bin/phpstan analyse --memory-limit=512M --no-progress --no-ansi
+      env:
+        # Additional environment variables to reduce memory usage
+        PHPSTAN_PRO_WEB_PORT: 0
