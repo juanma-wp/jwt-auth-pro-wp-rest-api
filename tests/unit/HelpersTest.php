@@ -273,12 +273,20 @@ class HelpersTest extends TestCase {
 	 * Test CORS origin validation.
 	 */
 	public function testCORSOriginValidation(): void {
-		// Test valid origin
+		// Set up test CORS origins
+		update_option( 'jwt_auth_pro_general_settings', array(
+			'cors_allowed_origins' => "https://example.com\nhttps://app.example.com\nhttp://localhost:3000",
+		) );
+
+		// Test valid origins
 		$this->assertTrue( wp_auth_jwt_is_valid_origin( 'https://example.com' ) );
 		$this->assertTrue( wp_auth_jwt_is_valid_origin( 'https://app.example.com' ) );
 
 		// Test invalid origin
 		$this->assertFalse( wp_auth_jwt_is_valid_origin( 'https://malicious.com' ) );
+
+		// Clean up
+		delete_option( 'jwt_auth_pro_general_settings' );
 	}
 
 	/**
