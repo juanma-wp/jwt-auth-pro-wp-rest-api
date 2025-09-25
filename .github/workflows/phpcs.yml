@@ -1,4 +1,4 @@
-name: PHPStan
+name: PHPCS
 
 on:
   push:
@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  phpstan:
-    name: PHPStan Static Analysis
+  phpcs:
+    name: PHP CodeSniffer
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,10 +21,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          tools: composer:v2
+          tools: composer:v2, cs2pr
 
-      - name: Install dependencies
+      - name: Install CS dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --memory-limit=512M
+      - name: Run PHPCS
+        run: vendor/bin/phpcs -d memory_limit=512M

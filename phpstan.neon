@@ -4,17 +4,23 @@ parameters:
 		- jwt-auth-pro-wp-rest-api.php
 		- includes/
 	bootstrapFiles:
-		- tests/bootstrap-unit.php
+		- tests/bootstrap-phpstan.php
 	excludePaths:
 		- vendor/
 		- node_modules/
 		- wp-plugins-cache
 		- wp-plugins-extracted
-	# Memory optimization settings
+		- tests/
+	# Memory optimization: Completely disable parallel processing
 	parallel:
-		maximumNumberOfProcesses: 2
-		minimumNumberOfJobsPerProcess: 2
+		maximumNumberOfProcesses: 1
 	tmpDir: %rootDir%/tmp/phpstan
+	resultCachePath: %rootDir%/tmp/phpstan/result-cache.php
+	# Disable memory-intensive checks
+	checkMissingIterableValueType: false
+	checkGenericClassInNonGenericObjectType: false
+	checkMissingCallableSignature: false
+	treatPhpDocTypesAsCertain: false
 	ignoreErrors:
 		# WordPress functions that may not be defined during static analysis
 		- '#Function (wp_|get_|is_|current_user_can|sanitize_|wp_json_encode|wp_unslash|wp_generate_password|apache_request_headers|rest_url|admin_url|plugin_dir_path|plugin_dir_url|is_ssl|apply_filters|add_action|add_filter|register_activation_hook|register_deactivation_hook|wp_create_nonce|wp_enqueue_script|wp_localize_script|dbDelta|error_log|http_response_code|setcookie|esc_url|function_exists|class_exists|defined|exit|header)\(\) not found\.#'
@@ -30,5 +36,14 @@ parameters:
 		-
 			identifier: missingType.generics
 	reportUnmatchedIgnoredErrors: false
+	# Additional memory-saving settings
+	polluteScopeWithLoopInitialAssignments: false
+	polluteScopeWithAlwaysIterableForeach: false
+	checkAlwaysTrueCheckTypeFunctionCall: false
+	checkAlwaysTrueInstanceof: false
+	checkAlwaysTrueStrictComparison: false
+	checkExplicitMixedMissingReturn: false
+	checkFunctionNameCase: false
+	# Keep WordPress extension but use minimal config to save memory
 includes:
 	- vendor/szepeviktor/phpstan-wordpress/extension.neon

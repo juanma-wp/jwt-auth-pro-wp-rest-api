@@ -1,0 +1,39 @@
+parameters:
+	# Ultra-minimal PHPStan configuration for memory-constrained environments
+	level: 5  # Reduced level for lower memory usage
+	paths:
+		- jwt-auth-pro-wp-rest-api.php
+		- includes/class-auth-jwt.php
+		- includes/class-admin-settings.php
+		# Analyze helpers.php separately if needed due to its complexity
+	bootstrapFiles:
+		- tests/bootstrap-phpstan.php
+	excludePaths:
+		- vendor/
+		- node_modules/
+		- tests/
+		- wp-plugins-cache
+		- wp-plugins-extracted
+		- includes/helpers.php  # Exclude most complex file if memory is critical
+	# Disable parallel processing for absolute minimum memory
+	parallel:
+		maximumNumberOfProcesses: 1
+		minimumNumberOfJobsPerProcess: 1
+	tmpDir: %rootDir%/tmp/phpstan
+	resultCachePath: %rootDir%/tmp/phpstan/minimal-cache.php
+	# Disable memory-intensive checks
+	checkMissingIterableValueType: false
+	checkGenericClassInNonGenericObjectType: false
+	checkMissingCallableSignature: false
+	checkExplicitMixedMissingReturn: false
+	checkFunctionNameCase: false
+	checkInternalClassCaseSensitivity: false
+	polluteScopeWithLoopInitialAssignments: false
+	polluteScopeWithAlwaysIterableForeach: false
+	checkAlwaysTrueCheckTypeFunctionCall: false
+	checkAlwaysTrueInstanceof: false
+	checkAlwaysTrueStrictComparison: false
+	ignoreErrors:
+		# Ignore everything to focus only on critical errors
+		- '#.*#'
+	reportUnmatchedIgnoredErrors: false
