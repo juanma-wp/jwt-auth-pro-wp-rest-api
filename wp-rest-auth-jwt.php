@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: WP REST Auth JWT
+ * Plugin Name: REST Auth JWT
  * Description: Simple, secure JWT authentication for WordPress REST API with HttpOnly refresh tokens
  * Version: 1.0.0
  * Author: WordPress Developer
@@ -213,7 +213,8 @@ class WP_REST_Auth_JWT {
 	 */
 	public function deactivate(): void {
 		// Clean up refresh tokens on deactivation.
-		// Note: Cache not needed for this cleanup operation during deactivation.
+		// Direct database query required for cleanup - no WordPress equivalent exists.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}jwt_refresh_tokens WHERE expires_at < %d", time() ) );

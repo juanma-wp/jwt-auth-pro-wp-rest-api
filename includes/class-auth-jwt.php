@@ -429,6 +429,8 @@ class Auth_JWT {
 		$token_data = wp_cache_get( $cache_key, 'wp_rest_auth_jwt' );
 
 		if ( false === $token_data ) {
+			// Direct database query required for JWT token validation - no WordPress equivalent exists.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$token_data = $wpdb->get_row(
 				$wpdb->prepare(
 					"SELECT * FROM {$wpdb->prefix}jwt_refresh_tokens WHERE token_hash = %s AND expires_at > %d AND is_revoked = 0 AND token_type = 'jwt'",
@@ -500,6 +502,8 @@ class Auth_JWT {
 		$cache_key = 'jwt_token_' . md5( $token_hash );
 		wp_cache_delete( $cache_key, 'wp_rest_auth_jwt' );
 
+		// Direct database query required for JWT token revocation - no WordPress equivalent exists.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$result = $wpdb->update(
 			$wpdb->prefix . 'jwt_refresh_tokens',
 			array( 'is_revoked' => 1 ),

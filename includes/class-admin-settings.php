@@ -168,10 +168,19 @@ class WP_REST_Auth_JWT_Admin_Settings {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-rest-auth-jwt' ) );
 		}
 
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'jwt';
+		// For tab navigation, we'll validate the tab parameter directly instead of requiring nonce.
+		$allowed_tabs = array( 'jwt', 'general', 'help' );
+		$active_tab   = 'jwt'; // Default tab.
+
+		if ( isset( $_GET['tab'] ) ) {
+			$requested_tab = sanitize_text_field( wp_unslash( $_GET['tab'] ) );
+			if ( in_array( $requested_tab, $allowed_tabs, true ) ) {
+				$active_tab = $requested_tab;
+			}
+		}
 		?>
 		<div class="wrap">
-			<h1>🔐 WP REST Auth JWT Settings</h1>
+			<h1>🔐 REST Auth JWT Settings</h1>
 			<p class="description">Simple, secure JWT authentication for WordPress REST API</p>
 
 			<nav class="nav-tab-wrapper">
