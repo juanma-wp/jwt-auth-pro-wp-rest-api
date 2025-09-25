@@ -21,7 +21,7 @@ jobs:
         tools: composer:v2
         ini-file: production
         # Conservative memory settings for reliable CI runs
-        ini-values: memory_limit=512M, opcache.enable=1, opcache.memory_consumption=32
+        ini-values: memory_limit=1G, opcache.enable=1, opcache.memory_consumption=32
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -29,7 +29,7 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
 
     - name: Run PHPStan (Memory Optimized)
-      run: vendor/bin/phpstan analyse --memory-limit=512M --no-progress --no-ansi
+      run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress --no-ansi
       env:
         # Additional environment variables to reduce memory usage
         PHPSTAN_PRO_WEB_PORT: 0
