@@ -1,6 +1,16 @@
-# WP REST Auth JWT
+=== REST Auth JWT ===
+Contributors: wordpress-developer
+Tags: jwt, authentication, rest-api, token, security
+Requires at least: 5.6
+Tested up to: 6.8
+Requires PHP: 7.4
+Stable tag: 1.0.0
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-[![CI](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/ci.yml/badge.svg)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/ci.yml)
+Simple, secure JWT authentication for WordPress REST API.
+
+== Description ==
 
 🔐 **Simple, secure JWT authentication for WordPress REST API**
 

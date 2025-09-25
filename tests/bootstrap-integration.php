@@ -154,7 +154,7 @@ if ( function_exists( 'add_filter' ) ) {
 }
 
 echo "WP REST Auth JWT Integration Test environment loaded successfully!\n";
-echo 'WordPress version: ' . ( defined( 'WP_VERSION' ) ? WP_VERSION : 'Unknown' ) . "\n";
-echo 'PHP version: ' . PHP_VERSION . "\n";
-echo 'Test directory: ' . $_tests_dir . "\n";
-echo 'WordPress directory: ' . $wp_core_dir . "\n\n";
+echo 'WordPress version: ' . ( defined( 'WP_VERSION' ) ? esc_html( WP_VERSION ) : 'Unknown' ) . "\n";
+echo 'PHP version: ' . esc_html( PHP_VERSION ) . "\n";
+echo 'Test directory: ' . esc_html( $_tests_dir ) . "\n";
+echo 'WordPress directory: ' . esc_html( $wp_core_dir ) . "\n\n";

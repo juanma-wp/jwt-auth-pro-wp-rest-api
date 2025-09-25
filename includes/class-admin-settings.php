@@ -163,6 +163,11 @@ class WP_REST_Auth_JWT_Admin_Settings {
 	 * Render the admin settings page.
 	 */
 	public function admin_page(): void {
+		// Check for valid admin page access.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-rest-auth-jwt' ) );
+		}
+
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'jwt';
 		?>
 		<div class="wrap">

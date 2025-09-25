@@ -425,14 +425,23 @@ class Auth_JWT {
 		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
 		$now        = time();
 
-		$token_data = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}jwt_refresh_tokens WHERE token_hash = %s AND expires_at > %d AND is_revoked = 0 AND token_type = 'jwt'",
-				$token_hash,
-				$now
-			),
-			ARRAY_A
-		);
+		$cache_key  = 'jwt_token_' . md5( $token_hash );
+		$token_data = wp_cache_get( $cache_key, 'wp_rest_auth_jwt' );
+
+		if ( false === $token_data ) {
+			$token_data = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->prefix}jwt_refresh_tokens WHERE token_hash = %s AND expires_at > %d AND is_revoked = 0 AND token_type = 'jwt'",
+					$token_hash,
+					$now
+				),
+				ARRAY_A
+			);
+
+			if ( $token_data ) {
+				wp_cache_set( $cache_key, $token_data, 'wp_rest_auth_jwt', 300 ); // Cache for 5 minutes.
+			}
+		}
 
 		if ( ! $token_data ) {
 			return wp_auth_jwt_error_response(
@@ -486,6 +495,10 @@ class Auth_JWT {
 		global $wpdb;
 
 		$token_hash = wp_auth_jwt_hash_token( $refresh_token, WP_JWT_AUTH_SECRET );
+
+		// Clear cache first.
+		$cache_key = 'jwt_token_' . md5( $token_hash );
+		wp_cache_delete( $cache_key, 'wp_rest_auth_jwt' );
 
 		$result = $wpdb->update(
 			$wpdb->prefix . 'jwt_refresh_tokens',

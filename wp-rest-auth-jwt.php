@@ -12,7 +12,6 @@
  * Requires at least: 5.6
  * Tested up to: 6.8
  * Requires PHP: 7.4
- * Network: false
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -214,6 +213,7 @@ class WP_REST_Auth_JWT {
 	 */
 	public function deactivate(): void {
 		// Clean up refresh tokens on deactivation.
+		// Note: Cache not needed for this cleanup operation during deactivation.
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}jwt_refresh_tokens WHERE expires_at < %d", time() ) );
