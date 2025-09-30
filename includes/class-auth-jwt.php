@@ -181,14 +181,12 @@ class Auth_JWT {
 		// Store refresh token.
 		$this->store_refresh_token( $user->ID, $refresh_token, $refresh_expires );
 
-		// Set refresh token as HTTPOnly cookie.
+		// Set refresh token as HTTPOnly cookie with environment-aware configuration.
 		wp_auth_jwt_set_cookie(
 			self::REFRESH_COOKIE_NAME,
 			$refresh_token,
-			$refresh_expires,
-			self::COOKIE_PATH,
-			true, // HTTPOnly.
-			true  // Secure.
+			$refresh_expires
+			// Path, httponly, and secure are auto-detected based on environment
 		);
 
 		return wp_auth_jwt_success_response(
@@ -251,14 +249,12 @@ class Auth_JWT {
 			// Update refresh token.
 			$this->update_refresh_token( $token_data['id'], $new_refresh_token, $refresh_expires );
 
-			// Set new refresh token cookie.
+			// Set new refresh token cookie with environment-aware configuration.
 			wp_auth_jwt_set_cookie(
 				self::REFRESH_COOKIE_NAME,
 				$new_refresh_token,
-				$refresh_expires,
-				self::COOKIE_PATH,
-				true, // HTTPOnly.
-				true  // Secure.
+				$refresh_expires
+				// Path, httponly, and secure are auto-detected based on environment
 			);
 		}
 
@@ -287,8 +283,8 @@ class Auth_JWT {
 			$this->revoke_refresh_token( $refresh_token );
 		}
 
-		// Delete refresh token cookie.
-		wp_auth_jwt_delete_cookie( self::REFRESH_COOKIE_NAME, self::COOKIE_PATH );
+		// Delete refresh token cookie with environment-aware path detection.
+		wp_auth_jwt_delete_cookie( self::REFRESH_COOKIE_NAME );
 
 		return wp_auth_jwt_success_response( array(), 'Logout successful' );
 	}

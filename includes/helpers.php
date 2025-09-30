@@ -171,31 +171,42 @@ function wp_auth_jwt_get_user_agent(): string {
 }
 
 /**
- * Set HTTPOnly cookie.
+ * Set HTTPOnly cookie with environment-aware configuration.
  *
- * @param string $name Cookie name.
- * @param string $value Cookie value.
- * @param int    $expires Expiration time.
- * @param string $path Cookie path.
- * @param bool   $httponly Whether cookie is HTTP only.
- * @param bool   $secure Whether cookie is secure.
+ * Uses JWT_Cookie_Config to automatically determine appropriate cookie settings
+ * based on environment (development/staging/production). Configuration can be
+ * overridden via WordPress admin settings or explicit parameters.
+ *
+ * @param string      $name     Cookie name.
+ * @param string      $value    Cookie value.
+ * @param int         $expires  Expiration time.
+ * @param string|null $path     Cookie path (null = use auto-detected).
+ * @param bool|null   $httponly Whether cookie is HTTP only (null = use auto-detected).
+ * @param bool|null   $secure   Whether cookie is secure (null = use auto-detected).
  * @return bool Success status.
  */
 function wp_auth_jwt_set_cookie(
 	string $name,
 	string $value,
 	int $expires,
-	string $path = '/',
-	bool $httponly = true,
+	?string $path = null,
+	?bool $httponly = null,
 	?bool $secure = null
 ): bool {
-	$secure   = $secure ?? is_ssl();
-	$samesite = apply_filters( 'wp_auth_jwt_cookie_samesite', 'Strict' );
-
 	// Avoid header warnings in test/CLI environments.
 	if ( defined( 'WP_CLI' ) || ( php_sapi_name() === 'cli' && defined( 'WP_DEBUG' ) ) ) {
 		return true;
 	}
+
+	// Get environment-aware configuration
+	$config = JWT_Cookie_Config::get_config();
+
+	// Use provided values or fall back to auto-detected config
+	$path     = $path ?? $config['path'];
+	$httponly = $httponly ?? $config['httponly'];
+	$secure   = $secure ?? $config['secure'];
+	$samesite = apply_filters( 'wp_auth_jwt_cookie_samesite', $config['samesite'] );
+	$domain   = $config['domain'];
 
 	if ( PHP_VERSION_ID >= 70300 ) {
 		return setcookie(
@@ -204,7 +215,7 @@ function wp_auth_jwt_set_cookie(
 			array(
 				'expires'  => $expires,
 				'path'     => $path,
-				'domain'   => '',
+				'domain'   => $domain,
 				'secure'   => $secure,
 				'httponly' => $httponly,
 				'samesite' => $samesite,
@@ -212,17 +223,21 @@ function wp_auth_jwt_set_cookie(
 		);
 	}
 
-	return setcookie( $name, $value, $expires, $path . '; SameSite=' . $samesite, '', $secure, $httponly );
+	// Fallback for PHP < 7.3
+	return setcookie( $name, $value, $expires, $path . '; SameSite=' . $samesite, $domain, $secure, $httponly );
 }
 
 /**
- * Delete cookie.
+ * Delete cookie with environment-aware configuration.
  *
- * @param string $name Cookie name.
- * @param string $path Cookie path.
+ * Uses the same path detection as wp_auth_jwt_set_cookie to ensure
+ * the cookie is properly deleted across all environments.
+ *
+ * @param string      $name Cookie name.
+ * @param string|null $path Cookie path (null = use auto-detected).
  * @return bool Success status.
  */
-function wp_auth_jwt_delete_cookie( string $name, string $path = '/' ): bool {
+function wp_auth_jwt_delete_cookie( string $name, ?string $path = null ): bool {
 	return wp_auth_jwt_set_cookie( $name, '', time() - 3600, $path );
 }
 

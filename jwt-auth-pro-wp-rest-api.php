@@ -67,6 +67,13 @@ class JWT_Auth_Pro {
 	 */
 	private $auth_jwt;
 
+	/**
+	 * OpenAPI Spec instance.
+	 *
+	 * @var JWT_Auth_Pro_OpenAPI_Spec
+	 */
+	private $openapi_spec;
+
 
 	/**
 	 * Constructor.
@@ -91,15 +98,18 @@ class JWT_Auth_Pro {
 	 */
 	private function load_dependencies(): void {
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/helpers.php';
+		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-jwt-cookie-config.php';
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-admin-settings.php';
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-auth-jwt.php';
+		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-openapi-spec.php';
 
 		// Initialize admin settings.
 		if ( is_admin() ) {
 			new JWT_Auth_Pro_Admin_Settings();
 		}
 
-		$this->auth_jwt = new Auth_JWT();
+		$this->auth_jwt     = new Auth_JWT();
+		$this->openapi_spec = new JWT_Auth_Pro_OpenAPI_Spec();
 	}
 
 	/**
@@ -144,6 +154,7 @@ class JWT_Auth_Pro {
 	 */
 	public function register_rest_routes(): void {
 		$this->auth_jwt->register_routes();
+		$this->openapi_spec->register_routes();
 	}
 
 	/**

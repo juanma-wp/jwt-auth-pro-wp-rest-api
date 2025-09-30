@@ -1,0 +1,389 @@
+openapi: 3.0.3
+info:
+  title: JWT Auth Pro for WP REST API
+  description: |
+    Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps.
+
+    This API implements OAuth 2.0 best practices with short-lived access tokens and secure refresh tokens.
+
+    ## Key Features
+    - Short-lived JWT access tokens (configurable, default 1 hour)
+    - Secure HTTP-only refresh tokens stored in database
+    - Automatic token rotation and revocation capabilities
+    - Protection against XSS attacks via HTTP-only cookies
+    - Complete token lifecycle management with user session tracking
+    - CORS support optimized for modern web applications
+
+    ## Authentication Flow
+    1. Obtain tokens using `/token` endpoint with username/password
+    2. Use the `access_token` in the Authorization header as `Bearer {token}`
+    3. Refresh the token using `/refresh` endpoint before expiration
+    4. Logout using `/logout` endpoint to revoke tokens
+  version: 1.0.0
+  contact:
+    name: Juan Manuel Garrido
+    url: https://juanma.codes
+    email: contact@juanma.codes
+  license:
+    name: GPL v2 or later
+    url: https://www.gnu.org/licenses/gpl-2.0.html
+
+servers:
+  - url: /wp-json/jwt/v1
+    description: WordPress REST API - JWT Auth Pro
+
+tags:
+  - name: Authentication
+    description: JWT authentication endpoints for secure token-based authentication
+
+paths:
+  /token:
+    post:
+      summary: Obtain Access Token
+      description: |
+        Authenticate with username and password to obtain a JWT access token and a secure HTTP-only refresh token cookie.
+
+        The access token should be used in the Authorization header for subsequent API requests.
+        The refresh token is automatically stored in an HTTP-only cookie for security.
+      operationId: issueToken
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: WordPress username
+                  example: admin
+                password:
+                  type: string
+                  format: password
+                  description: WordPress password
+                  example: password123
+      responses:
+        '200':
+          description: Authentication successful
+          headers:
+            Set-Cookie:
+              description: HTTP-only refresh token cookie
+              schema:
+                type: string
+                example: wp_jwt_refresh_token=xxx; Path=/wp-json/jwt/v1/; HttpOnly; Secure; SameSite=Strict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              example:
+                success: true
+                message: Authentication successful
+                data:
+                  access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3cC1yZXN0LWF1dGgtand0Iiwic3ViIjoiMSIsImlhdCI6MTcwOTg1MjQwMCwiZXhwIjoxNzA5ODU2MDAwLCJqdGkiOiJhYmMxMjMiLCJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl19.signature
+                  token_type: Bearer
+                  expires_in: 3600
+                  user:
+                    id: 1
+                    username: admin
+                    email: admin@example.com
+                    display_name: Administrator
+                    roles:
+                      - administrator
+        '400':
+          description: Missing credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Username and password are required
+                data:
+                  code: missing_credentials
+                  status: 400
+        '403':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Invalid username or password
+                data:
+                  code: invalid_credentials
+                  status: 403
+
+  /refresh:
+    post:
+      summary: Refresh Access Token
+      description: |
+        Use the refresh token cookie to obtain a new access token.
+
+        The refresh token is automatically included via HTTP-only cookie.
+        If token rotation is enabled, a new refresh token will also be issued.
+      operationId: refreshToken
+      tags:
+        - Authentication
+      parameters:
+        - name: Cookie
+          in: header
+          description: HTTP-only refresh token cookie (automatically sent by browser)
+          required: true
+          schema:
+            type: string
+            example: wp_jwt_refresh_token=xxx
+      responses:
+        '200':
+          description: Token refreshed successfully
+          headers:
+            Set-Cookie:
+              description: New HTTP-only refresh token cookie (if token rotation is enabled)
+              schema:
+                type: string
+                example: wp_jwt_refresh_token=yyy; Path=/wp-json/jwt/v1/; HttpOnly; Secure; SameSite=Strict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+              example:
+                success: true
+                message: Token refreshed successfully
+                data:
+                  access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.newtoken.signature
+                  token_type: Bearer
+                  expires_in: 3600
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Invalid or expired refresh token
+                data:
+                  code: invalid_refresh_token
+                  status: 401
+
+  /logout:
+    post:
+      summary: Logout
+      description: |
+        Revoke the refresh token and clear the authentication cookie.
+
+        This effectively logs out the user by invalidating their refresh token.
+        The access token will still be valid until it expires, but cannot be refreshed.
+      operationId: logout
+      tags:
+        - Authentication
+      parameters:
+        - name: Cookie
+          in: header
+          description: HTTP-only refresh token cookie (automatically sent by browser)
+          required: false
+          schema:
+            type: string
+            example: wp_jwt_refresh_token=xxx
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Logout successful
+                  data:
+                    type: object
+                    example: {}
+
+  /verify:
+    get:
+      summary: Verify Token
+      description: |
+        Verify that the provided JWT access token is valid and return user information.
+
+        Use this endpoint to check if the current access token is still valid
+        and to retrieve the authenticated user's details.
+      operationId: verifyToken
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Token is valid
+                  data:
+                    type: object
+                    properties:
+                      valid:
+                        type: boolean
+                        example: true
+                      user:
+                        $ref: '#/components/schemas/UserData'
+              example:
+                success: true
+                message: Token is valid
+                data:
+                  valid: true
+                  user:
+                    id: 1
+                    username: admin
+                    email: admin@example.com
+                    display_name: Administrator
+                    roles:
+                      - administrator
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Invalid or expired JWT token
+                data:
+                  code: invalid_token
+                  status: 401
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token in the Authorization header.
+
+        Example: `Authorization: Bearer {access_token}`
+
+  schemas:
+    TokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the request was successful
+          example: true
+        message:
+          type: string
+          description: Human-readable message
+          example: Authentication successful
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+              description: JWT access token for API authentication
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            token_type:
+              type: string
+              description: Token type (always "Bearer")
+              example: Bearer
+            expires_in:
+              type: integer
+              description: Access token lifetime in seconds
+              example: 3600
+            user:
+              $ref: '#/components/schemas/UserData'
+
+    RefreshResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the request was successful
+          example: true
+        message:
+          type: string
+          description: Human-readable message
+          example: Token refreshed successfully
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+              description: New JWT access token
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            token_type:
+              type: string
+              description: Token type (always "Bearer")
+              example: Bearer
+            expires_in:
+              type: integer
+              description: Access token lifetime in seconds
+              example: 3600
+
+    UserData:
+      type: object
+      description: WordPress user information
+      properties:
+        id:
+          type: integer
+          description: WordPress user ID
+          example: 1
+        username:
+          type: string
+          description: WordPress username
+          example: admin
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: admin@example.com
+        display_name:
+          type: string
+          description: User display name
+          example: Administrator
+        roles:
+          type: array
+          description: User roles
+          items:
+            type: string
+          example:
+            - administrator
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the request was successful (always false for errors)
+          example: false
+        message:
+          type: string
+          description: Human-readable error message
+          example: Invalid credentials
+        data:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: invalid_credentials
+            status:
+              type: integer
+              description: HTTP status code
+              example: 403

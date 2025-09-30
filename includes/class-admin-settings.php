@@ -41,6 +41,7 @@ class JWT_Auth_Pro_Admin_Settings {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
+		add_filter( 'wp_redirect', array( $this, 'preserve_tab_on_redirect' ), 10, 2 );
 	}
 
 	/**
@@ -50,7 +51,7 @@ class JWT_Auth_Pro_Admin_Settings {
 		add_options_page(
 			'JWT Auth Pro Settings',
 			'JWT Auth Pro',
-			'manage_options',
+			'activate_plugins',
 			'jwt-auth-pro-wp-rest-api',
 			array( $this, 'admin_page' )
 		);
@@ -74,6 +75,21 @@ class JWT_Auth_Pro_Admin_Settings {
 			self::OPTION_GENERAL_SETTINGS,
 			array(
 				'sanitize_callback' => array( $this, 'sanitize_general_settings' ),
+			)
+		);
+
+		register_setting(
+			self::OPTION_GROUP,
+			'jwt_auth_cookie_config',
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( $this, 'sanitize_cookie_settings' ),
+				'default'           => array(
+					'samesite' => 'auto',
+					'secure'   => 'auto',
+					'path'     => 'auto',
+					'domain'   => 'auto',
+				),
 			)
 		);
 
@@ -132,6 +148,46 @@ class JWT_Auth_Pro_Admin_Settings {
 			'jwt-auth-pro-wp-rest-api-general',
 			'general_settings'
 		);
+
+		// Cookie Configuration Section (on its own tab).
+		add_settings_section(
+			'cookie_config_section',
+			'Cookie Configuration',
+			array( $this, 'cookie_config_section' ),
+			'jwt-auth-pro-wp-rest-api-cookies'
+		);
+
+		add_settings_field(
+			'cookie_samesite',
+			'SameSite Attribute',
+			array( $this, 'cookie_samesite_field' ),
+			'jwt-auth-pro-wp-rest-api-cookies',
+			'cookie_config_section'
+		);
+
+		add_settings_field(
+			'cookie_secure',
+			'Secure Attribute',
+			array( $this, 'cookie_secure_field' ),
+			'jwt-auth-pro-wp-rest-api-cookies',
+			'cookie_config_section'
+		);
+
+		add_settings_field(
+			'cookie_path',
+			'Cookie Path',
+			array( $this, 'cookie_path_field' ),
+			'jwt-auth-pro-wp-rest-api-cookies',
+			'cookie_config_section'
+		);
+
+		add_settings_field(
+			'cookie_domain',
+			'Cookie Domain',
+			array( $this, 'cookie_domain_field' ),
+			'jwt-auth-pro-wp-rest-api-cookies',
+			'cookie_config_section'
+		);
 	}
 
 	/**
@@ -166,13 +222,13 @@ class JWT_Auth_Pro_Admin_Settings {
 	 * Render the admin settings page.
 	 */
 	public function admin_page(): void {
-		// Check for valid admin page access.
-		if ( ! current_user_can( 'manage_options' ) ) {
+		// Check for valid admin page access - requires plugin management permissions.
+		if ( ! current_user_can( 'activate_plugins' ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'jwt-auth-pro-wp-rest-api' ) );
 		}
 
 		// For tab navigation, we'll validate the tab parameter directly instead of requiring nonce.
-		$allowed_tabs = array( 'jwt', 'general', 'help' );
+		$allowed_tabs = array( 'jwt', 'general', 'cookies', 'help', 'api-docs' );
 		$active_tab   = 'jwt'; // Default tab.
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Tab navigation in admin doesn't require nonce.
@@ -191,25 +247,82 @@ class JWT_Auth_Pro_Admin_Settings {
 			<nav class="nav-tab-wrapper">
 				<a href="?page=jwt-auth-pro-wp-rest-api&tab=jwt" class="nav-tab <?php echo 'jwt' === $active_tab ? 'nav-tab-active' : ''; ?>">JWT Settings</a>
 				<a href="?page=jwt-auth-pro-wp-rest-api&tab=general" class="nav-tab <?php echo 'general' === $active_tab ? 'nav-tab-active' : ''; ?>">General Settings</a>
+				<a href="?page=jwt-auth-pro-wp-rest-api&tab=cookies" class="nav-tab <?php echo 'cookies' === $active_tab ? 'nav-tab-active' : ''; ?>">Cookie Settings</a>
+				<a href="?page=jwt-auth-pro-wp-rest-api&tab=api-docs" class="nav-tab <?php echo 'api-docs' === $active_tab ? 'nav-tab-active' : ''; ?>">API Documentation</a>
 				<a href="?page=jwt-auth-pro-wp-rest-api&tab=help" class="nav-tab <?php echo 'help' === $active_tab ? 'nav-tab-active' : ''; ?>">Help & Documentation</a>
 			</nav>
 
-			<form method="post" action="options.php">
-				<?php
-				settings_fields( self::OPTION_GROUP );
+			<?php if ( 'api-docs' === $active_tab ) : ?>
+				<?php $this->render_api_docs_tab(); ?>
+			<?php elseif ( 'help' === $active_tab ) : ?>
+				<?php $this->render_help_tab(); ?>
+			<?php else : ?>
+				<form method="post" action="options.php">
+					<?php
+					settings_fields( self::OPTION_GROUP );
 
-				if ( 'jwt' === $active_tab ) {
-					do_settings_sections( 'jwt-auth-pro-wp-rest-api-settings' );
-					submit_button();
-				} elseif ( 'general' === $active_tab ) {
-					do_settings_sections( 'jwt-auth-pro-wp-rest-api-general' );
-					submit_button();
-				} elseif ( 'help' === $active_tab ) {
-					$this->render_help_tab();
-				}
-				?>
-			</form>
+					if ( 'jwt' === $active_tab ) {
+						do_settings_sections( 'jwt-auth-pro-wp-rest-api-settings' );
+						submit_button();
+					} elseif ( 'general' === $active_tab ) {
+						do_settings_sections( 'jwt-auth-pro-wp-rest-api-general' );
+						submit_button();
+					} elseif ( 'cookies' === $active_tab ) {
+						do_settings_sections( 'jwt-auth-pro-wp-rest-api-cookies' );
+						submit_button();
+					}
+					?>
+				</form>
+			<?php endif; ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the API documentation tab with Swagger UI.
+	 */
+	private function render_api_docs_tab(): void {
+		$openapi_url = rest_url( 'jwt/v1/openapi' );
+		?>
+		<style>
+			.api-docs-container {
+				margin-top: 20px;
+				background: #fff;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+			}
+			#swagger-ui {
+				max-width: 100%;
+			}
+			.topbar {
+				display: none;
+			}
+		</style>
+		<div class="api-docs-container">
+			<div id="swagger-ui"></div>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-bundle.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-standalone-preset.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui.css" />
+		<script>
+			window.onload = function() {
+				window.ui = SwaggerUIBundle({
+					url: "<?php echo esc_url( $openapi_url ); ?>",
+					dom_id: "#swagger-ui",
+					deepLinking: true,
+					presets: [
+						SwaggerUIBundle.presets.apis,
+						SwaggerUIStandalonePreset
+					],
+					plugins: [
+						SwaggerUIBundle.plugins.DownloadUrl
+					],
+					layout: "StandaloneLayout",
+					persistAuthorization: true,
+					tryItOutEnabled: true
+				});
+			};
+		</script>
 		<?php
 	}
 
@@ -503,10 +616,18 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	/**
 	 * Sanitize JWT settings input.
 	 *
-	 * @param array $input Raw input values.
+	 * @param array|null $input Raw input values.
 	 * @return array Sanitized values.
 	 */
-	public function sanitize_jwt_settings( array $input ): array {
+	public function sanitize_jwt_settings( $input ): array {
+		// Get existing settings to preserve them when saving other tabs
+		$existing = get_option( self::OPTION_JWT_SETTINGS, array() );
+
+		// If no input or not an array (saving from a different tab), return existing
+		if ( ! is_array( $input ) || empty( $input ) ) {
+			return $existing;
+		}
+
 		$sanitized = array();
 
 		if ( isset( $input['secret_key'] ) ) {
@@ -534,10 +655,18 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	/**
 	 * Sanitize general settings input.
 	 *
-	 * @param array $input Raw input values.
+	 * @param array|null $input Raw input values.
 	 * @return array Sanitized values.
 	 */
-	public function sanitize_general_settings( array $input ): array {
+	public function sanitize_general_settings( $input ): array {
+		// Get existing settings to preserve them when saving other tabs
+		$existing = get_option( self::OPTION_GENERAL_SETTINGS, array() );
+
+		// If no input or not an array (saving from a different tab), return existing
+		if ( ! is_array( $input ) || empty( $input ) ) {
+			return $existing;
+		}
+
 		$sanitized = array();
 
 		$sanitized['enable_debug_logging'] = isset( $input['enable_debug_logging'] ) && $input['enable_debug_logging'];
@@ -582,5 +711,256 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 				'cors_allowed_origins' => "http://localhost:3000\nhttp://localhost:5173\nhttp://localhost:5174\nhttp://localhost:5175",
 			)
 		);
+	}
+
+	/**
+	 * Preserve tab parameter on settings save redirect.
+	 *
+	 * @param string $location Redirect location.
+	 * @param int    $status   HTTP status code.
+	 * @return string Modified redirect location.
+	 */
+	public function preserve_tab_on_redirect( string $location, int $status ): string {
+		// Only modify redirects to our settings page.
+		if ( ! str_contains( $location, 'page=jwt-auth-pro-wp-rest-api' ) ) {
+			return $location;
+		}
+
+		// Check if we have a tab parameter in the referer.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading referer for tab navigation.
+		if ( isset( $_POST['_wp_http_referer'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parse URL for tab parameter.
+			$referer = wp_unslash( $_POST['_wp_http_referer'] );
+			$parts   = wp_parse_url( $referer );
+			if ( isset( $parts['query'] ) ) {
+				parse_str( $parts['query'], $query );
+				if ( isset( $query['tab'] ) ) {
+					$location = add_query_arg( 'tab', sanitize_text_field( $query['tab'] ), $location );
+				}
+			}
+		}
+
+		return $location;
+	}
+
+	/**
+	 * Render cookie configuration section description.
+	 */
+	public function cookie_config_section(): void {
+		// Check if JWT_Cookie_Config class exists.
+		if ( ! class_exists( 'JWT_Cookie_Config' ) ) {
+			?>
+			<div class="notice notice-error inline">
+				<p><?php esc_html_e( 'Cookie configuration class not loaded. Please check plugin installation.', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+			</div>
+			<?php
+			return;
+		}
+
+		$environment    = JWT_Cookie_Config::get_environment();
+		$current_config = JWT_Cookie_Config::get_config();
+		?>
+		<p><?php esc_html_e( 'Configure cookie security settings for JWT refresh tokens. Settings are automatically configured based on your environment. Use "Auto" to let the plugin detect appropriate settings.', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+
+		<div class="notice notice-info inline">
+			<p>
+				<strong><?php esc_html_e( 'Current Environment:', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
+				<code><?php echo esc_html( $environment ); ?></code>
+			</p>
+		</div>
+
+		<div class="notice notice-warning inline">
+			<h4><?php esc_html_e( 'Active Cookie Configuration', 'jwt-auth-pro-wp-rest-api' ); ?></h4>
+			<table class="widefat" style="max-width: 600px;">
+				<tbody>
+					<tr>
+						<td><strong><?php esc_html_e( 'SameSite:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
+						<td><code><?php echo esc_html( $current_config['samesite'] ); ?></code></td>
+					</tr>
+					<tr>
+						<td><strong><?php esc_html_e( 'Secure:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
+						<td><code><?php echo esc_html( $current_config['secure'] ? 'true' : 'false' ); ?></code></td>
+					</tr>
+					<tr>
+						<td><strong><?php esc_html_e( 'Path:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
+						<td><code><?php echo esc_html( $current_config['path'] ); ?></code></td>
+					</tr>
+					<tr>
+						<td><strong><?php esc_html_e( 'Domain:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
+						<td><code><?php echo esc_html( $current_config['domain'] ?: '(current domain)' ); ?></code></td>
+					</tr>
+					<tr>
+						<td><strong><?php esc_html_e( 'HttpOnly:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
+						<td><code><?php echo esc_html( $current_config['httponly'] ? 'true' : 'false' ); ?></code></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="notice notice-info inline">
+			<h4><?php esc_html_e( 'Environment Detection Logic', 'jwt-auth-pro-wp-rest-api' ); ?></h4>
+			<ul>
+				<li><strong><?php esc_html_e( 'Development:', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
+					<?php esc_html_e( 'localhost, *.local, *.test domains OR WP_DEBUG enabled', 'jwt-auth-pro-wp-rest-api' ); ?>
+				</li>
+				<li><strong><?php esc_html_e( 'Staging:', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
+					<?php esc_html_e( 'Domains containing "staging", "dev", or "test"', 'jwt-auth-pro-wp-rest-api' ); ?>
+				</li>
+				<li><strong><?php esc_html_e( 'Production:', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
+					<?php esc_html_e( 'All other domains', 'jwt-auth-pro-wp-rest-api' ); ?>
+				</li>
+			</ul>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render SameSite field.
+	 */
+	public function cookie_samesite_field(): void {
+		$defaults = class_exists( 'JWT_Cookie_Config' ) ? JWT_Cookie_Config::get_defaults() : array( 'samesite' => 'auto' );
+		$config   = get_option( 'jwt_auth_cookie_config', $defaults );
+		$value    = $config['samesite'] ?? 'auto';
+		?>
+		<select name="jwt_auth_cookie_config[samesite]">
+			<option value="auto" <?php selected( $value, 'auto' ); ?>>
+				<?php esc_html_e( 'Auto (Recommended)', 'jwt-auth-pro-wp-rest-api' ); ?>
+			</option>
+			<option value="None" <?php selected( $value, 'None' ); ?>>
+				<?php esc_html_e( 'None (Cross-site allowed)', 'jwt-auth-pro-wp-rest-api' ); ?>
+			</option>
+			<option value="Lax" <?php selected( $value, 'Lax' ); ?>>
+				<?php esc_html_e( 'Lax (Relaxed)', 'jwt-auth-pro-wp-rest-api' ); ?>
+			</option>
+			<option value="Strict" <?php selected( $value, 'Strict' ); ?>>
+				<?php esc_html_e( 'Strict (Maximum security)', 'jwt-auth-pro-wp-rest-api' ); ?>
+			</option>
+		</select>
+		<p class="description">
+			<?php esc_html_e( 'Auto: None (development), Lax (staging), Strict (production)', 'jwt-auth-pro-wp-rest-api' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render Secure field.
+	 */
+	public function cookie_secure_field(): void {
+		$defaults = class_exists( 'JWT_Cookie_Config' ) ? JWT_Cookie_Config::get_defaults() : array( 'secure' => 'auto' );
+		$config   = get_option( 'jwt_auth_cookie_config', $defaults );
+		$value    = $config['secure'] ?? 'auto';
+		?>
+		<select name="jwt_auth_cookie_config[secure]">
+			<option value="auto" <?php selected( $value, 'auto' ); ?>>
+				<?php esc_html_e( 'Auto (Recommended)', 'jwt-auth-pro-wp-rest-api' ); ?>
+			</option>
+			<option value="1" <?php selected( $value, '1' ); ?>>
+				<?php esc_html_e( 'Enabled (HTTPS required)', 'jwt-auth-pro-wp-rest-api' ); ?>
+			</option>
+			<option value="0" <?php selected( $value, '0' ); ?>>
+				<?php esc_html_e( 'Disabled (HTTP allowed)', 'jwt-auth-pro-wp-rest-api' ); ?>
+			</option>
+		</select>
+		<p class="description">
+			<?php esc_html_e( 'Auto: Enabled for staging/production, disabled for development without HTTPS', 'jwt-auth-pro-wp-rest-api' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render Path field.
+	 */
+	public function cookie_path_field(): void {
+		$defaults = class_exists( 'JWT_Cookie_Config' ) ? JWT_Cookie_Config::get_defaults() : array( 'path' => 'auto' );
+		$config   = get_option( 'jwt_auth_cookie_config', $defaults );
+		$value    = $config['path'] ?? 'auto';
+		?>
+		<input type="text"
+			name="jwt_auth_cookie_config[path]"
+			value="<?php echo esc_attr( $value ); ?>"
+			class="regular-text"
+			placeholder="auto"
+		/>
+		<p class="description">
+			<?php esc_html_e( 'Auto: "/" (development), "/wp-json/jwt/v1/" (staging/production)', 'jwt-auth-pro-wp-rest-api' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render Domain field.
+	 */
+	public function cookie_domain_field(): void {
+		$defaults = class_exists( 'JWT_Cookie_Config' ) ? JWT_Cookie_Config::get_defaults() : array( 'domain' => 'auto' );
+		$config   = get_option( 'jwt_auth_cookie_config', $defaults );
+		$value    = $config['domain'] ?? 'auto';
+		?>
+		<input type="text"
+			name="jwt_auth_cookie_config[domain]"
+			value="<?php echo esc_attr( $value ); ?>"
+			class="regular-text"
+			placeholder="auto"
+		/>
+		<p class="description">
+			<?php esc_html_e( 'Auto: Empty (current domain only). Use for subdomain sharing (e.g., ".example.com")', 'jwt-auth-pro-wp-rest-api' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Sanitize cookie settings.
+	 *
+	 * @param array<string, mixed>|null $input Input settings.
+	 * @return array<string, mixed> Sanitized settings.
+	 */
+	public function sanitize_cookie_settings( $input ): array {
+		// Get existing settings or defaults
+		$defaults = class_exists( 'JWT_Cookie_Config' ) ? JWT_Cookie_Config::get_defaults() : array(
+			'samesite' => 'auto',
+			'secure'   => 'auto',
+			'path'     => 'auto',
+			'domain'   => 'auto',
+		);
+		$existing = get_option( 'jwt_auth_cookie_config', $defaults );
+
+		// Handle null or invalid input - return existing settings
+		if ( ! is_array( $input ) ) {
+			return $existing;
+		}
+
+		// Start with existing settings to preserve all fields
+		$sanitized = $existing;
+
+		// Sanitize SameSite
+		if ( isset( $input['samesite'] ) ) {
+			$valid_samesite        = array( 'auto', 'None', 'Lax', 'Strict' );
+			$sanitized['samesite'] = in_array( $input['samesite'], $valid_samesite, true ) ? $input['samesite'] : 'auto';
+		}
+
+		// Sanitize Secure
+		if ( isset( $input['secure'] ) ) {
+			if ( 'auto' === $input['secure'] ) {
+				$sanitized['secure'] = 'auto';
+			} else {
+				$sanitized['secure'] = in_array( $input['secure'], array( '1', 1, true ), true ) ? '1' : '0';
+			}
+		}
+
+		// Sanitize Path
+		if ( isset( $input['path'] ) ) {
+			$sanitized['path'] = 'auto' === $input['path'] ? 'auto' : sanitize_text_field( $input['path'] );
+		}
+
+		// Sanitize Domain
+		if ( isset( $input['domain'] ) ) {
+			$sanitized['domain'] = 'auto' === $input['domain'] ? 'auto' : sanitize_text_field( $input['domain'] );
+		}
+
+		// Clear cache after saving (if class exists)
+		if ( class_exists( 'JWT_Cookie_Config' ) && method_exists( 'JWT_Cookie_Config', 'clear_cache' ) ) {
+			JWT_Cookie_Config::clear_cache();
+		}
+
+		return $sanitized;
 	}
 }
