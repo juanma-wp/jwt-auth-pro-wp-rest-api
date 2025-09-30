@@ -1,0 +1,39 @@
+Local Composer Package Structure
+=================================
+
+Repository Root
+├── jwt-auth-core/                      # Shared JWT library package
+│   ├── composer.json                   # Package definition (myorg/jwt-auth-core)
+│   ├── README.md                       # Package documentation
+│   └── src/
+│       └── TokenManager.php            # Shared JWT token management logic
+│
+├── wp-jwt-login/                       # WordPress JWT Login plugin
+│   ├── composer.json                   # Plugin dependencies (requires jwt-auth-core)
+│   ├── composer.lock                   # Locked dependencies
+│   ├── wp-jwt-login.php                # Plugin main file
+│   ├── README.md                       # Plugin documentation
+│   └── vendor/                         # Composer dependencies (gitignored)
+│       └── myorg/
+│           └── jwt-auth-core -> ../../jwt-auth-core/  # Symlink for iterative dev
+│
+├── wp-oauth-login/                     # WordPress OAuth Login plugin
+│   ├── composer.json                   # Plugin dependencies (requires jwt-auth-core)
+│   ├── composer.lock                   # Locked dependencies
+│   ├── wp-oauth-login.php              # Plugin main file
+│   ├── README.md                       # Plugin documentation
+│   └── vendor/                         # Composer dependencies (gitignored)
+│       └── myorg/
+│           └── jwt-auth-core -> ../../jwt-auth-core/  # Symlink for iterative dev
+│
+├── COMPOSER-SETUP.md                   # Complete setup and usage guide
+├── test-composer-setup.sh              # Test script to verify setup
+└── .gitignore                          # Excludes vendor/ directories
+
+Key Features:
+=============
+- Shared code in jwt-auth-core is used by both plugins
+- Symlinks enable immediate reflection of changes during development
+- Each plugin can be distributed independently with bundled vendor/
+- Easy to extract jwt-auth-core to separate repository later
+- Professional Composer package structure
