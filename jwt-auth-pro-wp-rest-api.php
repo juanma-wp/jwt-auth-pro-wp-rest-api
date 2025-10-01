@@ -47,6 +47,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// Load Composer autoloader
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
+
 define( 'JWT_AUTH_PRO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JWT_AUTH_PRO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'JWT_AUTH_PRO_VERSION', '1.0.0' );

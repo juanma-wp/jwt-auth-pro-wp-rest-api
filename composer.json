@@ -22,8 +22,15 @@
     }
   ],
   "require": {
-    "php": ">=7.4"
+    "php": ">=7.4",
+    "wp-rest-auth/auth-toolkit": "dev-main"
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/juanma-wp/wp-rest-auth-toolkit"
+    }
+  ],
   "require-dev": {
     "phpunit/phpunit": "^9.0",
     "wp-phpunit/wp-phpunit": "^6.0",
