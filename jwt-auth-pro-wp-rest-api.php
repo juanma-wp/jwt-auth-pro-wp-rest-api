@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: JWT Auth Pro for WP REST API - Secure Refresh Tokens
+ * Plugin Name: JWT Auth Pro WP REST API
  * Description: Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps
  * Version: 1.0.0
  * Author: Juan Manuel Garrido
