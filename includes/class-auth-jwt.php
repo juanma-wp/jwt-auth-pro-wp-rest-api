@@ -38,7 +38,6 @@ class Auth_JWT {
 	const ISSUER                 = 'wp-rest-auth-jwt';
 	const REFRESH_COOKIE_NAME    = 'wp_jwt_refresh_token';
 	private const REST_NAMESPACE = 'jwt/v1';
-	private const COOKIE_PATH    = '/wp-json/jwt/v1/';
 
 	/**
 	 * Register REST API routes for JWT authentication.

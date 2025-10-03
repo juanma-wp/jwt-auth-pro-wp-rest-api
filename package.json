@@ -1,6 +1,6 @@
 {
   "name": "jwt-auth-pro-wp-rest-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Simple, secure JWT authentication for WordPress REST API",
   "private": true,
   "scripts": {

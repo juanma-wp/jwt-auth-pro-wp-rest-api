@@ -100,9 +100,9 @@ class JWT_Cookie_Config {
 		// Development indicators.
 		if (
 			in_array( $host, array( 'localhost', '127.0.0.1', '::1' ), true ) ||
-			str_ends_with( $host, '.local' ) ||
-			str_ends_with( $host, '.test' ) ||
-			str_ends_with( $host, '.localhost' ) ||
+			substr( $host, -6 ) === '.local' ||
+			substr( $host, -5 ) === '.test' ||
+			substr( $host, -10 ) === '.localhost' ||
 			( defined( 'WP_DEBUG' ) && WP_DEBUG )
 		) {
 			return self::ENV_DEVELOPMENT;
@@ -110,9 +110,9 @@ class JWT_Cookie_Config {
 
 		// Staging indicators.
 		if (
-			str_contains( $host, 'staging' ) ||
-			str_contains( $host, 'dev' ) ||
-			str_contains( $host, 'test' )
+			false !== strpos( $host, 'staging' ) ||
+			false !== strpos( $host, 'dev' ) ||
+			false !== strpos( $host, 'test' )
 		) {
 			return self::ENV_STAGING;
 		}

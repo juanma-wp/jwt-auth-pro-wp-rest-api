@@ -727,7 +727,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	 */
 	public function preserve_tab_on_redirect( string $location, int $status ): string {
 		// Only modify redirects to our settings page.
-		if ( ! str_contains( $location, 'page=jwt-auth-pro-wp-rest-api' ) ) {
+		if ( false === strpos( $location, 'page=jwt-auth-pro-wp-rest-api' ) ) {
 			return $location;
 		}
 
