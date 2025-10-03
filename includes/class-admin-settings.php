@@ -301,13 +301,17 @@ class JWT_Auth_Pro_Admin_Settings {
 		<div class="api-docs-container">
 			<div id="swagger-ui"></div>
 		</div>
-		<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-bundle.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-standalone-preset.js"></script>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui.css" />
-		<script>
-			window.onload = function() {
+		<?php
+		wp_enqueue_script( 'swagger-ui-bundle', 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-bundle.js', array(), '5.10.0', true );
+		wp_enqueue_script( 'swagger-ui-preset', 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-standalone-preset.js', array( 'swagger-ui-bundle' ), '5.10.0', true );
+		wp_enqueue_style( 'swagger-ui-css', 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui.css', array(), '5.10.0' );
+
+		wp_add_inline_script(
+			'swagger-ui-preset',
+			sprintf(
+				'window.onload = function() {
 				window.ui = SwaggerUIBundle({
-					url: "<?php echo esc_url( $openapi_url ); ?>",
+					url: "%s",
 					dom_id: "#swagger-ui",
 					deepLinking: true,
 					presets: [
@@ -321,9 +325,10 @@ class JWT_Auth_Pro_Admin_Settings {
 					persistAuthorization: true,
 					tryItOutEnabled: true
 				});
-			};
-		</script>
-		<?php
+			};',
+				esc_url( $openapi_url )
+			)
+		);
 	}
 
 	/**
@@ -620,10 +625,10 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	 * @return array Sanitized values.
 	 */
 	public function sanitize_jwt_settings( $input ): array {
-		// Get existing settings to preserve them when saving other tabs
+		// Get existing settings to preserve them when saving other tabs.
 		$existing = get_option( self::OPTION_JWT_SETTINGS, array() );
 
-		// If no input or not an array (saving from a different tab), return existing
+		// If no input or not an array (saving from a different tab), return existing.
 		if ( ! is_array( $input ) || empty( $input ) ) {
 			return $existing;
 		}
@@ -659,10 +664,10 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	 * @return array Sanitized values.
 	 */
 	public function sanitize_general_settings( $input ): array {
-		// Get existing settings to preserve them when saving other tabs
+		// Get existing settings to preserve them when saving other tabs.
 		$existing = get_option( self::OPTION_GENERAL_SETTINGS, array() );
 
-		// If no input or not an array (saving from a different tab), return existing
+		// If no input or not an array (saving from a different tab), return existing.
 		if ( ! is_array( $input ) || empty( $input ) ) {
 			return $existing;
 		}
@@ -726,11 +731,10 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 			return $location;
 		}
 
-		// Check if we have a tab parameter in the referer.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading referer for tab navigation.
-		if ( isset( $_POST['_wp_http_referer'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parse URL for tab parameter.
-			$referer = wp_unslash( $_POST['_wp_http_referer'] );
+		// Check if we have a tab parameter in the referer. Reading referer for tab navigation doesn't require nonce.
+		if ( isset( $_POST['_wp_http_referer'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			// Parse URL for tab parameter.
+			$referer = wp_unslash( $_POST['_wp_http_referer'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$parts   = wp_parse_url( $referer );
 			if ( isset( $parts['query'] ) ) {
 				parse_str( $parts['query'], $query );
@@ -787,7 +791,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 					</tr>
 					<tr>
 						<td><strong><?php esc_html_e( 'Domain:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
-						<td><code><?php echo esc_html( $current_config['domain'] ?: '(current domain)' ); ?></code></td>
+						<td><code><?php echo esc_html( $current_config['domain'] ? $current_config['domain'] : '(current domain)' ); ?></code></td>
 					</tr>
 					<tr>
 						<td><strong><?php esc_html_e( 'HttpOnly:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
@@ -914,7 +918,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	 * @return array<string, mixed> Sanitized settings.
 	 */
 	public function sanitize_cookie_settings( $input ): array {
-		// Get existing settings or defaults
+		// Get existing settings or defaults.
 		$defaults = class_exists( 'JWT_Cookie_Config' ) ? JWT_Cookie_Config::get_defaults() : array(
 			'samesite' => 'auto',
 			'secure'   => 'auto',
@@ -923,21 +927,21 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		);
 		$existing = get_option( 'jwt_auth_cookie_config', $defaults );
 
-		// Handle null or invalid input - return existing settings
+		// Handle null or invalid input - return existing settings.
 		if ( ! is_array( $input ) ) {
 			return $existing;
 		}
 
-		// Start with existing settings to preserve all fields
+		// Start with existing settings to preserve all fields.
 		$sanitized = $existing;
 
-		// Sanitize SameSite
+		// Sanitize SameSite.
 		if ( isset( $input['samesite'] ) ) {
 			$valid_samesite        = array( 'auto', 'None', 'Lax', 'Strict' );
 			$sanitized['samesite'] = in_array( $input['samesite'], $valid_samesite, true ) ? $input['samesite'] : 'auto';
 		}
 
-		// Sanitize Secure
+		// Sanitize Secure.
 		if ( isset( $input['secure'] ) ) {
 			if ( 'auto' === $input['secure'] ) {
 				$sanitized['secure'] = 'auto';
@@ -946,17 +950,17 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 			}
 		}
 
-		// Sanitize Path
+		// Sanitize Path.
 		if ( isset( $input['path'] ) ) {
 			$sanitized['path'] = 'auto' === $input['path'] ? 'auto' : sanitize_text_field( $input['path'] );
 		}
 
-		// Sanitize Domain
+		// Sanitize Domain.
 		if ( isset( $input['domain'] ) ) {
 			$sanitized['domain'] = 'auto' === $input['domain'] ? 'auto' : sanitize_text_field( $input['domain'] );
 		}
 
-		// Clear cache after saving (if class exists)
+		// Clear cache after saving (if class exists).
 		if ( class_exists( 'JWT_Cookie_Config' ) && method_exists( 'JWT_Cookie_Config', 'clear_cache' ) ) {
 			JWT_Cookie_Config::clear_cache();
 		}

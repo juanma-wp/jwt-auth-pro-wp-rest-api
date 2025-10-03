@@ -182,11 +182,11 @@ class Auth_JWT {
 		$this->store_refresh_token( $user->ID, $refresh_token, $refresh_expires );
 
 		// Set refresh token as HTTPOnly cookie with environment-aware configuration.
+		// Path, httponly, and secure are auto-detected based on environment.
 		wp_auth_jwt_set_cookie(
 			self::REFRESH_COOKIE_NAME,
 			$refresh_token,
 			$refresh_expires
-			// Path, httponly, and secure are auto-detected based on environment
 		);
 
 		return wp_auth_jwt_success_response(
@@ -250,11 +250,11 @@ class Auth_JWT {
 			$this->update_refresh_token( $token_data['id'], $new_refresh_token, $refresh_expires );
 
 			// Set new refresh token cookie with environment-aware configuration.
+			// Path, httponly, and secure are auto-detected based on environment.
 			wp_auth_jwt_set_cookie(
 				self::REFRESH_COOKIE_NAME,
 				$new_refresh_token,
 				$refresh_expires
-				// Path, httponly, and secure are auto-detected based on environment
 			);
 		}
 

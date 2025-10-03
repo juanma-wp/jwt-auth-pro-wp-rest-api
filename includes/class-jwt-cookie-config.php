@@ -80,24 +80,24 @@ class JWT_Cookie_Config {
 	 * @return string One of: 'development', 'staging', 'production'
 	 */
 	private static function detect_environment(): string {
-		// Use WordPress environment type if available (WP 5.5+)
+		// Use WordPress environment type if available (WP 5.5+).
 		if ( function_exists( 'wp_get_environment_type' ) ) {
 			$wp_env = wp_get_environment_type();
-			// Normalize 'local' to 'development' since they should behave the same
+			// Normalize 'local' to 'development' since they should behave the same.
 			if ( 'local' === $wp_env ) {
 				return self::ENV_DEVELOPMENT;
 			}
-			// Only return if it matches one of our expected values
+			// Only return if it matches one of our expected values.
 			if ( in_array( $wp_env, array( self::ENV_DEVELOPMENT, self::ENV_STAGING, self::ENV_PRODUCTION ), true ) ) {
 				return $wp_env;
 			}
-			// Fall through to manual detection if unexpected value
+			// Fall through to manual detection if unexpected value.
 		}
 
-		// Fallback detection based on domain and WP_DEBUG
+		// Fallback detection based on domain and WP_DEBUG.
 		$host = isset( $_SERVER['HTTP_HOST'] ) ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : '';
 
-		// Development indicators
+		// Development indicators.
 		if (
 			in_array( $host, array( 'localhost', '127.0.0.1', '::1' ), true ) ||
 			str_ends_with( $host, '.local' ) ||
@@ -108,7 +108,7 @@ class JWT_Cookie_Config {
 			return self::ENV_DEVELOPMENT;
 		}
 
-		// Staging indicators
+		// Staging indicators.
 		if (
 			str_contains( $host, 'staging' ) ||
 			str_contains( $host, 'dev' ) ||
@@ -128,24 +128,24 @@ class JWT_Cookie_Config {
 	 * @return string 'None', 'Lax', or 'Strict'
 	 */
 	private static function resolve_samesite( array $saved_config, string $environment ): string {
-		// Check for explicit override
+		// Check for explicit override.
 		if ( isset( $saved_config['samesite'] ) && 'auto' !== $saved_config['samesite'] ) {
 			return self::validate_samesite( $saved_config['samesite'] );
 		}
 
-		// Auto-detect based on environment
+		// Auto-detect based on environment.
 		switch ( $environment ) {
 			case self::ENV_DEVELOPMENT:
-				// Development: Allow cross-origin for SPAs on different ports
+				// Development: Allow cross-origin for SPAs on different ports.
 				return 'None';
 
 			case self::ENV_STAGING:
-				// Staging: Relaxed for testing
+				// Staging: Relaxed for testing.
 				return 'Lax';
 
 			case self::ENV_PRODUCTION:
 			default:
-				// Production: Strict for maximum security
+				// Production: Strict for maximum security.
 				return 'Strict';
 		}
 	}
@@ -158,22 +158,22 @@ class JWT_Cookie_Config {
 	 * @return bool
 	 */
 	private static function resolve_secure( array $saved_config, string $environment ): bool {
-		// Check for explicit override
+		// Check for explicit override.
 		if ( isset( $saved_config['secure'] ) && 'auto' !== $saved_config['secure'] ) {
-			// Handle string '1' and '0' from admin settings
+			// Handle string '1' and '0' from admin settings.
 			if ( '0' === $saved_config['secure'] || 0 === $saved_config['secure'] || false === $saved_config['secure'] ) {
 				return false;
 			}
 			return (bool) $saved_config['secure'];
 		}
 
-		// Auto-detect based on environment and SSL
+		// Auto-detect based on environment and SSL.
 		if ( self::ENV_DEVELOPMENT === $environment ) {
-			// Development: Only secure if actually using HTTPS
+			// Development: Only secure if actually using HTTPS.
 			return is_ssl();
 		}
 
-		// Staging/Production: Always require HTTPS
+		// Staging/Production: Always require HTTPS.
 		return true;
 	}
 
@@ -185,18 +185,18 @@ class JWT_Cookie_Config {
 	 * @return string
 	 */
 	private static function resolve_path( array $saved_config, string $environment ): string {
-		// Check for explicit override
+		// Check for explicit override.
 		if ( isset( $saved_config['path'] ) && 'auto' !== $saved_config['path'] ) {
 			return sanitize_text_field( $saved_config['path'] );
 		}
 
-		// Auto-detect based on environment
+		// Auto-detect based on environment.
 		if ( self::ENV_DEVELOPMENT === $environment ) {
-			// Development: Broad path for easier cross-origin access
+			// Development: Broad path for easier cross-origin access.
 			return '/';
 		}
 
-		// Staging/Production: Restricted path for security
+		// Staging/Production: Restricted path for security.
 		return '/wp-json/jwt/v1/';
 	}
 
@@ -208,18 +208,18 @@ class JWT_Cookie_Config {
 	 * @return string
 	 */
 	private static function resolve_domain( array $saved_config, string $environment ): string {
-		// Check for explicit override
+		// Check for explicit override.
 		if ( isset( $saved_config['domain'] ) && 'auto' !== $saved_config['domain'] ) {
 			return sanitize_text_field( $saved_config['domain'] );
 		}
 
-		// Auto-detect based on environment
+		// Auto-detect based on environment.
 		if ( self::ENV_DEVELOPMENT === $environment ) {
-			// Development: Empty domain for localhost
+			// Development: Empty domain for localhost.
 			return '';
 		}
 
-		// Staging/Production: Empty (defaults to current domain)
+		// Staging/Production: Empty (defaults to current domain).
 		return '';
 	}
 
@@ -230,8 +230,8 @@ class JWT_Cookie_Config {
 	 * @return bool
 	 */
 	private static function resolve_httponly( array $saved_config ): bool {
-		// HttpOnly should ALWAYS be true for security
-		// Only allow override in very specific debugging scenarios
+		// HttpOnly should ALWAYS be true for security.
+		// Only allow override in very specific debugging scenarios.
 		if ( isset( $saved_config['httponly'] ) && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			return (bool) $saved_config['httponly'];
 		}
@@ -257,7 +257,7 @@ class JWT_Cookie_Config {
 	 * @return bool True on success, false on failure.
 	 */
 	public static function update_config( array $config ): bool {
-		self::$config_cache = null; // Clear cache
+		self::$config_cache = null; // Clear cache.
 		return update_option( self::OPTION_NAME, $config );
 	}
 
