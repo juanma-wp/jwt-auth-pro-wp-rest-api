@@ -4,9 +4,8 @@ JWT Auth Pro provides a flexible, environment-aware cookie configuration system 
 
 1. **Constants** (highest priority)
 2. **Filters**
-3. **Admin Panel Settings**
-4. **Environment-based defaults** (if auto-detection is enabled)
-5. **Hard-coded defaults** (fallback)
+3. **Environment-based defaults** (if auto-detection is enabled)
+4. **Hard-coded defaults** (fallback)
 
 ## Quick Start
 
@@ -198,11 +197,9 @@ Understanding the order helps you override settings correctly:
    ↓
 2. Filters (jwt_auth_cookie_*)
    ↓
-3. Admin Panel Settings
+3. Environment Defaults (if auto-detect enabled)
    ↓
-4. Environment Defaults (if auto-detect enabled)
-   ↓
-5. Hard-coded Defaults                      ← Fallback
+4. Hard-coded Defaults                      ← Fallback
 ```
 
 ## Debug Mode

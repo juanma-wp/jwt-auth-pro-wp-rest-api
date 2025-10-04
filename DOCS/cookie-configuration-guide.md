@@ -7,10 +7,9 @@ Complete guide to understanding and configuring JWT refresh token cookies in JWT
 1. [Overview](#overview)
 2. [Understanding the Refresh Token Cookie](#understanding-the-refresh-token-cookie)
 3. [Cookie Attributes Explained](#cookie-attributes-explained)
-4. [WordPress Admin Settings](#wordpress-admin-settings)
-5. [Environment Auto-Detection](#environment-auto-detection)
-6. [Configuration Scenarios](#configuration-scenarios)
-7. [Troubleshooting](#troubleshooting)
+4. [Environment Auto-Detection](#environment-auto-detection)
+5. [Configuration Scenarios](#configuration-scenarios)
+6. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -20,7 +19,7 @@ JWT Auth Pro uses **HTTP-only cookies** to store refresh tokens, following OAuth
 
 - What the refresh token cookie is and why it's used
 - What each cookie attribute means
-- How to configure settings in WordPress admin
+- How environment auto-detection works
 - Recommended settings for different scenarios
 
 ---
@@ -125,7 +124,7 @@ Secure
 
 **Configuration:**
 - Auto-detected based on environment (see below)
-- Override in: **Settings → JWT Auth Pro → Cookie Settings → Secure Attribute**
+- Override with constant `JWT_AUTH_COOKIE_SECURE` or filter `jwt_auth_cookie_secure`
 
 ---
 
@@ -194,7 +193,7 @@ Backend:  https://example.com/wp-json
 
 **Configuration:**
 - Auto-detected based on environment (see below)
-- Override in: **Settings → JWT Auth Pro → Cookie Settings → SameSite Attribute**
+- Override with constant `JWT_AUTH_COOKIE_SAMESITE` or filter `jwt_auth_cookie_samesite`
 
 ---
 
@@ -220,7 +219,7 @@ Cookie is only sent to URLs matching this path.
 - **Staging/Production:** `/wp-json/jwt/v1/` (restricted)
 
 **Configuration:**
-- Override in: **Settings → JWT Auth Pro → Cookie Settings → Cookie Path**
+- Override with constant `JWT_AUTH_COOKIE_PATH` or filter `jwt_auth_cookie_path`
 
 ---
 
@@ -248,7 +247,7 @@ Share cookies across subdomains (e.g., `app.example.com` ↔ `api.example.com`)
 - Empty by default (current domain only)
 
 **Configuration:**
-- Override in: **Settings → JWT Auth Pro → Cookie Settings → Cookie Domain**
+- Override with constant `JWT_AUTH_COOKIE_DOMAIN` or filter `jwt_auth_cookie_domain`
 
 ---
 
@@ -266,117 +265,6 @@ After 30 days, browser automatically deletes the cookie.
 
 **Configuration:**
 - Controlled by: **Settings → JWT Auth Pro → JWT Settings → Refresh Token Expiry**
-
----
-
-## WordPress Admin Settings
-
-### Location
-
-Navigate to: **WordPress Admin → Settings → JWT Auth Pro → Cookie Settings**
-
-### Settings Page Interface
-
-```
-┌─────────────────────────────────────────────────────┐
-│  Current Environment: development                    │
-├─────────────────────────────────────────────────────┤
-│  Active Cookie Configuration                         │
-│  SameSite: None                                      │
-│  Secure: true                                        │
-│  Path: /                                             │
-│  Domain: (current domain)                            │
-│  HttpOnly: true                                      │
-└─────────────────────────────────────────────────────┘
-
-SameSite Attribute: [Auto (Recommended) ▼]
-  Options:
-  - Auto (Recommended)
-  - None (Cross-site allowed)
-  - Lax (Relaxed)
-  - Strict (Maximum security)
-
-Secure Attribute: [Auto (Recommended) ▼]
-  Options:
-  - Auto (Recommended)
-  - Enabled (HTTPS required)
-  - Disabled (HTTP allowed)
-
-Cookie Path: [auto]
-  Text input field
-  Placeholder: "auto"
-
-Cookie Domain: [auto]
-  Text input field
-  Placeholder: "auto"
-```
-
-### How Settings Work
-
-#### Auto Detection (Recommended)
-
-When set to **"Auto"**, the plugin automatically configures cookies based on your environment:
-
-```php
-// Plugin detects environment
-if (.local domain OR localhost OR WP_DEBUG) {
-  Environment = "development"
-} else if (domain contains "staging" OR "dev") {
-  Environment = "staging"
-} else {
-  Environment = "production"
-}
-```
-
-Then applies environment-specific defaults:
-
-| Setting | Development | Staging | Production |
-|---------|------------|---------|------------|
-| **SameSite** | None | Lax | Strict |
-| **Secure** | Based on HTTPS | true | true |
-| **Path** | / | /wp-json/jwt/v1/ | /wp-json/jwt/v1/ |
-| **Domain** | (empty) | (empty) | (empty) |
-
-#### Manual Override
-
-Select specific values to override auto-detection:
-
-**Example:** Force `SameSite=None` in production for cross-domain app:
-```
-SameSite Attribute: None (Cross-site allowed)
-Secure Attribute: Enabled (HTTPS required)
-```
-
-### Relationship Between Settings
-
-The **"Active Cookie Configuration"** box shows the **actual** settings being used, combining:
-
-1. **Auto-detection** (if set to "auto")
-2. **Manual overrides** (if specific values selected)
-3. **WordPress environment** (is_ssl(), domain, etc.)
-
-**Example:**
-
-If you select:
-```
-SameSite: Auto
-Secure: Auto
-```
-
-And your site is:
-```
-Domain: wcg2025-demo.wp.local
-HTTPS: true
-WP_DEBUG: true
-```
-
-The "Active Configuration" shows:
-```
-Environment: development (detected from .local domain)
-SameSite: None (development default)
-Secure: true (HTTPS detected)
-Path: / (development default)
-```
 
 ---
 
@@ -689,9 +577,13 @@ Cookie "wp_jwt_refresh_token" has been rejected because it is in a
 cross-site context and its "SameSite" is "None" and "Secure" is false.
 ```
 
-**Solution:** Enable Secure attribute
-```
-Settings → JWT Auth Pro → Cookie Settings → Secure Attribute: Enabled
+**Solution:** Enable Secure attribute via constant or filter
+```php
+// wp-config.php
+define('JWT_AUTH_COOKIE_SECURE', true);
+
+// Or via filter
+add_filter('jwt_auth_cookie_secure', '__return_true');
 ```
 
 **Check 2: CORS Headers**
