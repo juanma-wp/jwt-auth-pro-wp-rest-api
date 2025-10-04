@@ -39,28 +39,60 @@ class FeatureContext extends BaseWordpressContext implements Context
 	}
 
 	/**
+	 * @Given a WordPress database is configured
+	 */
+	public function aWordpressDatabaseIsConfigured()
+	{
+		// This is a background step that ensures WordPress is ready
+		// In wp-env, the database is automatically configured
+		// We just need to verify the site is accessible
+		$url = $this->getSiteUrl();
+		$ch  = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_exec($ch);
+		$status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$error       = curl_error($ch);
+		curl_close($ch);
+
+		if (! empty($error)) {
+			throw new Exception('WordPress site is not accessible: ' . $error);
+		}
+
+		if ($status_code < 200 || $status_code >= 400) {
+			throw new Exception('WordPress site returned error status: ' . $status_code);
+		}
+	}
+
+	/**
 	 * @When I request a JWT token with username :username and password :password
 	 */
 	public function iRequestAJwtTokenWithUsernameAndPassword($username, $password)
 	{
-		$url  = $this->getSiteUrl() . '/wp-json/jwt-auth/v1/token';
+		// Use query parameter format since pretty permalinks may not be configured
+		$url  = $this->getSiteUrl() . '/?rest_route=/jwt/v1/token';
 		$data = array(
 			'username' => $username,
 			'password' => $password,
 		);
 
-		$response = wp_remote_post(
-			$url,
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		curl_setopt(
+			$ch,
+			CURLOPT_HTTPHEADER,
 			array(
-				'body'    => wp_json_encode($data),
-				'headers' => array(
-					'Content-Type' => 'application/json',
-				),
+				'Content-Type: application/json',
 			)
 		);
 
-		$this->statusCode = wp_remote_retrieve_response_code($response);
-		$this->response   = json_decode(wp_remote_retrieve_body($response), true);
+		$response_body    = curl_exec($ch);
+		$this->statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$this->response   = json_decode($response_body, true);
+		curl_close($ch);
 	}
 
 	/**
@@ -72,11 +104,11 @@ class FeatureContext extends BaseWordpressContext implements Context
 			throw new Exception('Expected status code 200, got ' . $this->statusCode);
 		}
 
-		if (! isset($this->response['data']['token']) || empty($this->response['data']['token'])) {
-			throw new Exception('No token found in response');
+		if (! isset($this->response['data']['access_token']) || empty($this->response['data']['access_token'])) {
+			throw new Exception('No access token found in response');
 		}
 
-		$this->tokens['access_token'] = $this->response['data']['token'];
+		$this->tokens['access_token'] = $this->response['data']['access_token'];
 	}
 
 	/**
@@ -96,23 +128,28 @@ class FeatureContext extends BaseWordpressContext implements Context
 	 */
 	public function iMakeARequestToWithTheJwtToken($endpoint)
 	{
-		$url = $this->getSiteUrl() . $endpoint;
+		// Convert /wp-json/path to query parameter format
+		$rest_route = str_replace('/wp-json', '', $endpoint);
+		$url        = $this->getSiteUrl() . '/?rest_route=' . $rest_route;
 
-		if (! isset($this->tokens['access_token'])) {
-			throw new Exception('No access token available');
+		$headers = array();
+
+		// Only add Authorization header if token exists
+		// This allows testing unauthorized access
+		if (isset($this->tokens['access_token'])) {
+			$headers[] = 'Authorization: Bearer ' . $this->tokens['access_token'];
 		}
 
-		$response = wp_remote_get(
-			$url,
-			array(
-				'headers' => array(
-					'Authorization' => 'Bearer ' . $this->tokens['access_token'],
-				),
-			)
-		);
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		if (! empty($headers)) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		}
 
-		$this->statusCode = wp_remote_retrieve_response_code($response);
-		$this->response   = json_decode(wp_remote_retrieve_body($response), true);
+		$response_body    = curl_exec($ch);
+		$this->statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$this->response   = json_decode($response_body, true);
+		curl_close($ch);
 	}
 
 	/**
@@ -126,7 +163,7 @@ class FeatureContext extends BaseWordpressContext implements Context
 					'Expected status code %d, got %d. Response: %s',
 					$code,
 					$this->statusCode,
-					wp_json_encode($this->response)
+					json_encode($this->response)
 				)
 			);
 		}
@@ -153,28 +190,33 @@ class FeatureContext extends BaseWordpressContext implements Context
 	 */
 	public function iRefreshTheJwtTokenUsingTheRefreshToken()
 	{
-		$url = $this->getSiteUrl() . '/wp-json/jwt-auth/v1/token/refresh';
+		// Use query parameter format since pretty permalinks may not be configured
+		$url = $this->getSiteUrl() . '/?rest_route=/jwt/v1/refresh';
 
 		if (! isset($this->tokens['refresh_token'])) {
 			throw new Exception('No refresh token available');
 		}
 
-		$response = wp_remote_post(
-			$url,
+		$data = array(
+			'refresh_token' => $this->tokens['refresh_token'],
+		);
+
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		curl_setopt(
+			$ch,
+			CURLOPT_HTTPHEADER,
 			array(
-				'body'    => wp_json_encode(
-					array(
-						'refresh_token' => $this->tokens['refresh_token'],
-					)
-				),
-				'headers' => array(
-					'Content-Type' => 'application/json',
-				),
+				'Content-Type: application/json',
 			)
 		);
 
-		$this->statusCode = wp_remote_retrieve_response_code($response);
-		$this->response   = json_decode(wp_remote_retrieve_body($response), true);
+		$response_body    = curl_exec($ch);
+		$this->statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$this->response   = json_decode($response_body, true);
+		curl_close($ch);
 
 		if (isset($this->response['data']['token'])) {
 			$this->tokens['access_token'] = $this->response['data']['token'];

@@ -14,9 +14,12 @@
     "env:reset": "wp-env destroy && wp-env start",
     "env:update": "wp-env start --update",
     "composer:install": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer install --no-interaction --prefer-dist'",
+    "composer:update": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer update --no-interaction --prefer-dist'",
     "test": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testdox",
     "test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=unit --testdox",
-    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=integration --testdox"
+    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=integration --testdox",
+    "test:behat": "composer run behat",
+    "test:behat:verbose": "vendor/bin/behat --verbose"
   },
   "devDependencies": {
     "@wordpress/env": "^10.31.0"

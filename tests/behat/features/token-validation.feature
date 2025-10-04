@@ -9,14 +9,14 @@ Feature: JWT Token Validation
   Scenario: Validate a valid JWT token
     Given I request a JWT token with username "admin" and password "password"
     And I should receive a valid JWT token
-    When I make a request to "/wp-json/jwt-auth/v1/token/validate" with the JWT token
+    When I make a request to "/wp-json/jwt/v1/verify" with the JWT token
     Then the response status code should be 200
-    And the response should contain "code"
+    And the response should contain "success"
 
   Scenario: Reject an invalid JWT token
-    When I make a request to "/wp-json/jwt-auth/v1/token/validate" with the JWT token
+    When I make a request to "/wp-json/jwt/v1/verify" with the JWT token
     Then the response status code should be 401
-    And I should receive an error message "Authorization header not found"
+    And I should receive an error message "No valid token provided"
 
   Scenario: Reject an expired JWT token
     Given I request a JWT token with username "admin" and password "password"
