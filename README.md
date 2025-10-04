@@ -2,6 +2,7 @@
 
 [![Unit Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/unit-tests.yml)
 [![Integration Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/integration-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/integration-tests.yml)
+[![Behat Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/behat-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/behat-tests.yml)
 [![PHPCS](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpcs.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpcs.yml)
 [![PHPStan](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpstan.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpstan.yml)
 
@@ -149,7 +150,10 @@ npm run test:unit
 # Integration tests
 npm run test:integration
 
-# All tests (unit + integration)
+# Behat E2E tests
+npm run test:behat
+
+# All tests (unit + integration + behat)
 npm run test
 ```
 
