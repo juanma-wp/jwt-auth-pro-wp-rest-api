@@ -15,11 +15,12 @@
     "env:update": "wp-env start --update",
     "composer:install": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer install --no-interaction --prefer-dist'",
     "composer:update": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer update --no-interaction --prefer-dist'",
-    "test": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testdox",
-    "test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=unit --testdox",
-    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=integration --testdox",
-    "test:behat": "composer run behat",
-    "test:behat:verbose": "vendor/bin/behat --verbose"
+    "test:setup": "wp-env run tests-cli bash -c 'wp plugin activate jwt-auth-pro-wp-rest-api 2>/dev/null || true'",
+    "test": "npm run test:setup && npm run test:unit && npm run test:integration && npm run test:behat",
+    "test:unit": "npm run test:setup && wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=unit --testdox",
+    "test:integration": "npm run test:setup && wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=integration --testdox",
+    "test:behat": "npm run test:setup && composer run behat",
+    "test:behat:verbose": "npm run test:setup && vendor/bin/behat --verbose"
   },
   "devDependencies": {
     "@wordpress/env": "^10.31.0"
