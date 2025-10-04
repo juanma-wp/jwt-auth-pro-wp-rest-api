@@ -105,14 +105,29 @@ const posts = await fetch('/wp-json/wp/v2/posts', {
 define('JWT_AUTH_PRO_SECRET', 'your-super-secret-key-here');
 define('JWT_AUTH_PRO_ACCESS_TTL', 3600);      // 1 hour
 define('JWT_AUTH_PRO_REFRESH_TTL', 2592000);  // 30 days
+
+// Cookie configuration (optional)
+define('JWT_AUTH_COOKIE_SAMESITE', 'Strict'); // 'Strict', 'Lax', or 'None'
+define('JWT_AUTH_COOKIE_SECURE', true);       // Require HTTPS
+define('JWT_AUTH_COOKIE_LIFETIME', 7 * DAY_IN_SECONDS);
+define('JWT_AUTH_COOKIE_AUTO_DETECT', true);  // Auto-configure based on environment
 ```
 
 ### Via WordPress Admin
 Go to **Settings → WP REST Auth JWT** to configure:
 - JWT Secret Key
 - Token expiration times
+- Cookie security settings (with environment auto-detection)
 - CORS allowed origins
 - Debug logging
+
+### Environment-Aware Configuration
+The plugin automatically detects your environment and adjusts cookie settings:
+- **Development**: Relaxed settings for local testing
+- **Staging**: Balanced settings for testing
+- **Production**: Maximum security settings
+
+See [Cookie Configuration Guide](DOCS/cookie-configuration.md) for advanced options using constants and filters.
 
 ## 💡 Use Cases
 
@@ -131,7 +146,9 @@ Perfect for:
 
 ## 🛠️ Advanced Usage
 
-See `DOCS/advanced-usage.md` for the full JavaScript client example, and `DOCS/cors-and-cookies.md` for cross-origin and cookie configuration guidance.
+- [Cookie Configuration Guide](DOCS/cookie-configuration.md) - Environment detection, constants, and filters
+- [JavaScript Client Example](DOCS/advanced-usage.md) - Full client-side implementation
+- [CORS and Cookies Setup](DOCS/cors-and-cookies.md) - Cross-origin configuration
 
 ## 🧪 Testing (wp-env)
 

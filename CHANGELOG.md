@@ -5,6 +5,17 @@ All notable changes to JWT Auth Pro WP REST API will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Architecture Refactoring**: Cookie configuration moved to shared toolkit
+  - Migrated `JWT_Cookie_Config` implementation to `wp-rest-auth-toolkit` package
+  - Converted plugin class to lightweight wrapper (~140 lines vs ~500 lines)
+  - Maintains full backwards compatibility with existing API
+  - Enables code sharing across multiple WordPress authentication plugins
+  - Optimized test suite: 11 focused integration tests (down from 32 redundant tests)
+  - Comprehensive functionality tests now in toolkit (21 tests, 62 assertions)
+
 ## [1.1.0] - 2025-10-03
 
 ### Fixed

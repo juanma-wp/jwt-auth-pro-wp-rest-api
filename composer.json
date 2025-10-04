@@ -27,8 +27,11 @@
   },
   "repositories": [
     {
-      "type": "vcs",
-      "url": "https://github.com/juanma-wp/wp-rest-auth-toolkit"
+      "type": "path",
+      "url": "../wp-rest-auth-toolkit",
+      "options": {
+        "symlink": false
+      }
     }
   ],
   "require-dev": {

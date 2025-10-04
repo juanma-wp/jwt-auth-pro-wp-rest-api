@@ -188,6 +188,14 @@ class JWT_Auth_Pro_Admin_Settings {
 			'jwt-auth-pro-wp-rest-api-cookies',
 			'cookie_config_section'
 		);
+
+		add_settings_field(
+			'cookie_auto_detect',
+			'Auto-detect Environment',
+			array( $this, 'cookie_auto_detect_field' ),
+			'jwt-auth-pro-wp-rest-api-cookies',
+			'cookie_config_section'
+		);
 	}
 
 	/**
@@ -770,6 +778,9 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 			<p>
 				<strong><?php esc_html_e( 'Current Environment:', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
 				<code><?php echo esc_html( $environment ); ?></code>
+				&nbsp;|&nbsp;
+				<strong><?php esc_html_e( 'Auto-detection:', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
+				<code><?php echo esc_html( $current_config['auto_detect'] ? 'Enabled' : 'Disabled' ); ?></code>
 			</p>
 		</div>
 
@@ -777,6 +788,14 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 			<h4><?php esc_html_e( 'Active Cookie Configuration', 'jwt-auth-pro-wp-rest-api' ); ?></h4>
 			<table class="widefat" style="max-width: 600px;">
 				<tbody>
+					<tr>
+						<td><strong><?php esc_html_e( 'Enabled:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
+						<td><code><?php echo esc_html( $current_config['enabled'] ? 'Yes' : 'No' ); ?></code></td>
+					</tr>
+					<tr>
+						<td><strong><?php esc_html_e( 'Cookie Name:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
+						<td><code><?php echo esc_html( $current_config['name'] ); ?></code></td>
+					</tr>
 					<tr>
 						<td><strong><?php esc_html_e( 'SameSite:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
 						<td><code><?php echo esc_html( $current_config['samesite'] ); ?></code></td>
@@ -796,6 +815,10 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 					<tr>
 						<td><strong><?php esc_html_e( 'HttpOnly:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
 						<td><code><?php echo esc_html( $current_config['httponly'] ? 'true' : 'false' ); ?></code></td>
+					</tr>
+					<tr>
+						<td><strong><?php esc_html_e( 'Lifetime:', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
+						<td><code><?php echo esc_html( human_time_diff( 0, $current_config['lifetime'] ) ); ?></code></td>
 					</tr>
 				</tbody>
 			</table>
@@ -912,6 +935,38 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	}
 
 	/**
+	 * Render Auto-detect Environment field.
+	 */
+	public function cookie_auto_detect_field(): void {
+		$defaults = class_exists( 'JWT_Cookie_Config' ) ? JWT_Cookie_Config::get_defaults() : array( 'auto_detect' => true );
+		$config   = get_option( 'jwt_auth_cookie_config', $defaults );
+		$value    = $config['auto_detect'] ?? true;
+		$checked  = checked( $value, true, false );
+		?>
+		<label>
+			<input type="checkbox"
+				name="jwt_auth_cookie_config[auto_detect]"
+				value="1"
+				<?php echo $checked; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			/>
+			<?php esc_html_e( 'Automatically configure cookie settings based on detected environment', 'jwt-auth-pro-wp-rest-api' ); ?>
+		</label>
+		<p class="description">
+			<?php
+			esc_html_e(
+				'When enabled, the plugin will automatically adjust cookie security settings (SameSite, Secure, Path) based on your environment (development, staging, production). Disable this to use only your manual settings above.',
+				'jwt-auth-pro-wp-rest-api'
+			);
+			?>
+		</p>
+		<p class="description">
+			<strong><?php esc_html_e( 'Note:', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
+			<?php esc_html_e( 'Constants defined in wp-config.php (JWT_AUTH_COOKIE_*) will always override these settings.', 'jwt-auth-pro-wp-rest-api' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Sanitize cookie settings.
 	 *
 	 * @param array<string, mixed>|null $input Input settings.
@@ -959,6 +1014,10 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		if ( isset( $input['domain'] ) ) {
 			$sanitized['domain'] = 'auto' === $input['domain'] ? 'auto' : sanitize_text_field( $input['domain'] );
 		}
+
+		// Sanitize Auto-detect.
+		// Checkbox: if not set in input, it means unchecked = false.
+		$sanitized['auto_detect'] = isset( $input['auto_detect'] ) && '1' === $input['auto_detect'];
 
 		// Clear cache after saving (if class exists).
 		if ( class_exists( 'JWT_Cookie_Config' ) && method_exists( 'JWT_Cookie_Config', 'clear_cache' ) ) {
