@@ -40,6 +40,28 @@ class Auth_JWT {
 	private const REST_NAMESPACE = 'jwt/v1';
 
 	/**
+	 * Refresh token manager instance
+	 *
+	 * @var \WPRestAuth\AuthToolkit\Token\RefreshTokenManager
+	 */
+	private $refresh_token_manager;
+
+	/**
+	 * Constructor - Initialize refresh token manager
+	 */
+	public function __construct() {
+		global $wpdb;
+
+		$this->refresh_token_manager = new \WPRestAuth\AuthToolkit\Token\RefreshTokenManager(
+			$wpdb->prefix . 'jwt_refresh_tokens',
+			JWT_AUTH_PRO_SECRET,
+			'jwt',
+			'wp_rest_auth_jwt',
+			300 // 5 minutes cache TTL
+		);
+	}
+
+	/**
 	 * Register REST API routes for JWT authentication.
 	 */
 	public function register_routes(): void {
@@ -245,8 +267,8 @@ class Auth_JWT {
 			$new_refresh_token = wp_auth_jwt_generate_token( 64 );
 			$refresh_expires   = $now + JWT_AUTH_PRO_REFRESH_TTL;
 
-			// Update refresh token.
-			$this->update_refresh_token( $token_data['id'], $new_refresh_token, $refresh_expires );
+			// Rotate refresh token (revoke old, create new).
+			$this->rotate_refresh_token( $refresh_token, $new_refresh_token, (int) $user->ID, $refresh_expires );
 
 			// Set new refresh token cookie with environment-aware configuration.
 			// Path, httponly, and secure are auto-detected based on environment.
@@ -374,38 +396,14 @@ class Auth_JWT {
 	 * @return bool True on success, false on failure.
 	 */
 	public function store_refresh_token( int $user_id, string $refresh_token, int $expires_at ): bool {
-		global $wpdb;
-
-		$token_hash = wp_auth_jwt_hash_token( $refresh_token, JWT_AUTH_PRO_SECRET );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct insert for plugin-managed JWT storage; values are parameterized.
-		$result = $wpdb->insert(
-			$wpdb->prefix . 'jwt_refresh_tokens',
+		return $this->refresh_token_manager->store(
+			$user_id,
+			$refresh_token,
+			$expires_at,
 			array(
-				'user_id'    => $user_id,
-				'token_hash' => $token_hash,
-				'expires_at' => $expires_at,
-				'issued_at'  => time(),
-				'created_at' => time(),
-				'is_revoked' => 0,
-				'token_type' => 'jwt',
-				'user_agent' => wp_auth_jwt_get_user_agent(),
-				'ip_address' => wp_auth_jwt_get_ip_address(),
-			),
-			array(
-				'%d',
-				'%s',
-				'%d',
-				'%d',
-				'%d',
-				'%d',
-				'%s',
-				'%s',
-				'%s',
+				'issued_at' => time(),
 			)
 		);
-
-		return false !== $result;
 	}
 
 	/**
@@ -415,30 +413,7 @@ class Auth_JWT {
 	 * @return array|WP_Error Token data or error if invalid.
 	 */
 	private function validate_refresh_token( string $refresh_token ) {
-		global $wpdb;
-
-		$token_hash = wp_auth_jwt_hash_token( $refresh_token, JWT_AUTH_PRO_SECRET );
-		$now        = time();
-
-		$cache_key  = 'jwt_token_' . md5( $token_hash );
-		$token_data = wp_cache_get( $cache_key, 'wp_rest_auth_jwt' );
-
-		if ( false === $token_data ) {
-			// Direct database query required for JWT token validation - no WordPress equivalent exists.
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$token_data = $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT * FROM {$wpdb->prefix}jwt_refresh_tokens WHERE token_hash = %s AND expires_at > %d AND is_revoked = 0 AND token_type = 'jwt'",
-					$token_hash,
-					$now
-				),
-				ARRAY_A
-			);
-
-			if ( $token_data ) {
-				wp_cache_set( $cache_key, $token_data, 'wp_rest_auth_jwt', 300 ); // Cache for 5 minutes.
-			}
-		}
+		$token_data = $this->refresh_token_manager->validate( $refresh_token );
 
 		if ( ! $token_data ) {
 			return wp_auth_jwt_error_response(
@@ -452,34 +427,24 @@ class Auth_JWT {
 	}
 
 	/**
-	 * Update an existing refresh token with new values.
+	 * Update an existing refresh token with new values (using token rotation).
 	 *
-	 * @param int    $token_id          Token record ID.
+	 * @param string $old_refresh_token Old refresh token to revoke.
 	 * @param string $new_refresh_token New refresh token value.
+	 * @param int    $user_id           User ID.
 	 * @param int    $expires_at        New expiration timestamp.
 	 * @return bool True on success, false on failure.
 	 */
-	private function update_refresh_token( int $token_id, string $new_refresh_token, int $expires_at ): bool {
-		global $wpdb;
-
-		$token_hash = wp_auth_jwt_hash_token( $new_refresh_token, JWT_AUTH_PRO_SECRET );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct update for plugin-managed JWT storage; values are parameterized.
-		$result = $wpdb->update(
-			$wpdb->prefix . 'jwt_refresh_tokens',
+	private function rotate_refresh_token( string $old_refresh_token, string $new_refresh_token, int $user_id, int $expires_at ): bool {
+		return $this->refresh_token_manager->rotate(
+			$old_refresh_token,
+			$new_refresh_token,
+			$user_id,
+			$expires_at,
 			array(
-				'token_hash' => $token_hash,
-				'expires_at' => $expires_at,
-				'created_at' => time(),
-				'user_agent' => wp_auth_jwt_get_user_agent(),
-				'ip_address' => wp_auth_jwt_get_ip_address(),
-			),
-			array( 'id' => $token_id ),
-			array( '%s', '%d', '%d', '%s', '%s' ),
-			array( '%d' )
+				'issued_at' => time(),
+			)
 		);
-
-		return false !== $result;
 	}
 
 	/**
@@ -489,28 +454,7 @@ class Auth_JWT {
 	 * @return bool True on success, false on failure.
 	 */
 	public function revoke_refresh_token( string $refresh_token ): bool {
-		global $wpdb;
-
-		$token_hash = wp_auth_jwt_hash_token( $refresh_token, JWT_AUTH_PRO_SECRET );
-
-		// Clear cache first.
-		$cache_key = 'jwt_token_' . md5( $token_hash );
-		wp_cache_delete( $cache_key, 'wp_rest_auth_jwt' );
-
-		// Direct database query required for JWT token revocation - no WordPress equivalent exists.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$result = $wpdb->update(
-			$wpdb->prefix . 'jwt_refresh_tokens',
-			array( 'is_revoked' => 1 ),
-			array(
-				'token_hash' => $token_hash,
-				'token_type' => 'jwt',
-			),
-			array( '%d' ),
-			array( '%s', '%s' )
-		);
-
-		return false !== $result;
+		return $this->refresh_token_manager->revoke( $refresh_token );
 	}
 
 	/**
@@ -520,16 +464,7 @@ class Auth_JWT {
 	 * @return array List of refresh tokens for the user.
 	 */
 	public function get_user_refresh_tokens( int $user_id ): array {
-		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct query for plugin-managed JWT storage; caching not applicable for short-lived token rows.
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}jwt_refresh_tokens WHERE user_id = %d AND token_type = 'jwt'",
-				$user_id
-			),
-			ARRAY_A
-		);
-		return $results ? $results : array();
+		return $this->refresh_token_manager->getUserTokens( $user_id, 100 );
 	}
 
 	/**
@@ -540,20 +475,7 @@ class Auth_JWT {
 	 * @return bool True on success, false on failure.
 	 */
 	public function revoke_user_token( int $user_id, int $token_id ): bool {
-		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful direct query for plugin-managed JWT storage; values are parameterized.
-		$updated = $wpdb->update(
-			$wpdb->prefix . 'jwt_refresh_tokens',
-			array( 'is_revoked' => 1 ),
-			array(
-				'id'         => $token_id,
-				'user_id'    => $user_id,
-				'token_type' => 'jwt',
-			),
-			array( '%d' ),
-			array( '%d', '%d', '%s' )
-		);
-		return false !== $updated;
+		return $this->refresh_token_manager->revokeById( $user_id, $token_id );
 	}
 
 	/**
@@ -577,14 +499,6 @@ class Auth_JWT {
 	 * Clean up expired tokens from the database.
 	 */
 	public function clean_expired_tokens(): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Purposeful cleanup of expired JWT rows; not a candidate for persistent caching.
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}jwt_refresh_tokens WHERE expires_at < %d AND token_type = 'jwt'",
-				time()
-			)
-		);
+		$this->refresh_token_manager->cleanExpired();
 	}
 }

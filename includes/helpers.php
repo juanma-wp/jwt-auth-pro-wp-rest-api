@@ -25,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use WPRestAuth\AuthToolkit\JWT\Encoder;
 use WPRestAuth\AuthToolkit\Token\Generator;
 use WPRestAuth\AuthToolkit\Token\Hasher;
+use WPRestAuth\AuthToolkit\Token\RefreshTokenManager;
 use WPRestAuth\AuthToolkit\Http\Cookie;
 use WPRestAuth\AuthToolkit\Http\Response;
 
