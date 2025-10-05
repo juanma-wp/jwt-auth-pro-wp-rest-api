@@ -157,7 +157,7 @@ class JWT_Auth_Pro_Admin_Settings {
 			'jwt-auth-pro-wp-rest-api-cookies'
 		);
 
-		// No form fields - read-only display only
+		// No form fields - read-only display only.
 	}
 
 	/**
