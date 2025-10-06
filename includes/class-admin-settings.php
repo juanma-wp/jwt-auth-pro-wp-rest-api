@@ -272,7 +272,7 @@ class JWT_Auth_Pro_Admin_Settings {
 			<div id="swagger-ui"></div>
 		</div>
 		<?php
-		$plugin_url = plugin_dir_url( dirname( __FILE__ ) );
+		$plugin_url = plugin_dir_url( __DIR__ );
 		wp_enqueue_script( 'swagger-ui-bundle', $plugin_url . 'assets/swagger-ui/swagger-ui-bundle.js', array(), '5.10.0', true );
 		wp_enqueue_script( 'swagger-ui-preset', $plugin_url . 'assets/swagger-ui/swagger-ui-standalone-preset.js', array( 'swagger-ui-bundle' ), '5.10.0', true );
 		wp_enqueue_style( 'swagger-ui-css', $plugin_url . 'assets/swagger-ui/swagger-ui.css', array(), '5.10.0' );
