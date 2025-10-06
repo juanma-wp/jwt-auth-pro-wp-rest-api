@@ -1,12 +1,8 @@
 {
   "core": "WordPress/WordPress#6.8",
   "phpVersion": "8.1",
-  "plugins": [
-    "."
-  ],
-  "themes": [
-    "WordPress/twentytwentyfour"
-  ],
+  "plugins": [".", "https://downloads.wordpress.org/plugin/plugin-check.zip"],
+  "themes": ["WordPress/twentytwentyfour"],
   "config": {
     "WP_DEBUG": true,
     "WP_DEBUG_LOG": true,

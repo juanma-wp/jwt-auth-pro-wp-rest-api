@@ -1,6 +1,6 @@
-=== JWT Auth Pro for WP REST API - Secure Refresh Tokens ===
+=== JWT Auth Pro WP REST API ===
 Contributors: juanmaguitar
-Tags: jwt, authentication, api, rest-api, security, oauth, tokens, spa, mobile
+Tags: jwt, authentication, rest-api, security, tokens
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4

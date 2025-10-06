@@ -26,7 +26,10 @@ use WPRestAuth\AuthToolkit\JWT\Encoder;
 use WPRestAuth\AuthToolkit\Token\Generator;
 use WPRestAuth\AuthToolkit\Token\Hasher;
 use WPRestAuth\AuthToolkit\Token\RefreshTokenManager;
+use WPRestAuth\AuthToolkit\Security\IpResolver;
+use WPRestAuth\AuthToolkit\Security\UserAgent;
 use WPRestAuth\AuthToolkit\Http\Cookie;
+use WPRestAuth\AuthToolkit\Http\Cors;
 use WPRestAuth\AuthToolkit\Http\Response;
 
 /**
@@ -97,10 +100,12 @@ function wp_auth_jwt_hash_token( string $token, string $secret ): string {
 }
 
 /**
- * Get client IP address
+ * Get client IP address with proxy support.
+ *
+ * @return string Client IP address.
  */
 function wp_auth_jwt_get_ip_address(): string {
-	return \WPRestAuth\AuthToolkit\Security\IpResolver::get();
+	return IpResolver::get();
 }
 
 /**
@@ -109,7 +114,7 @@ function wp_auth_jwt_get_ip_address(): string {
  * @return string User agent string.
  */
 function wp_auth_jwt_get_user_agent(): string {
-	return \WPRestAuth\AuthToolkit\Security\UserAgent::get();
+	return UserAgent::get();
 }
 
 /**
@@ -175,14 +180,19 @@ function wp_auth_jwt_delete_cookie( string $name, ?string $path = null ): bool {
 }
 
 /**
- * Add CORS headers if needed
+ * Add CORS headers if needed.
+ *
+ * Uses the toolkit's Cors utility to handle cross-origin requests
+ * based on admin-configured allowed origins.
+ *
+ * @return void
  */
 function wp_auth_jwt_maybe_add_cors_headers(): void {
 	$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
 	$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
 
 	if ( ! empty( $allowed_origins ) ) {
-		\WPRestAuth\AuthToolkit\Http\Cors::handleRequest(
+		Cors::handleRequest(
 			$allowed_origins,
 			array(
 				'methods' => array( 'GET', 'POST', 'PUT', 'DELETE', 'OPTIONS' ),
