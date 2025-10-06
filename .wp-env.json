@@ -27,7 +27,6 @@
     }
   },
   "mappings": {
-    "wp-content/plugins/jwt-auth-pro-wp-rest-api/vendor": "./vendor",
-    "wp-content/plugins/jwt-auth-pro-wp-rest-api/wp-rest-auth-toolkit": "./wp-rest-auth-toolkit"
+    "wp-content/plugins/jwt-auth-pro-wp-rest-api/vendor": "./vendor"
   }
 }
