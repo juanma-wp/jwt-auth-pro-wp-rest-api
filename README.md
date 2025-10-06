@@ -145,6 +145,17 @@ Perfect for:
 3. **Token Expires** → Use refresh endpoint to get new access token
 4. **Logout** → Revoke refresh token
 
+### 📊 Visual Workflow Diagrams
+
+For detailed visual representations of the authentication workflows, see our comprehensive [Workflow Diagrams](DOCS/diagrams.md) which include:
+
+- **Authentication Flow**: Login process and JWT token generation
+- **Token Validation Flow**: API request validation with JWT
+- **Token Renewal Flow**: Refresh token rotation and renewal process
+- **Logout Flow**: Token revocation and session cleanup
+- **Complete Session Lifecycle**: Full user session state diagram
+- **Architecture & Security Model**: Component and security diagrams
+
 ## 🛠️ Advanced Usage
 
 - [Cookie Configuration Guide](DOCS/cookie-configuration.md) - Environment detection, constants, and filters
