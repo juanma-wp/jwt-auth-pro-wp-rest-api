@@ -1,0 +1,32 @@
+{
+  "name": "myorg/wp-oauth-login",
+  "description": "WordPress OAuth Login plugin using shared JWT core library",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Your Organization",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "myorg/jwt-auth-core": "@dev"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../jwt-auth-core"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "MyOrg\\WPOAuthLogin\\": "src/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true
+    }
+  }
+}

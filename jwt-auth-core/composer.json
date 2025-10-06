@@ -1,0 +1,29 @@
+{
+  "name": "myorg/jwt-auth-core",
+  "description": "Shared JWT authentication logic for WordPress plugins",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "jwt",
+    "authentication",
+    "wordpress",
+    "shared",
+    "library"
+  ],
+  "authors": [
+    {
+      "name": "Your Organization",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "MyOrg\\JWTAuthCore\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

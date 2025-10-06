@@ -2,6 +2,12 @@
 /node_modules/
 /vendor/
 
+# Plugin vendor directories (for local Composer packages)
+/wp-jwt-login/vendor/
+/wp-jwt-login/composer.lock
+/wp-oauth-login/vendor/
+/wp-oauth-login/composer.lock
+
 # wp-env
 /.wp-env/
 
