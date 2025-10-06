@@ -1,0 +1,46 @@
+# Development and build files
+/.git
+/.github
+/node_modules
+/tests
+/vendor
+*.md
+.DS_Store
+.editorconfig
+.gitignore
+.gitattributes
+.travis.yml
+.distignore
+
+# Composer files
+composer.json
+composer.lock
+
+# NPM files
+package.json
+package-lock.json
+
+# Testing and CI files
+.phpunit.result.cache
+phpunit.xml
+phpunit.xml.dist
+.phpcs.xml
+.phpcs.xml.dist
+phpcs.xml
+phpcs.xml.dist
+phpstan.neon
+phpstan.neon.dist
+behat.yml
+
+# WordPress environment
+.wp-env.json
+.wp-env.override.json
+
+# IDE files
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+Thumbs.db
