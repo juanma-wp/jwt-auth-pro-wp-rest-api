@@ -28,6 +28,7 @@ return array(
 	 * - Path=/ makes cookie available to entire site
 	 */
 	'development' => array(
+		'enabled'  => true,
 		'name'     => 'wp_jwt_refresh_token',
 		'secure'   => null, // Dynamic - will be set based on is_ssl()
 		'samesite' => 'Lax',
@@ -46,6 +47,7 @@ return array(
 	 * - Path=/ for full site access during testing
 	 */
 	'staging' => array(
+		'enabled'  => true,
 		'name'     => 'wp_jwt_refresh_token',
 		'secure'   => true,
 		'samesite' => 'Lax',
@@ -64,6 +66,7 @@ return array(
 	 * - Path=/wp-json/ restricts cookie to REST API endpoints only
 	 */
 	'production' => array(
+		'enabled'  => true,
 		'name'     => 'wp_jwt_refresh_token',
 		'secure'   => true,
 		'samesite' => 'Strict',
@@ -80,6 +83,7 @@ return array(
 	 * or when specific settings are not defined in environment config.
 	 */
 	'base' => array(
+		'enabled'  => true,
 		'name'     => 'wp_jwt_refresh_token',
 		'secure'   => true,
 		'samesite' => 'Lax',

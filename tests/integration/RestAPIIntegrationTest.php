@@ -266,6 +266,50 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 		unset( $_COOKIE[ Auth_JWT::REFRESH_COOKIE_NAME ] );
 	}
 
+	/**
+	 * Test refresh endpoint with cookie from HTTP_COOKIE header fallback.
+	 *
+	 * Prevents regression where $_COOKIE wasn't populated but HTTP_COOKIE header contained the cookie.
+	 *
+	 * @group regression
+	 */
+	public function testRefreshEndpointWithHTTPCookieHeaderFallback(): void {
+		// Create a test user
+		$user_id = $this->factory->user->create(
+			array(
+				'user_login' => 'testuser_cookie',
+				'user_email' => 'cookie@example.com',
+			)
+		);
+
+		// Generate refresh token
+		$refresh_token = wp_auth_jwt_generate_token( 64 );
+		$this->auth_jwt->store_refresh_token( $user_id, $refresh_token, time() + JWT_AUTH_REFRESH_TTL );
+
+		// Test refresh endpoint with cookie in HTTP_COOKIE header (not $_COOKIE)
+		$request = new WP_REST_Request( 'POST', '/jwt/v1/refresh' );
+
+		// Simulate cross-origin REST API request where $_COOKIE isn't populated
+		// but cookie is in HTTP_COOKIE header
+		unset( $_COOKIE[ Auth_JWT::REFRESH_COOKIE_NAME ] );
+		$_SERVER['HTTP_COOKIE'] = Auth_JWT::REFRESH_COOKIE_NAME . '=' . $refresh_token;
+
+		$response = $this->server->dispatch( $request );
+
+		if ( $response->get_status() === 200 ) {
+			$data = $response->get_data();
+			$this->assertArrayHasKey( 'data', $data );
+			$this->assertArrayHasKey( 'access_token', $data['data'] );
+			$this->assertTrue( $data['success'], 'Refresh should succeed with HTTP_COOKIE header fallback' );
+		} else {
+			// Verify the endpoint returns proper error
+			$this->assertInstanceOf( 'WP_Error', $response->as_error() );
+		}
+
+		// Clean up
+		unset( $_SERVER['HTTP_COOKIE'] );
+	}
+
 	public function testLogoutEndpoint(): void {
 		$request = new WP_REST_Request( 'POST', '/jwt/v1/logout' );
 

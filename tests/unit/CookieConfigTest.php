@@ -222,21 +222,188 @@ class CookieConfigTest extends TestCase
 	}
 
 	/**
-	 * Test WordPress integration - option name is correct.
+	 * Test WordPress integration - filters can override config file defaults.
 	 */
 	public function testWordPressIntegration(): void
 	{
-		// Verify wrapper uses correct WordPress option name
-		add_filter('pre_option_jwt_auth_cookie_config', function () {
-			return array('name' => 'wp_integration_test');
+		// Filters have higher priority than config file defaults
+		add_filter('jwt_auth_cookie_name', function () {
+			return 'filtered_cookie_name';
 		});
 
 		JWT_Cookie_Config::clear_cache();
 		$config = JWT_Cookie_Config::get_config();
 
-		$this->assertSame('wp_integration_test', $config['name']);
+		$this->assertSame('filtered_cookie_name', $config['name']);
 
-		remove_all_filters('pre_option_jwt_auth_cookie_config');
+		remove_all_filters('jwt_auth_cookie_name');
+	}
+
+	/**
+	 * Test that config file is loaded correctly.
+	 *
+	 * @group regression
+	 */
+	public function testConfigFileLoadsEnvironmentDefaults(): void
+	{
+		$_SERVER['HTTP_HOST'] = 'localhost';
+		JWT_Cookie_Config::clear_cache();
+
+		$env_defaults = JWT_Cookie_Config::get_environment_defaults('development');
+
+		$this->assertIsArray($env_defaults);
+		$this->assertArrayHasKey('name', $env_defaults);
+		$this->assertArrayHasKey('secure', $env_defaults);
+		$this->assertArrayHasKey('samesite', $env_defaults);
+		$this->assertSame('wp_jwt_refresh_token', $env_defaults['name']);
+	}
+
+	/**
+	 * Test that cookie name in config matches Auth_JWT constant.
+	 *
+	 * Prevents regression where admin panel showed wrong cookie name.
+	 *
+	 * @group regression
+	 */
+	public function testCookieNameMatchesAuthJWTConstant(): void
+	{
+		// Load Auth_JWT class if available
+		if (! class_exists('Auth_JWT')) {
+			require_once dirname(__DIR__, 2) . '/includes/class-auth-jwt.php';
+		}
+
+		$_SERVER['HTTP_HOST'] = 'localhost';
+		JWT_Cookie_Config::clear_cache();
+
+		$config = JWT_Cookie_Config::get_config();
+
+		$this->assertSame(
+			Auth_JWT::REFRESH_COOKIE_NAME,
+			$config['name'],
+			'Cookie name in config must match Auth_JWT::REFRESH_COOKIE_NAME constant'
+		);
+	}
+
+	/**
+	 * Test secure flag is false for HTTP in development.
+	 *
+	 * Prevents regression where secure=true prevented cookies from working on HTTP.
+	 *
+	 * @group regression
+	 */
+	public function testSecureFlagIsFalseForHTTPInDevelopment(): void
+	{
+		$_SERVER['HTTP_HOST'] = 'localhost';
+		$_SERVER['HTTPS']     = 'off';
+		unset($_SERVER['HTTP_X_FORWARDED_PROTO']);
+
+		JWT_Cookie_Config::clear_cache();
+		$config = JWT_Cookie_Config::get_config();
+
+		$this->assertFalse(
+			$config['secure'],
+			'Secure flag must be false for HTTP in development environment'
+		);
+		$this->assertSame('development', $config['environment']);
+	}
+
+	/**
+	 * Test secure flag is true for HTTPS in development.
+	 *
+	 * @group regression
+	 */
+	public function testSecureFlagIsTrueForHTTPSInDevelopment(): void
+	{
+		$_SERVER['HTTP_HOST'] = 'localhost';
+		$_SERVER['HTTPS']     = 'on';
+
+		JWT_Cookie_Config::clear_cache();
+		$config = JWT_Cookie_Config::get_config();
+
+		$this->assertTrue(
+			$config['secure'],
+			'Secure flag must be true for HTTPS even in development'
+		);
+	}
+
+	/**
+	 * Test SameSite compatibility with Secure flag.
+	 *
+	 * Prevents regression: SameSite=None requires Secure=true.
+	 * For HTTP development, we must use SameSite=Lax.
+	 *
+	 * @group regression
+	 */
+	public function testSameSiteCompatibilityWithSecureFlag(): void
+	{
+		$_SERVER['HTTP_HOST'] = 'localhost';
+		$_SERVER['HTTPS']     = 'off';
+
+		JWT_Cookie_Config::clear_cache();
+		$config = JWT_Cookie_Config::get_config();
+
+		// If SameSite is None, Secure must be true (browser requirement)
+		if ('None' === $config['samesite']) {
+			$this->assertTrue(
+				$config['secure'],
+				'SameSite=None requires Secure=true. Use SameSite=Lax for HTTP development.'
+			);
+		}
+
+		// For HTTP in development, we should use Lax
+		if (! $config['secure'] && 'development' === $config['environment']) {
+			$this->assertNotSame(
+				'None',
+				$config['samesite'],
+				'HTTP development should use SameSite=Lax, not None'
+			);
+		}
+	}
+
+	/**
+	 * Test all environment configs are valid.
+	 *
+	 * @group regression
+	 * @dataProvider environmentProvider
+	 */
+	public function testAllEnvironmentConfigsAreValid(string $environment): void
+	{
+		$config = JWT_Cookie_Config::get_environment_defaults($environment);
+
+		$this->assertIsArray($config);
+		$this->assertArrayHasKey('name', $config);
+		$this->assertArrayHasKey('samesite', $config);
+		$this->assertArrayHasKey('path', $config);
+		$this->assertArrayHasKey('httponly', $config);
+		$this->assertArrayHasKey('lifetime', $config);
+
+		// Validate SameSite values
+		$this->assertContains(
+			$config['samesite'],
+			array('None', 'Lax', 'Strict'),
+			"Invalid SameSite value for {$environment}"
+		);
+
+		// HttpOnly should always be true for security
+		$this->assertTrue(
+			$config['httponly'],
+			"HttpOnly must be true for {$environment}"
+		);
+	}
+
+	/**
+	 * Data provider for environment tests.
+	 *
+	 * @return array<int, array<int, string>>
+	 */
+	public function environmentProvider(): array
+	{
+		return array(
+			array('development'),
+			array('staging'),
+			array('production'),
+			array('base'),
+		);
 	}
 
 	/**
