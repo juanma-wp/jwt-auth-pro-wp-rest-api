@@ -15,29 +15,18 @@ if ! command -v zip > /dev/null 2>&1; then
 fi
 
 echo "==> Installing WP-CLI dist-archive command..."
-wp package install wp-cli/dist-archive-command:@stable 2>/dev/null || true
-
-echo "==> Verifying dist-archive command..."
-if ! wp dist-archive --help > /dev/null 2>&1; then
-    echo "Error: dist-archive command is not available."
-    echo "Attempting to reinstall package..."
-    wp package install wp-cli/dist-archive-command:@stable --force
-
-    if ! wp dist-archive --help > /dev/null 2>&1; then
-        echo "Error: Failed to install dist-archive command."
-        exit 1
-    fi
-fi
+cd /tmp && wp package install wp-cli/dist-archive-command:@stable 2>/dev/null || true
 
 echo "==> Creating distribution archive..."
+cd /var/www/html/wp-content/plugins/jwt-auth-pro-wp-rest-api
 VERSION="${1:-1.0.0}"
-OUTPUT_FILE="build/jwt-auth-pro-${VERSION}.zip"
+OUTPUT_FILE="build/jwt-auth-pro-wp-rest-api-${VERSION}.zip"
 
 # Create build directory and remove old archive
 mkdir -p build
 rm -f "${OUTPUT_FILE}"
 
-wp dist-archive . "${OUTPUT_FILE}"
+wp dist-archive . "${OUTPUT_FILE}" --skip-plugins
 
 echo "==> Build complete: ${OUTPUT_FILE}"
 ls -lh "${OUTPUT_FILE}"

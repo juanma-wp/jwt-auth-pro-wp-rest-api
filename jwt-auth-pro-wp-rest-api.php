@@ -93,8 +93,9 @@ class JWT_Auth_Pro {
 	 * Initialize the plugin.
 	 */
 	public function init(): void {
-		$this->setup_constants();
 		$this->load_dependencies();
+		$this->setup_constants();
+		$this->init_components();
 		$this->init_hooks();
 	}
 
@@ -107,14 +108,6 @@ class JWT_Auth_Pro {
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-admin-settings.php';
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-auth-jwt.php';
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-openapi-spec.php';
-
-		// Initialize admin settings.
-		if ( is_admin() ) {
-			new JWT_Auth_Pro_Admin_Settings();
-		}
-
-		$this->auth_jwt     = new Auth_JWT();
-		$this->openapi_spec = new JWT_Auth_Pro_OpenAPI_Spec();
 	}
 
 	/**

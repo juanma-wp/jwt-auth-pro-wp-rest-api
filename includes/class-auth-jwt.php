@@ -52,9 +52,17 @@ class Auth_JWT {
 	public function __construct() {
 		global $wpdb;
 
+		// Get secret with fallback - plugin can load but won't work without it
+		$secret = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : '';
+
+		if ( empty( $secret ) ) {
+			// Plugin loads but authentication won't work - admin notice already shown by main class
+			return;
+		}
+
 		$this->refresh_token_manager = new \WPRestAuth\AuthToolkit\Token\RefreshTokenManager(
 			$wpdb->prefix . 'jwt_refresh_tokens',
-			JWT_AUTH_PRO_SECRET,
+			$secret,
 			'jwt',
 			'wp_rest_auth_jwt',
 			300 // 5 minutes cache TTL
