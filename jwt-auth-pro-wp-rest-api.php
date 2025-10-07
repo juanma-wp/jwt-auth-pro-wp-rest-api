@@ -139,6 +139,19 @@ class JWT_Auth_Pro {
 	}
 
 	/**
+	 * Initialize plugin components.
+	 */
+	private function init_components(): void {
+		// Initialize admin settings.
+		if ( is_admin() ) {
+			new JWT_Auth_Pro_Admin_Settings();
+		}
+
+		$this->auth_jwt     = new Auth_JWT();
+		$this->openapi_spec = new JWT_Auth_Pro_OpenAPI_Spec();
+	}
+
+	/**
 	 * Initialize WordPress hooks.
 	 */
 	private function init_hooks(): void {
