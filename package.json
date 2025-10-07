@@ -21,8 +21,9 @@
     "test:integration": "npm run test:setup && wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=integration --testdox",
     "test:behat": "npm run test:setup && composer run behat",
     "test:behat:verbose": "npm run test:setup && vendor/bin/behat --verbose",
-    "plugin:check": "wp-env run tests-cli wp plugin check jwt-auth-pro-wp-rest-api --exclude-directories=tests,bin --exclude-files=.gitignore,.phpunit.result.cache",
-    "plugin:build": "composer install --no-dev --prefer-dist --no-interaction && wp dist-archive . jwt-auth-pro-$npm_package_version.zip"
+    "plugin:check": "wp-env run tests-cli wp plugin check jwt-auth-pro-wp-rest-api --exclude-directories=tests,bin --exclude-files=.gitignore,.phpunit.result.cache,.distignore",
+    "preplugin:build": "docker ps --format '{{.Names}}' | grep tests-cli | xargs -I {} docker exec -u root {} apk add --no-cache zip 2>/dev/null || true",
+    "plugin:build": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api sh bin/build-plugin.sh $npm_package_version"
   },
   "devDependencies": {
     "@wordpress/env": "^10.31.0"
