@@ -93,8 +93,8 @@ class JWT_Auth_Pro {
 	 * Initialize the plugin.
 	 */
 	public function init(): void {
-		$this->load_dependencies();
 		$this->setup_constants();
+		$this->load_dependencies();
 		$this->init_hooks();
 	}
 
