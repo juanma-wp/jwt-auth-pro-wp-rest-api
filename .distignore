@@ -3,7 +3,9 @@
 /.github
 /node_modules
 /tests
-/vendor
+/bin
+/build
+/DOCS
 *.md
 .DS_Store
 .editorconfig
@@ -24,13 +26,19 @@ package-lock.json
 .phpunit.result.cache
 phpunit.xml
 phpunit.xml.dist
+phpunit-unit.xml
+phpunit-integration.xml
 .phpcs.xml
 .phpcs.xml.dist
 phpcs.xml
 phpcs.xml.dist
 phpstan.neon
 phpstan.neon.dist
+phpstan-minimal.neon
 behat.yml
+excalidraw.log
+/vendor/wp-rest-auth/auth-toolkit/tests
+/vendor/wp-rest-auth/auth-toolkit/.github
 
 # WordPress environment
 .wp-env.json
