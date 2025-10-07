@@ -27,6 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WPRestAuth\AuthToolkit\Http\Cookie;
+
 /**
  * JWT Authentication Handler Class.
  *
@@ -124,14 +126,17 @@ class Auth_JWT {
 			)
 		);
 
-		// Add CORS support.
-		add_action( 'rest_api_init', array( $this, 'add_cors_support' ) );
+		// Add CORS support - call directly since we're already in rest_api_init.
+		$this->add_cors_support();
 	}
 
 	/**
 	 * Add CORS support for REST API requests.
 	 */
 	public function add_cors_support(): void {
+		// Call immediately to set headers early
+		wp_auth_jwt_maybe_add_cors_headers();
+
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
 		add_filter(
 			'rest_pre_serve_request',
@@ -238,7 +243,8 @@ class Auth_JWT {
 	public function refresh_access_token( WP_REST_Request $request ) {
 		wp_auth_jwt_maybe_add_cors_headers();
 
-		$refresh_token = isset( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ) : '';
+		// Use Cookie::get() which handles both $_COOKIE and HTTP_COOKIE header fallback
+		$refresh_token = Cookie::get( self::REFRESH_COOKIE_NAME, '' );
 
 		if ( empty( $refresh_token ) ) {
 			return wp_auth_jwt_error_response(
@@ -306,7 +312,8 @@ class Auth_JWT {
 	public function logout( WP_REST_Request $request ): WP_REST_Response {
 		wp_auth_jwt_maybe_add_cors_headers();
 
-		$refresh_token = isset( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::REFRESH_COOKIE_NAME ] ) ) : '';
+		// Use Cookie::get() which handles both $_COOKIE and HTTP_COOKIE header fallback
+		$refresh_token = Cookie::get( self::REFRESH_COOKIE_NAME, '' );
 
 		if ( ! empty( $refresh_token ) ) {
 			$this->revoke_refresh_token( $refresh_token );

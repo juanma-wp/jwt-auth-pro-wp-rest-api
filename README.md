@@ -1,4 +1,4 @@
-# JWT Auth Pro - Secure Refresh Tokens
+# JWT Auth Pro WP REST API - Secure Refresh Tokens
 
 [![Plugin Check](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/plugin-check.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/plugin-check.yml)
 [![Unit Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/unit-tests.yml)
