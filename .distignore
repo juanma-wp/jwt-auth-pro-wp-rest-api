@@ -15,7 +15,6 @@
 .distignore
 
 # Composer files
-composer.json
 composer.lock
 
 # NPM files
