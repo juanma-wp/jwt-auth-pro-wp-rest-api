@@ -232,12 +232,24 @@ class JWT_Auth_Pro {
 	 * Deactivate the plugin.
 	 */
 	public function deactivate(): void {
-		// Clean up refresh tokens on deactivation.
-		// Direct database query required for cleanup - no WordPress equivalent exists.
 		global $wpdb;
+
+		// Delete all refresh tokens from database table.
 		$table_name = $wpdb->prefix . 'jwt_refresh_tokens';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}jwt_refresh_tokens WHERE expires_at < %d", time() ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "TRUNCATE TABLE {$table_name}" );
+
+		// Drop the refresh tokens table.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DROP TABLE IF EXISTS {$table_name}" );
+
+		// Delete WordPress options.
+		delete_option( JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS );
+		delete_option( JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS );
+		delete_option( 'jwt_auth_cookie_config' );
+
+		// Clear any transients that might have been set.
+		delete_transient( 'jwt_auth_pro_version' );
 	}
 
 	/**
