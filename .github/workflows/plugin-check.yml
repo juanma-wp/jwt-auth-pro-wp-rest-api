@@ -22,23 +22,16 @@ jobs:
     - name: Install dependencies
       run: composer install --no-dev --prefer-dist --no-progress --no-interaction
 
-    - name: Create wp-env override config
+    - name: Create distribution build
       run: |
-        cat > .wp-env.override.json <<EOF
-        {
-          "config": {
-            "JWT_AUTH_PRO_SECRET": "test-secret-key-for-github-actions-only",
-            "JWT_AUTH_ACCESS_TTL": 3600,
-            "JWT_AUTH_REFRESH_TTL": 86400
-          }
-        }
-        EOF
+        mkdir -p plugin-build
+        rsync -a --exclude-from=.distignore ./ plugin-build/
 
     - name: Run plugin check
       uses: wordpress/plugin-check-action@v1
       with:
         repo-token: ''
-        build-dir: './'
+        build-dir: './plugin-build'
         checks: ''
         exclude-checks: ''
         categories: 'plugin_repo'
