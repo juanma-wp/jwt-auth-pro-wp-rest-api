@@ -656,6 +656,31 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	}
 
 	/**
+	 * Sanitize cookie settings input.
+	 *
+	 * Cookie settings are read-only and managed automatically by JWT_Cookie_Config.
+	 * This method exists to satisfy WordPress settings API requirements.
+	 *
+	 * @param array|null $input Raw input values.
+	 * @return array Sanitized values.
+	 */
+	public function sanitize_cookie_settings( $input ): array {
+		// Get existing settings to preserve them.
+		$existing = get_option(
+			'jwt_auth_cookie_config',
+			array(
+				'samesite' => 'auto',
+				'secure'   => 'auto',
+				'path'     => 'auto',
+				'domain'   => 'auto',
+			)
+		);
+
+		// Cookie settings are read-only, so just return the existing values.
+		return $existing;
+	}
+
+	/**
 	 * Helper methods to get settings.
 	 */
 	/**
