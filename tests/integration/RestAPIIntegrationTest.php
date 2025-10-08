@@ -270,6 +270,10 @@ class RestAPIIntegrationTest extends WP_UnitTestCase {
 	 * Test refresh endpoint with cookie from HTTP_COOKIE header fallback.
 	 *
 	 * Prevents regression where $_COOKIE wasn't populated but HTTP_COOKIE header contained the cookie.
+	 * This is an end-to-end integration test with WordPress REST API.
+	 *
+	 * Note: The Cookie::get() method is unit tested in wp-rest-auth-toolkit/tests/Http/CookieTest.php.
+	 * This test verifies the complete flow including WordPress, REST API, and refresh token handling.
 	 *
 	 * @group regression
 	 */

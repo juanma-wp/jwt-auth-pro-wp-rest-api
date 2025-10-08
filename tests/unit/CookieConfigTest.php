@@ -130,46 +130,8 @@ class CookieConfigTest extends TestCase
 		$this->assertTrue(true, 'Constants JWT_AUTH_COOKIE_* are documented and used by wrapper');
 	}
 
-	/**
-	 * Test environment detection works through wrapper.
-	 */
-	public function testEnvironmentDetectionWorks(): void
-	{
-		$_SERVER['HTTP_HOST'] = 'localhost';
-		JWT_Cookie_Config::clear_cache();
-
-		$this->assertTrue(JWT_Cookie_Config::is_development());
-		$this->assertFalse(JWT_Cookie_Config::is_production());
-		$this->assertSame('development', JWT_Cookie_Config::get_environment());
-	}
-
-	/**
-	 * Test configuration caching works through wrapper.
-	 */
-	public function testConfigurationCaching(): void
-	{
-		$_SERVER['HTTP_HOST'] = 'localhost';
-
-		// First call populates cache
-		$config1 = JWT_Cookie_Config::get_config();
-
-		// Change environment
-		$_SERVER['HTTP_HOST'] = 'example.com';
-
-		// Second call should return cached value
-		$config2 = JWT_Cookie_Config::get_config();
-
-		$this->assertSame($config1['environment'], $config2['environment']);
-
-		// Clear cache and get fresh config
-		JWT_Cookie_Config::clear_cache();
-		$config3 = JWT_Cookie_Config::get_config();
-
-		// Should now reflect new environment (if WP_DEBUG is not forcing development)
-		if (!defined('WP_DEBUG') || !WP_DEBUG) {
-			$this->assertNotSame($config1['environment'], $config3['environment']);
-		}
-	}
+	// Note: Environment detection and caching are tested in wp-rest-auth-toolkit/tests/Http/CookieConfigTest.php
+	// The wrapper delegates to CookieConfig::getEnvironment() and CookieConfig::clearCache()
 
 	/**
 	 * Test get_defaults returns plugin-specific defaults.
@@ -327,10 +289,13 @@ class CookieConfigTest extends TestCase
 	}
 
 	/**
-	 * Test SameSite compatibility with Secure flag.
+	 * Test SameSite compatibility with Secure flag in JWT config file.
 	 *
 	 * Prevents regression: SameSite=None requires Secure=true.
-	 * For HTTP development, we must use SameSite=Lax.
+	 * For HTTP development, JWT config file uses SameSite=Lax.
+	 *
+	 * Note: General SameSite=None validation is tested in wp-rest-auth-toolkit/tests/Http/CookieConfigTest.php
+	 * This test specifically validates the JWT plugin's config file behavior.
 	 *
 	 * @group regression
 	 */
