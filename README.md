@@ -59,7 +59,7 @@ Unlike basic JWT plugins that use **single long-lived tokens**, JWT Auth Pro imp
 
 ### 2. Configure
 1. Generate a JWT Secret Key (or add to wp-config.php)
-2. Set token expiration times
+2. Set token expiration times if needed (or leave the defaults)
 3. Configure CORS origins for your frontend
 
 ### 3. Start Using
@@ -175,6 +175,25 @@ npm run test:behat
 npm run test
 ```
 
+## 🔧 Cross-Origin Development
+
+Developing a frontend on a different port (e.g., React on `:5173`, WordPress on `:8884`)?
+
+**The plugin automatically configures cookies for cross-origin development!**
+
+Just add your frontend origin to **Settings → JWT Auth Pro → CORS Allowed Origins**:
+```
+http://localhost:5173
+http://localhost:3000
+```
+
+The plugin will automatically:
+- Set `SameSite=None` to allow cross-origin cookies
+- Configure cookies for HTTP localhost development
+- Handle CORS headers properly
+
+**📖 For detailed setup instructions**, see [DEVELOPMENT.md](./DOCS/DEVELOPMENT.md)
+
 ## ❓ Need More Features?
 
 This plugin provides simple JWT authentication. If you need:
@@ -189,7 +208,7 @@ Check out our companion plugin: **WP REST Auth OAuth2**
 
 - WordPress 5.6+
 - PHP 7.4+
-- HTTPS (recommended for HTTPOnly cookies)
+- HTTPS (recommended for production; localhost HTTP supported for development)
 
 ## 📄 License
 

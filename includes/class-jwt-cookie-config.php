@@ -47,60 +47,67 @@ class JWT_Cookie_Config {
 	private const CONSTANT_PREFIX = 'JWT_AUTH_COOKIE';
 
 	/**
-	 * Cached environment defaults from config file.
+	 * Get environment-specific defaults from the toolkit.
 	 *
-	 * @var array<string, array<string, mixed>>|null
-	 */
-	private static $environment_defaults = null;
-
-	/**
-	 * Load environment defaults from config file.
-	 *
-	 * @return array<string, array<string, mixed>>
-	 */
-	private static function load_environment_defaults(): array {
-		if ( null !== self::$environment_defaults ) {
-			return self::$environment_defaults;
-		}
-
-		$config_file = dirname( __DIR__ ) . '/config/cookie-defaults.php';
-
-		if ( ! file_exists( $config_file ) ) {
-			self::$environment_defaults = array();
-			return self::$environment_defaults;
-		}
-
-		$defaults = require $config_file;
-
-		if ( ! is_array( $defaults ) ) {
-			self::$environment_defaults = array();
-			return self::$environment_defaults;
-		}
-
-		self::$environment_defaults = $defaults;
-		return self::$environment_defaults;
-	}
-
-	/**
-	 * Get environment-specific defaults.
+	 * This method is kept for backwards compatibility with tests and existing code.
+	 * It delegates to the toolkit's internal environment detection.
 	 *
 	 * @param string $environment Environment name (development, staging, production).
 	 * @return array<string, mixed>
 	 */
 	public static function get_environment_defaults( string $environment = '' ): array {
+		// Get base defaults from toolkit.
+		$defaults = CookieConfig::getDefaults();
+
+		// If no environment specified, use current environment.
 		if ( empty( $environment ) ) {
 			$environment = self::get_environment();
 		}
 
-		$all_defaults = self::load_environment_defaults();
+		// Get environment-specific overrides from toolkit.
+		// We simulate this by getting a full config with environment set.
+		$original_env = self::get_environment();
 
-		// Get environment-specific defaults or fall back to base.
-		$defaults = $all_defaults[ $environment ] ?? $all_defaults['base'] ?? array();
-
-		// Handle dynamic secure flag in development.
-		if ( 'development' === $environment && null === ( $defaults['secure'] ?? null ) ) {
-			$defaults['secure'] = is_ssl();
+		// Temporarily override environment detection if needed.
+		// Since we can't easily override the environment in the toolkit,
+		// we'll provide sensible defaults based on the environment name.
+		switch ( $environment ) {
+			case 'development':
+				// Check if actually using HTTPS.
+				$is_https = ( ! empty( $_SERVER['HTTPS'] ) && 'off' !== strtolower( $_SERVER['HTTPS'] ) ) ||
+							( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' === $_SERVER['HTTP_X_FORWARDED_PROTO'] );
+				$defaults['secure']   = $is_https;
+				$defaults['samesite'] = 'None';   // Allow cross-origin for SPAs.
+				break;
+			case 'staging':
+				$defaults['secure']   = true;
+				$defaults['samesite'] = 'Lax';
+				break;
+			case 'production':
+				$defaults['secure']   = true;
+				$defaults['samesite'] = 'Strict';
+				$defaults['path']     = '/wp-json/';
+				break;
+			case 'base':
+			default:
+				// For base environment, replace 'auto' with actual values.
+				if ( 'auto' === $defaults['samesite'] ) {
+					$defaults['samesite'] = 'Lax'; // Safe default.
+				}
+				if ( 'auto' === $defaults['secure'] ) {
+					$defaults['secure'] = true; // Safe default.
+				}
+				if ( 'auto' === $defaults['path'] ) {
+					$defaults['path'] = '/';
+				}
+				if ( 'auto' === $defaults['domain'] ) {
+					$defaults['domain'] = '';
+				}
+				break;
 		}
+
+		// Override cookie name for JWT Auth.
+		$defaults['name'] = Auth_JWT::REFRESH_COOKIE_NAME;
 
 		return $defaults;
 	}
@@ -108,12 +115,15 @@ class JWT_Cookie_Config {
 	/**
 	 * Get cookie configuration for current environment.
 	 *
-	 * Priority order:
+	 * Delegates to the shared CookieConfig implementation from wp-rest-auth-toolkit.
+	 * The toolkit handles environment detection and provides appropriate defaults.
+	 *
+	 * Priority order (handled by toolkit):
 	 * 1. Constants (JWT_AUTH_COOKIE_*)
 	 * 2. Filters (jwt_auth_cookie_config / jwt_auth_cookie_{key})
 	 * 3. Saved options (admin panel)
-	 * 4. Environment-based defaults from config file (if auto-detection enabled)
-	 * 5. Toolkit base defaults
+	 * 4. Environment-based defaults (auto-detected)
+	 * 5. Base defaults
 	 *
 	 * @return array{
 	 *     enabled: bool,
@@ -129,40 +139,17 @@ class JWT_Cookie_Config {
 	 * }
 	 */
 	public static function get_config(): array {
-		// Start with our environment-specific defaults from config file.
-		$environment        = self::get_environment();
-		$environment_config = self::get_environment_defaults( $environment );
+		// Get config from toolkit with our custom prefixes.
+		$config = CookieConfig::getConfig(
+			self::OPTION_NAME,
+			self::FILTER_PREFIX,
+			self::CONSTANT_PREFIX
+		);
 
-		// Get saved options from database.
-		$saved_config = get_option( self::OPTION_NAME, array() );
-		$auto_detect  = ! isset( $saved_config['auto_detect'] ) || $saved_config['auto_detect'];
-
-		// Start with our base config.
-		$config = $environment_config;
-
-		// Add metadata.
-		$config['environment'] = $environment;
-		$config['auto_detect'] = $auto_detect;
-
-		// Apply saved options from admin panel (if not using auto-detect).
-		if ( ! $auto_detect && is_array( $saved_config ) ) {
-			$config = array_merge( $config, $saved_config );
-		}
-
-		// Apply constants (highest priority before filters).
-		foreach ( $config as $key => $value ) {
-			$constant = strtoupper( self::CONSTANT_PREFIX . '_' . $key );
-			if ( defined( $constant ) ) {
-				$config[ $key ] = constant( $constant );
-			}
-		}
-
-		// Apply global filter.
-		$config = apply_filters( self::FILTER_PREFIX . '_config', $config );
-
-		// Apply individual field filters.
-		foreach ( $config as $key => $value ) {
-			$config[ $key ] = apply_filters( self::FILTER_PREFIX . '_' . $key, $value, $config );
+		// Set JWT-specific cookie name as default if not customized by filters/constants.
+		// Check if name is still the toolkit default.
+		if ( 'auth_session' === $config['name'] ) {
+			$config['name'] = Auth_JWT::REFRESH_COOKIE_NAME;
 		}
 
 		return $config;
@@ -195,7 +182,7 @@ class JWT_Cookie_Config {
 	 */
 	public static function get_defaults(): array {
 		$defaults         = CookieConfig::getDefaults();
-		$defaults['name'] = 'jwtauth_session'; // Override default name for JWT Auth.
+		$defaults['name'] = Auth_JWT::REFRESH_COOKIE_NAME; // Override default name for JWT Auth.
 		return $defaults;
 	}
 
