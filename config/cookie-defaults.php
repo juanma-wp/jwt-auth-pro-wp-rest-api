@@ -30,7 +30,7 @@ return array(
 	'development' => array(
 		'enabled'  => true,
 		'name'     => 'wp_jwt_refresh_token',
-		'secure'   => null, // Dynamic - will be set based on is_ssl()
+		'secure'   => null, // Dynamic - will be set based on is_ssl().
 		'samesite' => 'Lax',
 		'path'     => '/',
 		'domain'   => '',
@@ -46,7 +46,7 @@ return array(
 	 * - SameSite=Lax allows some cross-site requests (e.g., external links)
 	 * - Path=/ for full site access during testing
 	 */
-	'staging' => array(
+	'staging'     => array(
 		'enabled'  => true,
 		'name'     => 'wp_jwt_refresh_token',
 		'secure'   => true,
@@ -65,7 +65,7 @@ return array(
 	 * - SameSite=Strict prevents all cross-site requests
 	 * - Path=/wp-json/ restricts cookie to REST API endpoints only
 	 */
-	'production' => array(
+	'production'  => array(
 		'enabled'  => true,
 		'name'     => 'wp_jwt_refresh_token',
 		'secure'   => true,
@@ -82,7 +82,7 @@ return array(
 	 * Fallback values used when environment cannot be detected
 	 * or when specific settings are not defined in environment config.
 	 */
-	'base' => array(
+	'base'        => array(
 		'enabled'  => true,
 		'name'     => 'wp_jwt_refresh_token',
 		'secure'   => true,

@@ -94,10 +94,10 @@ class JWT_Cookie_Config {
 
 		$all_defaults = self::load_environment_defaults();
 
-		// Get environment-specific defaults or fall back to base
+		// Get environment-specific defaults or fall back to base.
 		$defaults = $all_defaults[ $environment ] ?? $all_defaults['base'] ?? array();
 
-		// Handle dynamic secure flag in development
+		// Handle dynamic secure flag in development.
 		if ( 'development' === $environment && null === ( $defaults['secure'] ?? null ) ) {
 			$defaults['secure'] = is_ssl();
 		}
@@ -129,27 +129,27 @@ class JWT_Cookie_Config {
 	 * }
 	 */
 	public static function get_config(): array {
-		// Start with our environment-specific defaults from config file
+		// Start with our environment-specific defaults from config file.
 		$environment        = self::get_environment();
 		$environment_config = self::get_environment_defaults( $environment );
 
-		// Get saved options from database
+		// Get saved options from database.
 		$saved_config = get_option( self::OPTION_NAME, array() );
 		$auto_detect  = ! isset( $saved_config['auto_detect'] ) || $saved_config['auto_detect'];
 
-		// Start with our base config
+		// Start with our base config.
 		$config = $environment_config;
 
-		// Add metadata
+		// Add metadata.
 		$config['environment'] = $environment;
 		$config['auto_detect'] = $auto_detect;
 
-		// Apply saved options from admin panel (if not using auto-detect)
+		// Apply saved options from admin panel (if not using auto-detect).
 		if ( ! $auto_detect && is_array( $saved_config ) ) {
 			$config = array_merge( $config, $saved_config );
 		}
 
-		// Apply constants (highest priority before filters)
+		// Apply constants (highest priority before filters).
 		foreach ( $config as $key => $value ) {
 			$constant = strtoupper( self::CONSTANT_PREFIX . '_' . $key );
 			if ( defined( $constant ) ) {
@@ -157,10 +157,10 @@ class JWT_Cookie_Config {
 			}
 		}
 
-		// Apply global filter
+		// Apply global filter.
 		$config = apply_filters( self::FILTER_PREFIX . '_config', $config );
 
-		// Apply individual field filters
+		// Apply individual field filters.
 		foreach ( $config as $key => $value ) {
 			$config[ $key ] = apply_filters( self::FILTER_PREFIX . '_' . $key, $value, $config );
 		}

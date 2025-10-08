@@ -54,11 +54,11 @@ class Auth_JWT {
 	public function __construct() {
 		global $wpdb;
 
-		// Get secret with fallback - plugin can load but won't work without it
+		// Get secret with fallback - plugin can load but won't work without it.
 		$secret = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : '';
 
 		if ( empty( $secret ) ) {
-			// Plugin loads but authentication won't work - admin notice already shown by main class
+			// Plugin loads but authentication won't work - admin notice already shown by main class.
 			return;
 		}
 
@@ -134,7 +134,7 @@ class Auth_JWT {
 	 * Add CORS support for REST API requests.
 	 */
 	public function add_cors_support(): void {
-		// Call immediately to set headers early
+		// Call immediately to set headers early.
 		wp_auth_jwt_maybe_add_cors_headers();
 
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
@@ -243,7 +243,7 @@ class Auth_JWT {
 	public function refresh_access_token( WP_REST_Request $request ) {
 		wp_auth_jwt_maybe_add_cors_headers();
 
-		// Use Cookie::get() which handles both $_COOKIE and HTTP_COOKIE header fallback
+		// Use Cookie::get() which handles both $_COOKIE and HTTP_COOKIE header fallback.
 		$refresh_token = Cookie::get( self::REFRESH_COOKIE_NAME, '' );
 
 		if ( empty( $refresh_token ) ) {
@@ -312,7 +312,7 @@ class Auth_JWT {
 	public function logout( WP_REST_Request $request ): WP_REST_Response {
 		wp_auth_jwt_maybe_add_cors_headers();
 
-		// Use Cookie::get() which handles both $_COOKIE and HTTP_COOKIE header fallback
+		// Use Cookie::get() which handles both $_COOKIE and HTTP_COOKIE header fallback.
 		$refresh_token = Cookie::get( self::REFRESH_COOKIE_NAME, '' );
 
 		if ( ! empty( $refresh_token ) ) {

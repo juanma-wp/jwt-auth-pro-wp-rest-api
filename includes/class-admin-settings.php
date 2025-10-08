@@ -734,13 +734,13 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		$environment    = JWT_Cookie_Config::get_environment();
 		$current_config = JWT_Cookie_Config::get_config();
 
-		// Override with actual runtime values used by Auth_JWT class
+		// Override with actual runtime values used by Auth_JWT class.
 		if ( class_exists( 'Auth_JWT' ) ) {
 			$current_config['name'] = Auth_JWT::REFRESH_COOKIE_NAME;
 		}
 
-		// In development, show the actual secure flag based on current request
-		// (config might show cached value from different context)
+		// In development, show the actual secure flag based on current request.
+		// (config might show cached value from different context).
 		if ( 'development' === $environment ) {
 			$current_config['secure'] = is_ssl();
 		}
