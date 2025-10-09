@@ -13,6 +13,7 @@
     "env:logs": "wp-env logs",
     "env:reset": "wp-env destroy && wp-env start",
     "env:update": "wp-env start --update",
+    "env:bash": "wp-env run cli bash",
     "composer:install": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer install --no-interaction --prefer-dist'",
     "composer:update": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer update --no-interaction --prefer-dist'",
     "test:setup": "wp-env run tests-cli bash -c 'wp plugin activate jwt-auth-pro-wp-rest-api 2>/dev/null || true'",

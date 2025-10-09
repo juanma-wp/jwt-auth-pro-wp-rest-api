@@ -1,4 +1,5 @@
 {
+  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
   "core": "WordPress/WordPress#6.8",
   "phpVersion": "8.1",
   "plugins": [".", "https://downloads.wordpress.org/plugin/plugin-check.zip"],
@@ -28,6 +29,7 @@
   },
   "mappings": {
     "wp-content/plugins/jwt-auth-pro-wp-rest-api/vendor": "./vendor",
-    "wp-content/plugins/jwt-auth-pro-wp-rest-api/build": "./build"
+    "wp-content/plugins/jwt-auth-pro-wp-rest-api/build": "./build",
+    "wp-content/mu-plugins": "./mu-plugins"
   }
 }
