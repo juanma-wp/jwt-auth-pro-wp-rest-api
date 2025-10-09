@@ -159,38 +159,21 @@ class JWT_Auth_Pro {
 		add_filter( 'rest_authentication_errors', array( $this, 'maybe_auth_bearer' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
-		// Add CORS headers early for all REST API requests
-		// Use priority 1 to run as early as possible
-		add_action( 'init', array( $this, 'maybe_add_cors_for_rest' ), 1 );
+		// Initialize CORS support
+		$this->init_cors();
 	}
 
 	/**
-	 * Add CORS headers for REST API requests early in the request lifecycle.
+	 * Initialize CORS support using SimpleCors from auth-toolkit.
 	 */
-	public function maybe_add_cors_for_rest(): void {
-		// Check if this is a REST API request
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+	private function init_cors(): void {
+		// Get CORS settings from admin panel
+		$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
+		$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
 
-		if ( strpos( $request_uri, '/wp-json/' ) !== false || strpos( $request_uri, rest_get_url_prefix() ) !== false ) {
-			require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/helpers.php';
-			require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-admin-settings.php';
-
-			// Get allowed origins and add CORS headers
-			$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
-			$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
-
-			if ( ! empty( $allowed_origins ) ) {
-				// For OPTIONS requests, handle immediately
-				if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS' ) {
-					wp_auth_jwt_maybe_add_cors_headers();
-					// Send headers and exit to prevent WordPress from overriding
-					status_header( 200 );
-					exit;
-				} else {
-					// For other requests, just add headers
-					wp_auth_jwt_maybe_add_cors_headers();
-				}
-			}
+		// Only enable CORS if origins are configured
+		if ( ! empty( $allowed_origins ) ) {
+			\WPRestAuth\AuthToolkit\Http\SimpleCors::enable( $allowed_origins );
 		}
 	}
 
