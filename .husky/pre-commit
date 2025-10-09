@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# CodeRabbit pre-commit hook - reviews staged changes before commit
+echo "🐇 Running CodeRabbit review on staged changes..."
+
+# Run CodeRabbit review on uncommitted (staged) changes
+coderabbit review --plain --type uncommitted
+
+# Capture the exit code
+REVIEW_EXIT_CODE=$?
+
+# If review fails, show a message and exit with failure
+if [ $REVIEW_EXIT_CODE -ne 0 ]; then
+    echo "❌ CodeRabbit found issues that should be fixed before committing."
+    echo "   Please address the issues above and try again."
+    exit 1
+fi
+
+echo "✅ CodeRabbit review passed! Proceeding with commit..."
+exit 0

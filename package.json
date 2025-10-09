@@ -24,10 +24,18 @@
     "test:behat:verbose": "npm run test:setup && vendor/bin/behat --verbose",
     "plugin:check": "wp-env run tests-cli wp plugin check jwt-auth-pro-wp-rest-api --exclude-directories=tests,bin --exclude-files=.gitignore,.phpunit.result.cache,.distignore",
     "preplugin:build": "docker ps --format '{{.Names}}' | grep tests-cli | xargs -I {} docker exec -u root {} apk add --no-cache zip 2>/dev/null || true",
-    "plugin:build": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api sh bin/build-plugin.sh $npm_package_version"
+    "plugin:build": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api sh bin/build-plugin.sh $npm_package_version",
+    "prepare": "husky",
+    "review": "coderabbit review --plain --type uncommitted",
+    "review:staged": "coderabbit review --plain --type uncommitted",
+    "review:last": "coderabbit review --plain --type committed --base-commit HEAD~1",
+    "review:commit": "coderabbit review --plain --type committed --base-commit",
+    "review:ai": "coderabbit review --prompt-only --type uncommitted",
+    "review:help": "echo 'Available review commands:\n  npm run review        - Review staged changes\n  npm run review:staged - Same as review\n  npm run review:last   - Review the last commit\n  npm run review:commit <SHA> - Review a specific commit\n  npm run review:ai     - Get AI-friendly output for staged changes'"
   },
   "devDependencies": {
-    "@wordpress/env": "^10.31.0"
+    "@wordpress/env": "^10.31.0",
+    "husky": "^9.1.7"
   },
   "engines": {
     "node": ">=16.0.0",
