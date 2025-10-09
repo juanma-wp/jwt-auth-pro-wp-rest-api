@@ -347,8 +347,8 @@ class RestAPIIntegrationTest extends WP_UnitTestCase
 		$request  = new WP_REST_Request('OPTIONS', '/jwt/v1/token');
 		$response = $this->server->dispatch($request);
 
-		// Test that CORS is handled (method exists)
-		$this->assertTrue(method_exists($this->auth_jwt, 'add_cors_support'));
+		// Test that CORS is handled via Cors class from toolkit
+		$this->assertTrue(class_exists('\WPRestAuth\AuthToolkit\Http\Cors'));
 
 		// Clean up
 		unset($_SERVER['HTTP_ORIGIN']);

@@ -64,24 +64,38 @@ class JWT_Cookie_Config {
 			$environment = self::get_environment();
 		}
 
-		// Get environment-specific overrides from toolkit.
-		// We simulate this by getting a full config with environment set.
-		$original_env = self::get_environment();
-
-		// Temporarily override environment detection if needed.
-		// Since we can't easily override the environment in the toolkit,
-		// we'll provide sensible defaults based on the environment name.
+		// Apply environment-specific overrides.
+		// The toolkit now handles cross-origin detection, so we just apply environment-specific settings.
 		switch ( $environment ) {
 			case 'development':
-				// Check if actually using HTTPS.
-				$is_https = ( ! empty( $_SERVER['HTTPS'] ) && 'off' !== strtolower( $_SERVER['HTTPS'] ) ) ||
-							( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' === $_SERVER['HTTP_X_FORWARDED_PROTO'] );
-				$defaults['secure']   = $is_https;
-				$defaults['samesite'] = 'None';   // Allow cross-origin for SPAs.
+				// For development, resolve auto values to sensible defaults
+				if ( 'auto' === $defaults['samesite'] ) {
+					$defaults['samesite'] = 'Lax'; // Default for development without cross-origin
+				}
+				if ( 'auto' === $defaults['secure'] ) {
+					$defaults['secure'] = false; // Allow HTTP in development
+				}
+				if ( 'auto' === $defaults['path'] ) {
+					$defaults['path'] = '/';
+				}
+				if ( 'auto' === $defaults['domain'] ) {
+					$defaults['domain'] = '';
+				}
 				break;
 			case 'staging':
-				$defaults['secure']   = true;
-				$defaults['samesite'] = 'Lax';
+				// For staging, use more secure defaults
+				if ( 'auto' === $defaults['samesite'] ) {
+					$defaults['samesite'] = 'Lax';
+				}
+				if ( 'auto' === $defaults['secure'] ) {
+					$defaults['secure'] = true;
+				}
+				if ( 'auto' === $defaults['path'] ) {
+					$defaults['path'] = '/';
+				}
+				if ( 'auto' === $defaults['domain'] ) {
+					$defaults['domain'] = '';
+				}
 				break;
 			case 'production':
 				$defaults['secure']   = true;
@@ -92,10 +106,10 @@ class JWT_Cookie_Config {
 			default:
 				// For base environment, replace 'auto' with actual values.
 				if ( 'auto' === $defaults['samesite'] ) {
-					$defaults['samesite'] = 'Lax'; // Safe default.
+					$defaults['samesite'] = 'Lax';
 				}
 				if ( 'auto' === $defaults['secure'] ) {
-					$defaults['secure'] = true; // Safe default.
+					$defaults['secure'] = true;
 				}
 				if ( 'auto' === $defaults['path'] ) {
 					$defaults['path'] = '/';

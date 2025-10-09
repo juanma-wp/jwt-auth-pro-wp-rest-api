@@ -146,13 +146,16 @@ class JWTAuthTest extends TestCase {
 
 	/**
 	 * Test CORS support functionality.
+	 *
+	 * CORS is now handled centrally by Cors::enableForWordPress() in JWT_Auth_Pro::init_cors().
+	 * The add_cors_support() method was removed as part of CORS consolidation.
 	 */
 	public function testCORSSupport(): void {
-		$this->assertTrue( method_exists( $this->auth_jwt, 'add_cors_support' ) );
+		// Verify wp_auth_jwt_maybe_add_cors_headers helper exists (kept for backward compatibility)
+		$this->assertTrue( function_exists( 'wp_auth_jwt_maybe_add_cors_headers' ) );
 
-		// Test CORS method exists and can be called
-		$this->auth_jwt->add_cors_support();
-		$this->assertTrue( true ); // Should not throw errors
+		// Verify Cors class exists in toolkit
+		$this->assertTrue( class_exists( '\WPRestAuth\AuthToolkit\Http\Cors' ) );
 	}
 
 	/**

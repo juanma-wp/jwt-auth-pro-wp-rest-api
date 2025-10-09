@@ -150,8 +150,15 @@ function wp_auth_jwt_set_cookie(
 	$samesite = apply_filters( 'wp_auth_jwt_cookie_samesite', $config['samesite'] );
 	$domain   = $config['domain'];
 
+	// Debug log the cookie configuration
+	error_log( 'JWT Cookie Debug - Setting cookie: ' . $name );
+	error_log( 'JWT Cookie Debug - Path: ' . $path );
+	error_log( 'JWT Cookie Debug - Secure: ' . ( $secure ? 'true' : 'false' ) );
+	error_log( 'JWT Cookie Debug - SameSite: ' . $samesite );
+	error_log( 'JWT Cookie Debug - Domain: ' . $domain );
+
 	// Delegate to Cookie class which handles CLI detection and PHP version compatibility.
-	return Cookie::set(
+	$result = Cookie::set(
 		$name,
 		$value,
 		array(
@@ -163,6 +170,9 @@ function wp_auth_jwt_set_cookie(
 			'samesite' => $samesite,
 		)
 	);
+
+	error_log( 'JWT Cookie Debug - Set result: ' . ( $result ? 'success' : 'failed' ) );
+	return $result;
 }
 
 /**
@@ -182,24 +192,17 @@ function wp_auth_jwt_delete_cookie( string $name, ?string $path = null ): bool {
 /**
  * Add CORS headers if needed.
  *
- * Uses the toolkit's Cors utility to handle cross-origin requests
- * based on admin-configured allowed origins.
+ * DEPRECATED: CORS is now handled centrally by Cors::enableForWordPress() in init_cors().
+ * This function is kept for backward compatibility but is now a no-op.
+ *
+ * The toolkit's Cors class handles all CORS headers automatically on rest_api_init,
+ * including preflight OPTIONS requests and origin validation.
  *
  * @return void
  */
 function wp_auth_jwt_maybe_add_cors_headers(): void {
-	$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
-	$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
-
-	if ( ! empty( $allowed_origins ) ) {
-		Cors::handleRequest(
-			$allowed_origins,
-			array(
-				'methods' => array( 'GET', 'POST', 'PUT', 'DELETE', 'OPTIONS' ),
-				'headers' => array( 'Authorization', 'Content-Type', 'X-Requested-With' ),
-			)
-		);
-	}
+	// No-op: CORS is now handled centrally by the toolkit's Cors class
+	// See JWT_Auth_Pro::init_cors() in jwt-auth-pro-wp-rest-api.php
 }
 
 /**

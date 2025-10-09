@@ -265,6 +265,7 @@ class CookieConfigTest extends TestCase
 		$_SERVER['HTTP_HOST'] = 'localhost';
 		$_SERVER['HTTPS']     = 'off';
 		unset($_SERVER['HTTP_X_FORWARDED_PROTO']);
+		unset($_SERVER['HTTP_ORIGIN']); // No origin = same-origin
 
 		JWT_Cookie_Config::clear_cache();
 		$config = JWT_Cookie_Config::get_config();
@@ -280,9 +281,8 @@ class CookieConfigTest extends TestCase
 		);
 		$this->assertSame('development', $config['environment']);
 
-		// In development, we use SameSite=None for cross-origin support
-		// Modern browsers allow this on localhost even with Secure=false
-		$this->assertSame('None', $config['samesite']);
+		// In development without cross-origin, we use SameSite=Lax
+		$this->assertSame('Lax', $config['samesite']);
 	}
 
 	/**
@@ -307,8 +307,8 @@ class CookieConfigTest extends TestCase
 	/**
 	 * Test SameSite compatibility with Secure flag in JWT config file.
 	 *
-	 * In development on localhost, browsers allow SameSite=None with Secure=false
-	 * for improved developer experience with cross-origin requests.
+	 * In development on localhost with cross-origin requests, SameSite=None is set.
+	 * Without cross-origin, SameSite=Lax is used.
 	 *
 	 * In production/staging, SameSite=None requires Secure=true (browser requirement).
 	 *
@@ -321,14 +321,14 @@ class CookieConfigTest extends TestCase
 	{
 		$_SERVER['HTTP_HOST'] = 'localhost';
 		$_SERVER['HTTPS']     = 'off';
+		unset($_SERVER['HTTP_ORIGIN']); // No origin = same-origin
 
 		JWT_Cookie_Config::clear_cache();
 		$config = JWT_Cookie_Config::get_config();
 
-		// In development on localhost, we allow SameSite=None with Secure=false
-		// for cross-origin development (e.g., React on :5173, WordPress on :8884)
+		// In development without cross-origin, we use SameSite=Lax
 		if ('development' === $config['environment']) {
-			$this->assertSame('None', $config['samesite']);
+			$this->assertSame('Lax', $config['samesite']);
 			$this->assertFalse($config['secure']);
 		}
 

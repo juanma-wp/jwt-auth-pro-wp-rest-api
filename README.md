@@ -82,6 +82,43 @@ const posts = await fetch('/wp-json/wp/v2/posts', {
 });
 ```
 
+## 🔧 Cross-Origin Development Setup
+
+### ⚠️ Important: HTTPS Required on WordPress Server
+
+When developing with a separate frontend (React, Vue, etc.) on a different port, **the WordPress server must use HTTPS** for refresh tokens to work properly:
+
+- **Cross-origin cookies require `SameSite=None`** to work across different origins
+- **`SameSite=None` requires `Secure=true`** (HTTPS only) per browser specifications
+- Without HTTPS on the server, refresh tokens stored in HttpOnly cookies **will not be sent** on cross-origin requests
+
+**Note:** Your frontend can use either HTTP or HTTPS - only the WordPress server needs HTTPS.
+
+### 🎯 Recommended Solution: WordPress Studio
+
+[**WordPress Studio**](https://developer.wordpress.com/studio/) is the easiest way to set up a local WordPress development environment with HTTPS enabled:
+
+1. **Download WordPress Studio** (free from Automattic)
+2. **Create a new site** or import your existing one
+3. **Enable HTTPS** in site settings (one click)
+4. **Configure CORS** in the plugin settings for your frontend URL
+
+Example working setup:
+```
+WordPress API: https://localhost:8881 (WordPress Studio with HTTPS) ✅
+React App:     http://localhost:5173  (Can be HTTP or HTTPS) ✅
+```
+
+
+### CORS Configuration
+
+Add your frontend URL to the CORS allowed origins in the plugin settings:
+```
+https://localhost:5173
+https://localhost:3000
+https://your-app.com
+```
+
 ## 📍 Endpoints
 
 | Method | Endpoint | Description |
@@ -129,6 +166,42 @@ The plugin automatically detects your environment and adjusts cookie settings:
 - **Production**: Maximum security settings
 
 See [Cookie Configuration Guide](DOCS/cookie-configuration.md) for advanced options using constants and filters.
+
+## 🚨 Troubleshooting
+
+### Refresh Token Not Working (Cookie Not Set)
+
+**Symptom:** Login works but refresh token returns 401 Unauthorized
+
+**Common Causes & Solutions:**
+
+1. **WordPress server using HTTP instead of HTTPS**
+   - Solution: Enable HTTPS on WordPress (use WordPress Studio or self-signed certificates)
+   - Check: The `Set-Cookie` header should include `Secure` attribute
+
+2. **Wrong SameSite configuration**
+   - For cross-origin: Needs `SameSite=None` with `Secure=true`
+   - Check browser DevTools → Network → Response Headers for `Set-Cookie`
+
+3. **Browser blocking third-party cookies**
+   - Some browsers block all third-party cookies regardless of SameSite
+   - Solution: Use same domain/subdomain or configure exceptions
+
+### CORS Errors
+
+**Symptom:** "Access to fetch at ... has been blocked by CORS policy"
+
+**Solutions:**
+1. Add your frontend URL to CORS allowed origins in plugin settings
+2. Ensure the exact origin is listed (including protocol and port)
+3. Check that CORS headers are present in response
+
+### Cookie Not Visible in Browser
+
+**This is expected!** Refresh tokens use HttpOnly cookies which are:
+- Not accessible via JavaScript (security feature)
+- Automatically sent by the browser with requests
+- Only visible in DevTools → Application → Cookies
 
 ## 💡 Use Cases
 

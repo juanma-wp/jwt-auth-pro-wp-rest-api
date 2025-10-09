@@ -56,6 +56,11 @@ define( 'JWT_AUTH_PRO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JWT_AUTH_PRO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'JWT_AUTH_PRO_VERSION', '1.1.0' );
 
+// Debug: Add a constant to check if plugin is loaded
+if ( ! defined( 'JWT_AUTH_PRO_LOADED' ) ) {
+	define( 'JWT_AUTH_PRO_LOADED', true );
+}
+
 /**
  * Main plugin class for JWT Auth Pro.
  *
@@ -124,7 +129,8 @@ class JWT_Auth_Pro {
 			} else {
 				// Check if it's defined in wp-config.php as fallback.
 				add_action( 'admin_notices', array( $this, 'missing_config_notice' ) );
-				return;
+				// Don't return early - let the plugin initialize even without a secret
+				// The auth endpoints won't work but at least REST API won't break
 			}
 		}
 
@@ -164,16 +170,28 @@ class JWT_Auth_Pro {
 	}
 
 	/**
-	 * Initialize CORS support using SimpleCors from auth-toolkit.
+	 * Initialize CORS support using Cors from auth-toolkit.
+	 *
+	 * Uses the clean Cors implementation that properly handles:
+	 * - Origin validation
+	 * - Preflight OPTIONS requests
+	 * - Header management
+	 * - Pattern matching for origins
 	 */
 	private function init_cors(): void {
 		// Get CORS settings from admin panel
 		$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
 		$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
 
-		// Only enable CORS if origins are configured
-		if ( ! empty( $allowed_origins ) ) {
-			\WPRestAuth\AuthToolkit\Http\SimpleCors::enable( $allowed_origins );
+		// Default to localhost for development if no origins configured
+		if ( empty( $allowed_origins ) ) {
+			$allowed_origins = "http://localhost:5173\nhttp://localhost:3000\nhttp://localhost:5174";
+		}
+
+		// Enable CORS using the toolkit's Cors class
+		// This handles everything: validation, preflight, headers
+		if ( class_exists( '\WPRestAuth\AuthToolkit\Http\Cors' ) ) {
+			\WPRestAuth\AuthToolkit\Http\Cors::enableForWordPress( $allowed_origins );
 		}
 	}
 
