@@ -579,9 +579,10 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	 */
 	public function cors_allowed_origins_field(): void {
 		$settings = get_option( self::OPTION_GENERAL_SETTINGS, array() );
-		$value    = $settings['cors_allowed_origins'] ?? "http://localhost:3000\nhttp://localhost:5173\nhttp://localhost:5174\nhttp://localhost:5175";
+		$value    = $settings['cors_allowed_origins'] ?? '';
 		?>
-		<textarea name="<?php echo esc_attr( self::OPTION_GENERAL_SETTINGS ); ?>[cors_allowed_origins]" class="large-text" rows="5"><?php echo esc_textarea( $value ); ?></textarea>
+		<textarea name="<?php echo esc_attr( self::OPTION_GENERAL_SETTINGS ); ?>[cors_allowed_origins]" class="large-text" rows="5" placeholder="http://localhost:3000
+https://your-app.com"><?php echo esc_textarea( $value ); ?></textarea>
 		<p class="description">One origin per line. Use * to allow all origins (not recommended for production).</p>
 		<?php
 	}
@@ -709,7 +710,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 			self::OPTION_GENERAL_SETTINGS,
 			array(
 				'enable_debug_logging' => false,
-				'cors_allowed_origins' => "http://localhost:3000\nhttp://localhost:5173\nhttp://localhost:5174\nhttp://localhost:5175",
+				'cors_allowed_origins' => '',
 			)
 		);
 	}
