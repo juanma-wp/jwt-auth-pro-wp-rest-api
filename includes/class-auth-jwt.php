@@ -58,13 +58,8 @@ class Auth_JWT {
 		$secret = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : '';
 
 		if ( empty( $secret ) ) {
-			// Add admin notice for missing secret.
-			add_action(
-				'admin_notices',
-				function () {
-					echo '<div class="notice notice-error"><p><strong>JWT Auth:</strong> JWT_AUTH_PRO_SECRET constant is not defined. Please configure it in wp-config.php</p></div>';
-				}
-			);
+			// Secret not configured - skip initialization.
+			// Admin notice is handled by JWT_Auth_Pro::missing_config_notice().
 			return;
 		}
 

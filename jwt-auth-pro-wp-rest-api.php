@@ -70,6 +70,7 @@ class JWT_Auth_Pro {
 
 
 
+
 	/**
 	 * Auth JWT instance.
 	 *
@@ -182,11 +183,6 @@ class JWT_Auth_Pro {
 		// Get CORS settings from admin panel.
 		$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
 		$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
-
-		// Default to localhost for development if no origins configured.
-		if ( empty( $allowed_origins ) ) {
-			$allowed_origins = "http://localhost:5173\nhttp://localhost:3000\nhttp://localhost:5174";
-		}
 
 		// Enable CORS using the toolkit's Cors class.
 		// This handles everything: validation, preflight, headers.

@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/juanma-wp/wp-rest-auth-toolkit.git",
-                "reference": "8376c6070bcd84028443d9062bd6fc7bce4ac8e1"
+                "reference": "73ee77f127b2818b9aa04b4499830033754fff38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/juanma-wp/wp-rest-auth-toolkit/zipball/8376c6070bcd84028443d9062bd6fc7bce4ac8e1",
-                "reference": "8376c6070bcd84028443d9062bd6fc7bce4ac8e1",
+                "url": "https://api.github.com/repos/juanma-wp/wp-rest-auth-toolkit/zipball/73ee77f127b2818b9aa04b4499830033754fff38",
+                "reference": "73ee77f127b2818b9aa04b4499830033754fff38",
                 "shasum": ""
             },
             "require": {
@@ -79,7 +79,7 @@
                 "source": "https://github.com/juanma-wp/wp-rest-auth-toolkit/tree/main",
                 "issues": "https://github.com/juanma-wp/wp-rest-auth-toolkit/issues"
             },
-            "time": "2025-10-09T21:09:08+00:00"
+            "time": "2025-10-09T21:57:33+00:00"
         }
     ],
     "packages-dev": [
