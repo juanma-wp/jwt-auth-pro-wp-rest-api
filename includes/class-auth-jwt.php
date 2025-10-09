@@ -54,11 +54,11 @@ class Auth_JWT {
 	public function __construct() {
 		global $wpdb;
 
-		// Get secret - fail fast if not configured
+		// Get secret - fail fast if not configured.
 		$secret = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : '';
 
 		if ( empty( $secret ) ) {
-			// Add admin notice for missing secret
+			// Add admin notice for missing secret.
 			add_action(
 				'admin_notices',
 				function () {
@@ -68,13 +68,13 @@ class Auth_JWT {
 			return;
 		}
 
-		// Initialize refresh token manager with validated secret
+		// Initialize refresh token manager with validated secret.
 		$this->refresh_token_manager = new \WPRestAuth\AuthToolkit\Token\RefreshTokenManager(
 			$wpdb->prefix . 'jwt_refresh_tokens',
 			$secret,
 			'jwt',
 			'wp_rest_auth_jwt',
-			300 // 5 minutes cache TTL
+			300 // 5 minutes cache TTL.
 		);
 	}
 
@@ -141,13 +141,14 @@ class Auth_JWT {
 	 * @param int   $user_id      User ID to generate token for.
 	 * @param array $extra_claims Optional extra claims to merge into the token.
 	 * @return string Generated JWT access token.
+	 * @throws \Exception If JWT secret is not configured.
 	 */
 	public function generate_access_token( int $user_id, array $extra_claims = array() ): string {
-		// Get JWT settings with fallbacks
-		// Always use direct database query for REST API requests
+		// Get JWT settings with fallbacks.
+		// Always use direct database query for REST API requests.
 		$jwt_settings = get_option( 'jwt_auth_jwt', array() );
-		$secret = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : ( $jwt_settings['secret_key'] ?? '' );
-		$ttl = defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ? JWT_AUTH_PRO_ACCESS_TTL : ( $jwt_settings['access_token_expiry'] ?? 3600 );
+		$secret       = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : ( $jwt_settings['secret_key'] ?? '' );
+		$ttl          = defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ? JWT_AUTH_PRO_ACCESS_TTL : ( $jwt_settings['access_token_expiry'] ?? 3600 );
 
 		if ( empty( $secret ) ) {
 			error_log( 'JWT Auth: Secret not configured. Please set JWT_AUTH_PRO_SECRET constant or configure in settings.' );
@@ -175,7 +176,7 @@ class Auth_JWT {
 	 * @return WP_REST_Response|WP_Error Response or error.
 	 */
 	public function issue_token( WP_REST_Request $request ) {
-		// Handle CORS preflight using toolkit
+		// Handle CORS preflight using toolkit.
 		if ( \WPRestAuth\AuthToolkit\Http\Cors::isOptionsRequest() ) {
 			return \WPRestAuth\AuthToolkit\Http\Cors::handleOptionsRequest();
 		}
@@ -208,11 +209,11 @@ class Auth_JWT {
 		);
 		$access_token  = $this->generate_access_token( (int) $user->ID, $access_claims );
 
-		// Get JWT settings with fallbacks
-		// Always use direct database query for REST API requests
+		// Get JWT settings with fallbacks.
+		// Always use direct database query for REST API requests.
 		$jwt_settings = get_option( 'jwt_auth_jwt', array() );
-		$access_ttl = defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ? JWT_AUTH_PRO_ACCESS_TTL : ( $jwt_settings['access_token_expiry'] ?? 3600 );
-		$refresh_ttl = defined( 'JWT_AUTH_PRO_REFRESH_TTL' ) ? JWT_AUTH_PRO_REFRESH_TTL : ( $jwt_settings['refresh_token_expiry'] ?? 2592000 );
+		$access_ttl   = defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ? JWT_AUTH_PRO_ACCESS_TTL : ( $jwt_settings['access_token_expiry'] ?? 3600 );
+		$refresh_ttl  = defined( 'JWT_AUTH_PRO_REFRESH_TTL' ) ? JWT_AUTH_PRO_REFRESH_TTL : ( $jwt_settings['refresh_token_expiry'] ?? 2592000 );
 
 		// Generate refresh token.
 		$refresh_token   = wp_auth_jwt_generate_token( 64 );
@@ -249,7 +250,7 @@ class Auth_JWT {
 	 * @return WP_REST_Response|WP_Error Response or error.
 	 */
 	public function refresh_access_token( WP_REST_Request $request ) {
-		// Handle CORS preflight using toolkit
+		// Handle CORS preflight using toolkit.
 		if ( \WPRestAuth\AuthToolkit\Http\Cors::isOptionsRequest() ) {
 			return \WPRestAuth\AuthToolkit\Http\Cors::handleOptionsRequest();
 		}
@@ -321,7 +322,7 @@ class Auth_JWT {
 	 * @return WP_REST_Response Success response.
 	 */
 	public function logout( WP_REST_Request $request ): WP_REST_Response {
-		// Handle CORS preflight using toolkit
+		// Handle CORS preflight using toolkit.
 		if ( \WPRestAuth\AuthToolkit\Http\Cors::isOptionsRequest() ) {
 			return \WPRestAuth\AuthToolkit\Http\Cors::handleOptionsRequest();
 		}

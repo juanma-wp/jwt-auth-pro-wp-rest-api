@@ -150,7 +150,7 @@ function wp_auth_jwt_set_cookie(
 	$samesite = apply_filters( 'wp_auth_jwt_cookie_samesite', $config['samesite'] );
 	$domain   = $config['domain'];
 
-	// Debug log the cookie configuration
+	// Debug log the cookie configuration.
 	error_log( 'JWT Cookie Debug - Setting cookie: ' . $name );
 	error_log( 'JWT Cookie Debug - Path: ' . $path );
 	error_log( 'JWT Cookie Debug - Secure: ' . ( $secure ? 'true' : 'false' ) );
@@ -201,8 +201,8 @@ function wp_auth_jwt_delete_cookie( string $name, ?string $path = null ): bool {
  * @return void
  */
 function wp_auth_jwt_maybe_add_cors_headers(): void {
-	// No-op: CORS is now handled centrally by the toolkit's Cors class
-	// See JWT_Auth_Pro::init_cors() in jwt-auth-pro-wp-rest-api.php
+	// No-op: CORS is now handled centrally by the toolkit's Cors class.
+	// See JWT_Auth_Pro::init_cors() in jwt-auth-pro-wp-rest-api.php.
 }
 
 /**

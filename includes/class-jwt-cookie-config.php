@@ -68,12 +68,12 @@ class JWT_Cookie_Config {
 		// The toolkit now handles cross-origin detection, so we just apply environment-specific settings.
 		switch ( $environment ) {
 			case 'development':
-				// For development, resolve auto values to sensible defaults
+				// For development, resolve auto values to sensible defaults.
 				if ( 'auto' === $defaults['samesite'] ) {
-					$defaults['samesite'] = 'Lax'; // Default for development without cross-origin
+					$defaults['samesite'] = 'Lax'; // Default for development without cross-origin.
 				}
 				if ( 'auto' === $defaults['secure'] ) {
-					$defaults['secure'] = false; // Allow HTTP in development
+					$defaults['secure'] = false; // Allow HTTP in development.
 				}
 				if ( 'auto' === $defaults['path'] ) {
 					$defaults['path'] = '/';
@@ -83,7 +83,7 @@ class JWT_Cookie_Config {
 				}
 				break;
 			case 'staging':
-				// For staging, use more secure defaults
+				// For staging, use more secure defaults.
 				if ( 'auto' === $defaults['samesite'] ) {
 					$defaults['samesite'] = 'Lax';
 				}

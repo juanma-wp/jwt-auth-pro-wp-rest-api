@@ -56,7 +56,7 @@ define( 'JWT_AUTH_PRO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JWT_AUTH_PRO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'JWT_AUTH_PRO_VERSION', '1.1.0' );
 
-// Debug: Add a constant to check if plugin is loaded
+// Debug: Add a constant to check if plugin is loaded.
 if ( ! defined( 'JWT_AUTH_PRO_LOADED' ) ) {
 	define( 'JWT_AUTH_PRO_LOADED', true );
 }
@@ -129,8 +129,8 @@ class JWT_Auth_Pro {
 			} else {
 				// Check if it's defined in wp-config.php as fallback.
 				add_action( 'admin_notices', array( $this, 'missing_config_notice' ) );
-				// Don't return early - let the plugin initialize even without a secret
-				// The auth endpoints won't work but at least REST API won't break
+				// Don't return early - let the plugin initialize even without a secret.
+				// The auth endpoints won't work but at least REST API won't break.
 			}
 		}
 
@@ -165,7 +165,7 @@ class JWT_Auth_Pro {
 		add_filter( 'rest_authentication_errors', array( $this, 'maybe_auth_bearer' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
-		// Initialize CORS support
+		// Initialize CORS support.
 		$this->init_cors();
 	}
 
@@ -179,17 +179,17 @@ class JWT_Auth_Pro {
 	 * - Pattern matching for origins
 	 */
 	private function init_cors(): void {
-		// Get CORS settings from admin panel
+		// Get CORS settings from admin panel.
 		$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
 		$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
 
-		// Default to localhost for development if no origins configured
+		// Default to localhost for development if no origins configured.
 		if ( empty( $allowed_origins ) ) {
 			$allowed_origins = "http://localhost:5173\nhttp://localhost:3000\nhttp://localhost:5174";
 		}
 
-		// Enable CORS using the toolkit's Cors class
-		// This handles everything: validation, preflight, headers
+		// Enable CORS using the toolkit's Cors class.
+		// This handles everything: validation, preflight, headers.
 		if ( class_exists( '\WPRestAuth\AuthToolkit\Http\Cors' ) ) {
 			\WPRestAuth\AuthToolkit\Http\Cors::enableForWordPress( $allowed_origins );
 		}
