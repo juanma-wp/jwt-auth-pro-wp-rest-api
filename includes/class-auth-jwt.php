@@ -79,7 +79,7 @@ class Auth_JWT {
 			self::REST_NAMESPACE,
 			'/token',
 			array(
-				'methods'             => array( 'POST' ),
+				'methods'             => array( 'POST', 'OPTIONS' ),
 				'callback'            => array( $this, 'issue_token' ),
 				'permission_callback' => '__return_true',
 				'args'                => array(
@@ -100,7 +100,7 @@ class Auth_JWT {
 			self::REST_NAMESPACE,
 			'/refresh',
 			array(
-				'methods'             => array( 'POST' ),
+				'methods'             => array( 'POST', 'OPTIONS' ),
 				'callback'            => array( $this, 'refresh_access_token' ),
 				'permission_callback' => '__return_true',
 			)
@@ -180,6 +180,11 @@ class Auth_JWT {
 	public function issue_token( WP_REST_Request $request ) {
 		wp_auth_jwt_maybe_add_cors_headers();
 
+		// Handle OPTIONS request
+		if ( $request->get_method() === 'OPTIONS' ) {
+			return new WP_REST_Response( null, 200 );
+		}
+
 		$username = $request->get_param( 'username' );
 		$password = $request->get_param( 'password' );
 
@@ -242,6 +247,11 @@ class Auth_JWT {
 	 */
 	public function refresh_access_token( WP_REST_Request $request ) {
 		wp_auth_jwt_maybe_add_cors_headers();
+
+		// Handle OPTIONS request
+		if ( $request->get_method() === 'OPTIONS' ) {
+			return new WP_REST_Response( null, 200 );
+		}
 
 		// Use Cookie::get() which handles both $_COOKIE and HTTP_COOKIE header fallback.
 		$refresh_token = Cookie::get( self::REFRESH_COOKIE_NAME, '' );
