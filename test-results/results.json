@@ -1,0 +1,343 @@
+{
+  "config": {
+    "configFile": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/playwright.config.js",
+    "rootDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e/global-setup.js",
+    "globalTeardown": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e/global-teardown.js",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/junit.xml"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "same-domain",
+        "name": "same-domain",
+        "testDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/cookie-scenarios\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "cross-origin",
+        "name": "cross-origin",
+        "testDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/cookie-scenarios\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "auto-detect",
+        "name": "auto-detect",
+        "testDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/cookie-scenarios\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "strict-production",
+        "name": "strict-production",
+        "testDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/cookie-scenarios\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "https",
+        "name": "https",
+        "testDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/cookie-scenarios\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "mobile-chrome",
+        "name": "mobile-chrome",
+        "testDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/cookie-scenarios\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/cookie-scenarios\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/cookie-scenarios\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.0",
+    "workers": 8,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "cookie-scenarios.spec.js",
+      "file": "cookie-scenarios.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Auto Development Config",
+          "file": "cookie-scenarios.spec.js",
+          "line": 27,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Same Domain - Login and Refresh",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "auto-detect",
+                  "projectName": "auto-detect",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30649,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e/cookie-scenarios.spec.js",
+                            "column": 32,
+                            "line": 40
+                          },
+                          "message": "Error: page.waitForResponse: Test timeout of 30000ms exceeded.\n\n  38 |     await page.fill('#password', TEST_CREDENTIALS.password);\n  39 |\n> 40 |     const loginResponse = page.waitForResponse(\n     |                                ^\n  41 |       (resp) => resp.url().includes('/jwt/v1/token') && resp.status() === 200\n  42 |     );\n  43 |\n    at /Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e/cookie-scenarios.spec.js:40:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-12T10:07:48.890Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results/cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results/cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results/cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "67e3d0a5bc345da1b206-b634b42372a465085a87",
+              "file": "cookie-scenarios.spec.js",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "Cross-Origin - Login and Refresh",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "auto-detect",
+                  "projectName": "auto-detect",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "timedOut",
+                      "duration": 30654,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e/cookie-scenarios.spec.js",
+                            "column": 32,
+                            "line": 82
+                          },
+                          "message": "Error: page.waitForResponse: Test timeout of 30000ms exceeded.\n\n  80 |\n  81 |     // Login to WordPress API on different domain\n> 82 |     const loginResponse = page.waitForResponse(\n     |                                ^\n  83 |       (resp) =>\n  84 |         resp.url().includes('rest-api-tests.wp.local/wp-json/jwt/v1/token') &&\n  85 |         resp.status() === 200\n    at /Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e/cookie-scenarios.spec.js:82:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-12T10:07:48.890Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results/cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results/cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/test-results/cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "67e3d0a5bc345da1b206-a98207d3b3912255fb52",
+              "file": "cookie-scenarios.spec.js",
+              "line": 75,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-10-12T10:07:48.605Z",
+    "duration": 31222.905000000002,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

@@ -90,6 +90,14 @@ jobs:
           WP_USER: admin
           WP_PASS: admin
 
+      - name: Start test app
+        run: |
+          cd tests/test-app
+          npx http-server . -p 5173 -c-1 --cors > /dev/null 2>&1 &
+          echo "Waiting for test app to start..."
+          sleep 5
+          curl -s http://localhost:5173/ | grep -q "JWT Auth Test Client" && echo "Test app is running" || exit 1
+
       - name: Run Playwright tests
         run: npm run test:e2e -- --project=${{ matrix.scenario }}
         env:
@@ -166,6 +174,13 @@ jobs:
       - name: Activate plugin
         run: |
           docker compose -f tests/docker/docker-compose.test.yml exec -T wordpress wp plugin activate jwt-auth-pro-wp-rest-api
+
+      - name: Start test app
+        run: |
+          cd tests/test-app
+          npx http-server . -p 5173 -c-1 --cors > /dev/null 2>&1 &
+          echo "Waiting for test app to start..."
+          sleep 5
 
       - name: Run HTTPS tests
         run: npm run test:e2e -- --project=https

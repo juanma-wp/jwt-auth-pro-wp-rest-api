@@ -1,0 +1,80 @@
+<testsuites id="" name="" tests="2" failures="2" skipped="0" errors="0" time="31.222905">
+<testsuite name="cookie-scenarios.spec.js" timestamp="2025-10-12T10:07:48.622Z" hostname="auto-detect" tests="2" failures="2" skipped="0" time="61.303" errors="0">
+<testcase name="Auto Development Config › Same Domain - Login and Refresh" classname="cookie-scenarios.spec.js" time="30.649">
+<failure message="cookie-scenarios.spec.js:30:7 Same Domain - Login and Refresh" type="FAILURE">
+<![CDATA[  [auto-detect] › cookie-scenarios.spec.js:30:7 › Auto Development Config › Same Domain - Login and Refresh 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+
+      38 |     await page.fill('#password', TEST_CREDENTIALS.password);
+      39 |
+    > 40 |     const loginResponse = page.waitForResponse(
+         |                                ^
+      41 |       (resp) => resp.url().includes('/jwt/v1/token') && resp.status() === 200
+      42 |     );
+      43 |
+        at /Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e/cookie-scenarios.spec.js:40:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/test-failed-1.png]]
+
+[[ATTACHMENT|cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/video.webm]]
+
+[[ATTACHMENT|cookie-scenarios-Auto-Deve-c0e67--Domain---Login-and-Refresh-auto-detect/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Auto Development Config › Cross-Origin - Login and Refresh" classname="cookie-scenarios.spec.js" time="30.654">
+<failure message="cookie-scenarios.spec.js:75:7 Cross-Origin - Login and Refresh" type="FAILURE">
+<![CDATA[  [auto-detect] › cookie-scenarios.spec.js:75:7 › Auto Development Config › Cross-Origin - Login and Refresh 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+
+      80 |
+      81 |     // Login to WordPress API on different domain
+    > 82 |     const loginResponse = page.waitForResponse(
+         |                                ^
+      83 |       (resp) =>
+      84 |         resp.url().includes('rest-api-tests.wp.local/wp-json/jwt/v1/token') &&
+      85 |         resp.status() === 200
+        at /Users/juanmanuelgarrido/PROJECTS/2025/jwt-auth-pro-wp-rest-api/tests/e2e/cookie-scenarios.spec.js:82:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/test-failed-1.png]]
+
+[[ATTACHMENT|cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/video.webm]]
+
+[[ATTACHMENT|cookie-scenarios-Auto-Deve-2231b--Origin---Login-and-Refresh-auto-detect/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

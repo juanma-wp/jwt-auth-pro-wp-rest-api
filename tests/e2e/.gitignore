@@ -1,0 +1,12 @@
+node_modules/
+playwright-report/
+test-results/
+package-lock.json
+.env
+.DS_Store
+
+# Traefik certificates
+docker/traefik/acme/acme.json
+
+# Playwright
+playwright/.cache/

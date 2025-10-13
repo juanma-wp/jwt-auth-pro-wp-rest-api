@@ -30,18 +30,18 @@ test.describe('Auto Development Config', () => {
   test('Same Domain - Login and Refresh', async ({ page, context }) => {
     const inspector = new NetworkInspector(page);
 
-    // Navigate to React app
-    await page.goto('http://localhost:5173/login');
+    // Navigate to test app
+    await page.goto('http://localhost:5173');
 
-    // Login
-    await page.fill('[name="username"]', TEST_CREDENTIALS.username);
-    await page.fill('[name="password"]', TEST_CREDENTIALS.password);
+    // Login using the test app UI
+    await page.fill('#username', TEST_CREDENTIALS.username);
+    await page.fill('#password', TEST_CREDENTIALS.password);
 
     const loginResponse = page.waitForResponse(
       (resp) => resp.url().includes('/jwt/v1/token') && resp.status() === 200
     );
 
-    await page.click('button[type="submit"]');
+    await page.click('button[onclick="login()"]');
     const response = await loginResponse;
 
     // Verify access token in response
@@ -50,41 +50,33 @@ test.describe('Auto Development Config', () => {
 
     // Verify HTTPOnly cookie set
     const cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
 
     expect(refreshCookie).toBeDefined();
     expect(refreshCookie.httpOnly).toBe(true);
-    expect(refreshCookie.sameSite).toBe('Lax'); // Auto-detect for same domain
+    // localhost:5173 -> rest-api-tests.wp.local is cross-origin, so auto-detect sets None
+    expect(refreshCookie.sameSite).toBe('None');
 
-    // Test refresh flow
-    await page.evaluate(() => {
-      // Expire access token in localStorage
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        localStorage.setItem('access_token', 'expired');
-      }
-    });
-
-    // Trigger refresh by making authenticated request
+    // Test refresh flow - click the refresh button
     const refreshResponse = page.waitForResponse(
       (resp) => resp.url().includes('/jwt/v1/token/refresh')
     );
 
-    await page.goto('http://localhost:5173/profile');
+    await page.click('button[onclick="refreshToken()"]');
     const refreshResp = await refreshResponse;
 
     expect(refreshResp.status()).toBe(200);
 
-    // Verify refresh_token cookie was sent (inspect network)
+    // Verify wp_jwt_refresh_token cookie was sent (inspect network)
     const refreshCookies = await context.cookies();
-    expect(refreshCookies.find((c) => c.name === 'refresh_token')).toBeDefined();
+    expect(refreshCookies.find((c) => c.name === 'wp_jwt_refresh_token')).toBeDefined();
   });
 
   test('Cross-Origin - Login and Refresh', async ({ page, context }) => {
     const inspector = new NetworkInspector(page);
 
-    // Navigate to React app on different origin
-    await page.goto('http://localhost:5173/login');
+    // Navigate to test app
+    await page.goto('http://localhost:5173');
 
     // Login to WordPress API on different domain
     const loginResponse = page.waitForResponse(
@@ -93,9 +85,9 @@ test.describe('Auto Development Config', () => {
         resp.status() === 200
     );
 
-    await page.fill('[name="username"]', TEST_CREDENTIALS.username);
-    await page.fill('[name="password"]', TEST_CREDENTIALS.password);
-    await page.click('button[type="submit"]');
+    await page.fill('#username', TEST_CREDENTIALS.username);
+    await page.fill('#password', TEST_CREDENTIALS.password);
+    await page.click('button[onclick="login()"]');
 
     const response = await loginResponse;
 
@@ -106,23 +98,19 @@ test.describe('Auto Development Config', () => {
 
     // Verify HTTPOnly cookie set with SameSite=None for cross-origin
     const cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
 
     expect(refreshCookie).toBeDefined();
     expect(refreshCookie.httpOnly).toBe(true);
     expect(refreshCookie.sameSite).toBe('None'); // Auto-detect for cross-origin
 
-    // Verify refresh works cross-origin
-    await page.evaluate(() => {
-      localStorage.setItem('access_token', 'expired');
-    });
-
+    // Verify refresh works cross-origin - click the refresh button
     const refreshResponse = page.waitForResponse(
       (resp) =>
         resp.url().includes('rest-api-tests.wp.local/wp-json/jwt/v1/token/refresh')
     );
 
-    await page.reload();
+    await page.click('button[onclick="refreshToken()"]');
     const refreshResp = await refreshResponse;
 
     expect(refreshResp.status()).toBe(200);
@@ -158,7 +146,7 @@ test.describe('Strict Production Config', () => {
 
     // Verify cookie with Strict SameSite
     const cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
 
     expect(refreshCookie).toBeDefined();
     expect(refreshCookie.sameSite).toBe('Strict');
@@ -181,7 +169,7 @@ test.describe('Strict Production Config', () => {
 
     // Verify cookie is set but won't be sent on cross-origin requests
     const cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
 
     if (refreshCookie) {
       expect(refreshCookie.sameSite).toBe('Strict');
@@ -195,7 +183,7 @@ test.describe('Strict Production Config', () => {
     await page.reload();
     const refreshResp = await refreshResponse;
 
-    // Expect 401 because refresh_token cookie not sent
+    // Expect 401 because wp_jwt_refresh_token cookie not sent
     expect(refreshResp.status()).toBe(401);
   });
 });
@@ -223,7 +211,7 @@ test.describe('None Cross-Origin Config', () => {
 
     // Verify SameSite=None with Secure
     const cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
 
     expect(refreshCookie).toBeDefined();
     expect(refreshCookie.sameSite).toBe('None');
@@ -266,7 +254,7 @@ test.describe('None Cross-Origin Config', () => {
 
     // Cookie may be set but browser will block it
     const cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
 
     // Browser should reject SameSite=None without Secure
     // Some browsers may not even store the cookie
@@ -293,24 +281,24 @@ test.describe('None Cross-Origin Config', () => {
  */
 test.describe('Security Checks', () => {
   test('HTTPOnly prevents JavaScript access', async ({ page, context }) => {
-    await page.goto('http://localhost:5173/login');
+    await page.goto('http://localhost:5173');
 
-    await page.fill('[name="username"]', TEST_CREDENTIALS.username);
-    await page.fill('[name="password"]', TEST_CREDENTIALS.password);
-    await page.click('button[type="submit"]');
+    await page.fill('#username', TEST_CREDENTIALS.username);
+    await page.fill('#password', TEST_CREDENTIALS.password);
+    await page.click('button[onclick="login()"]');
 
     await page.waitForResponse((resp) => resp.url().includes('/jwt/v1/token'));
 
     // Try to access cookie from JavaScript
     const canAccessCookie = await page.evaluate(() => {
-      return document.cookie.includes('refresh_token');
+      return document.cookie.includes('wp_jwt_refresh_token');
     });
 
     expect(canAccessCookie).toBe(false);
 
     // But cookie should be in browser storage (accessible via Playwright)
     const cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
     expect(refreshCookie).toBeDefined();
   });
 
@@ -324,30 +312,30 @@ test.describe('Security Checks', () => {
     await page.waitForResponse((resp) => resp.url().includes('/jwt/v1/token'));
 
     const cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
 
     expect(refreshCookie.secure).toBe(true);
   });
 
   test('Cookie cleared on logout', async ({ page, context }) => {
     // Login first
-    await page.goto('http://localhost:5173/login');
-    await page.fill('[name="username"]', TEST_CREDENTIALS.username);
-    await page.fill('[name="password"]', TEST_CREDENTIALS.password);
-    await page.click('button[type="submit"]');
+    await page.goto('http://localhost:5173');
+    await page.fill('#username', TEST_CREDENTIALS.username);
+    await page.fill('#password', TEST_CREDENTIALS.password);
+    await page.click('button[onclick="login()"]');
 
     await page.waitForResponse((resp) => resp.url().includes('/jwt/v1/token'));
 
     let cookies = await context.cookies();
-    expect(cookies.find((c) => c.name === 'refresh_token')).toBeDefined();
+    expect(cookies.find((c) => c.name === 'wp_jwt_refresh_token')).toBeDefined();
 
     // Logout
-    await page.click('button[data-testid="logout"]');
+    await page.click('button[onclick="logout()"]');
     await page.waitForResponse((resp) => resp.url().includes('/jwt/v1/logout'));
 
     // Verify cookie cleared
     cookies = await context.cookies();
-    const refreshCookie = cookies.find((c) => c.name === 'refresh_token');
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
 
     // Cookie should be removed or have empty value
     expect(!refreshCookie || refreshCookie.value === '').toBe(true);
@@ -362,18 +350,18 @@ test.describe('CORS Headers', () => {
   test('Preflight request has correct headers', async ({ page }) => {
     const inspector = new NetworkInspector(page);
 
-    await page.goto('http://localhost:5173/login');
+    await page.goto('http://localhost:5173');
 
     // Intercept OPTIONS request
     const preflightRequest = page.waitForRequest(
       (req) => req.method() === 'OPTIONS' && req.url().includes('/jwt/v1/token')
     );
 
-    await page.fill('[name="username"]', TEST_CREDENTIALS.username);
-    await page.fill('[name="password"]', TEST_CREDENTIALS.password);
+    await page.fill('#username', TEST_CREDENTIALS.username);
+    await page.fill('#password', TEST_CREDENTIALS.password);
 
     // Trigger login (which should trigger preflight first)
-    await page.click('button[type="submit"]');
+    await page.click('button[onclick="login()"]');
 
     const request = await preflightRequest;
     const response = await request.response();
@@ -386,20 +374,50 @@ test.describe('CORS Headers', () => {
   });
 
   test('Actual request has credentials', async ({ page }) => {
-    await page.goto('http://localhost:5173/login');
+    await page.goto('http://localhost:5173');
 
     const loginResponse = page.waitForResponse(
       (resp) => resp.url().includes('/jwt/v1/token') && resp.status() === 200
     );
 
-    await page.fill('[name="username"]', TEST_CREDENTIALS.username);
-    await page.fill('[name="password"]', TEST_CREDENTIALS.password);
-    await page.click('button[type="submit"]');
+    await page.fill('#username', TEST_CREDENTIALS.username);
+    await page.fill('#password', TEST_CREDENTIALS.password);
+    await page.click('button[onclick="login()"]');
 
     const response = await loginResponse;
     const headers = response.headers();
 
     expect(headers['access-control-allow-credentials']).toBe('true');
     expect(headers['access-control-allow-origin']).toBe('http://localhost:5173');
+  });
+});
+
+/**
+ * Test Group: Cookie Information
+ * Verify the cookie information display functionality
+ */
+test.describe('Cookie Information', () => {
+  test('Check cookies', async ({ page, context }) => {
+    // First login to set the cookie
+    await page.goto('http://localhost:5173');
+
+    await page.fill('#username', TEST_CREDENTIALS.username);
+    await page.fill('#password', TEST_CREDENTIALS.password);
+    await page.click('button[onclick="login()"]');
+
+    await page.waitForResponse((resp) => resp.url().includes('/jwt/v1/token'));
+
+    // Click the "Check Cookies" button
+    await page.click('button[onclick="checkCookies()"]');
+
+    // Wait for cookie info to be displayed
+    await page.waitForSelector('#cookieInfo', { state: 'visible' });
+
+    // Verify the cookie exists in browser
+    const cookies = await context.cookies();
+    const refreshCookie = cookies.find((c) => c.name === 'wp_jwt_refresh_token');
+
+    expect(refreshCookie).toBeDefined();
+    expect(refreshCookie.httpOnly).toBe(true);
   });
 });

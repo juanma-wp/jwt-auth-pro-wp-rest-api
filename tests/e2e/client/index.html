@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Auth E2E Test Client</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🔐 JWT Authentication Test Client</h1>
+            <p class="subtitle">Multi-domain & Protocol Testing for HTTPOnly Cookies</p>
+        </header>
+
+        <!-- Scenario Selector -->
+        <section class="card">
+            <h2>Test Scenario</h2>
+            <select id="scenarioSelect" data-testid="scenario-select">
+                <!-- Populated by JavaScript -->
+            </select>
+            <div id="scenarioInfo" class="scenario-info"></div>
+        </section>
+
+        <!-- Login Section -->
+        <section class="card">
+            <h2>1️⃣ Login</h2>
+            <form id="loginForm" data-testid="login-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" data-testid="username" value="admin" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" data-testid="password" value="password" required>
+                </div>
+                <button type="submit" data-testid="login-button">🔑 Login</button>
+            </form>
+            <div id="loginStatus" data-testid="login-status"></div>
+            <div id="tokenDisplay" data-testid="token-display" class="token-display"></div>
+        </section>
+
+        <!-- Cookie Information -->
+        <section class="card">
+            <h2>2️⃣ Cookie Information</h2>
+            <button id="checkCookiesBtn" data-testid="check-cookies-button">🍪 Check Cookies</button>
+            <div id="cookieStatus" data-testid="cookie-status"></div>
+        </section>
+
+        <!-- Token Refresh -->
+        <section class="card">
+            <h2>3️⃣ Refresh Token</h2>
+            <p class="info-text">HTTPOnly cookie will be sent automatically</p>
+            <button id="refreshBtn" data-testid="refresh-button">🔄 Refresh Token</button>
+            <div id="refreshStatus" data-testid="refresh-status"></div>
+        </section>
+
+        <!-- Token Verification -->
+        <section class="card">
+            <h2>4️⃣ Verify Token</h2>
+            <button id="verifyBtn" data-testid="verify-button">✅ Verify Token</button>
+            <div id="verifyStatus" data-testid="verify-status"></div>
+        </section>
+
+        <!-- Logout -->
+        <section class="card">
+            <h2>5️⃣ Logout</h2>
+            <button id="logoutBtn" data-testid="logout-button" class="danger">🚪 Logout</button>
+            <div id="logoutStatus" data-testid="logout-status"></div>
+        </section>
+
+        <!-- Network Activity Log -->
+        <section class="card">
+            <h2>📊 Network Activity</h2>
+            <button id="clearLogsBtn" class="secondary">Clear Logs</button>
+            <div id="networkLogs" data-testid="network-logs" class="logs"></div>
+        </section>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

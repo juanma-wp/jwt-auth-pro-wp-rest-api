@@ -1,0 +1,150 @@
+networks:
+  traefik:
+    name: traefik
+    driver: bridge
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: jwt-test-traefik
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "8000:80"
+      - "8443:443"
+      - "8888:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/acme:/acme
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.localtest.me`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+  db:
+    image: mysql:8.0
+    container_name: jwt-test-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - traefik
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # WordPress on main domain
+  wordpress:
+    image: wordpress:latest
+    container_name: jwt-test-wordpress
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 'true'
+      WORDPRESS_DEBUG_LOG: 'true'
+      WORDPRESS_DEBUG_DISPLAY: 'false'
+      JWT_AUTH_PRO_SECRET: "development-secret-key-for-testing-only-never-use-in-production-this-should-be-much-longer"
+    volumes:
+      - ../../../:/var/www/html/wp-content/plugins/jwt-auth-pro-wp-rest-api
+      - wordpress_data:/var/www/html
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress-http.rule=Host(`wordpress.localtest.me`)"
+      - "traefik.http.routers.wordpress-http.entrypoints=web"
+      - "traefik.http.routers.wordpress-https.rule=Host(`wordpress.localtest.me`)"
+      - "traefik.http.routers.wordpress-https.entrypoints=websecure"
+      - "traefik.http.routers.wordpress-https.tls=true"
+      - "traefik.http.routers.wordpress-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+
+  # WordPress on subdomain (alternative API endpoint)
+  wordpress-api:
+    image: wordpress:latest
+    container_name: jwt-test-wordpress-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 'true'
+      WORDPRESS_DEBUG_LOG: 'true'
+      WORDPRESS_DEBUG_DISPLAY: 'false'
+      JWT_AUTH_PRO_SECRET: "development-secret-key-for-testing-only-never-use-in-production-this-should-be-much-longer"
+    volumes:
+      - ../../../:/var/www/html/wp-content/plugins/jwt-auth-pro-wp-rest-api
+      - wordpress_api_data:/var/www/html
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress-api-http.rule=Host(`api.localtest.me`)"
+      - "traefik.http.routers.wordpress-api-http.entrypoints=web"
+      - "traefik.http.routers.wordpress-api-https.rule=Host(`api.localtest.me`)"
+      - "traefik.http.routers.wordpress-api-https.entrypoints=websecure"
+      - "traefik.http.routers.wordpress-api-https.tls=true"
+      - "traefik.http.routers.wordpress-api-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.wordpress-api.loadbalancer.server.port=80"
+
+  # Test client application
+  client:
+    build:
+      context: ../client
+      dockerfile: Dockerfile
+    container_name: jwt-test-client
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      # Client on main domain (HTTP)
+      - "traefik.http.routers.client-http.rule=Host(`client.localtest.me`)"
+      - "traefik.http.routers.client-http.entrypoints=web"
+      # Client on main domain (HTTPS)
+      - "traefik.http.routers.client-https.rule=Host(`client.localtest.me`)"
+      - "traefik.http.routers.client-https.entrypoints=websecure"
+      - "traefik.http.routers.client-https.tls=true"
+      - "traefik.http.routers.client-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.client.loadbalancer.server.port=80"
+
+  # Alternative client on different subdomain
+  client-app:
+    build:
+      context: ../client
+      dockerfile: Dockerfile
+    container_name: jwt-test-client-app
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      # Client app (HTTP)
+      - "traefik.http.routers.client-app-http.rule=Host(`app.localtest.me`)"
+      - "traefik.http.routers.client-app-http.entrypoints=web"
+      # Client app (HTTPS)
+      - "traefik.http.routers.client-app-https.rule=Host(`app.localtest.me`)"
+      - "traefik.http.routers.client-app-https.entrypoints=websecure"
+      - "traefik.http.routers.client-app-https.tls=true"
+      - "traefik.http.routers.client-app-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.client-app.loadbalancer.server.port=80"
+
+volumes:
+  db_data:
+  wordpress_data:
+  wordpress_api_data:

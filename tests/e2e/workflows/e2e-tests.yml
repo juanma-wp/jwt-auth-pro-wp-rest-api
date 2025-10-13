@@ -1,0 +1,200 @@
+name: E2E JWT Authentication Tests
+
+on:
+  push:
+    branches: [main, develop, feature/**]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite:
+          - same-domain
+          - cross-origin
+          - protocol-matrix
+
+    name: E2E Tests - ${{ matrix.test-suite }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Create Docker network
+        run: docker network create traefik || true
+
+      - name: Start Docker services
+        working-directory: tests/e2e/docker
+        run: |
+          docker compose up -d
+          echo "Waiting for services to be ready..."
+          sleep 30
+
+      - name: Wait for WordPress to be ready
+        run: |
+          max_attempts=60
+          attempt=0
+          until curl -k -sf https://wordpress.localtest.me/wp-json/ > /dev/null; do
+            attempt=$((attempt + 1))
+            if [ $attempt -eq $max_attempts ]; then
+              echo "WordPress did not start in time"
+              docker compose -f tests/e2e/docker/docker-compose.yml logs wordpress
+              exit 1
+            fi
+            echo "Waiting for WordPress... ($attempt/$max_attempts)"
+            sleep 5
+          done
+          echo "WordPress is ready!"
+
+      - name: Setup WordPress
+        run: |
+          # Install WordPress
+          docker compose -f tests/e2e/docker/docker-compose.yml exec -T wordpress \
+            wp core install \
+              --url=https://wordpress.localtest.me \
+              --title="JWT E2E Tests" \
+              --admin_user=admin \
+              --admin_password=password \
+              --admin_email=admin@example.com \
+              --skip-email \
+              --allow-root
+
+          # Activate plugin
+          docker compose -f tests/e2e/docker/docker-compose.yml exec -T wordpress \
+            wp plugin activate jwt-auth-pro-wp-rest-api --allow-root
+
+          # Configure CORS
+          docker compose -f tests/e2e/docker/docker-compose.yml exec -T wordpress \
+            wp option update jwt_auth_pro_general_settings \
+              --format=json \
+              '{"samesite":"auto","secure":"auto","auto_detect":true,"allowed_origins":"https://client.localtest.me,http://client.localtest.me,https://app.localtest.me,http://app.localtest.me"}' \
+              --allow-root
+
+      - name: Setup WordPress API instance
+        run: |
+          # Install WordPress on api subdomain
+          docker compose -f tests/e2e/docker/docker-compose.yml exec -T wordpress-api \
+            wp core install \
+              --url=https://api.localtest.me \
+              --title="JWT E2E Tests API" \
+              --admin_user=admin \
+              --admin_password=password \
+              --admin_email=admin@example.com \
+              --skip-email \
+              --allow-root
+
+          # Activate plugin
+          docker compose -f tests/e2e/docker/docker-compose.yml exec -T wordpress-api \
+            wp plugin activate jwt-auth-pro-wp-rest-api --allow-root
+
+          # Configure CORS
+          docker compose -f tests/e2e/docker/docker-compose.yml exec -T wordpress-api \
+            wp option update jwt_auth_pro_general_settings \
+              --format=json \
+              '{"samesite":"auto","secure":"auto","auto_detect":true,"allowed_origins":"https://client.localtest.me,http://client.localtest.me,https://app.localtest.me,http://app.localtest.me"}' \
+              --allow-root
+
+      - name: Run Playwright tests
+        working-directory: tests/e2e
+        run: npm run test:${{ matrix.test-suite }}
+        env:
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-${{ matrix.test-suite }}
+          path: |
+            tests/e2e/playwright-report/
+            tests/e2e/test-results/
+          retention-days: 7
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots-${{ matrix.test-suite }}
+          path: tests/e2e/test-results/
+          retention-days: 7
+
+      - name: Show Docker logs on failure
+        if: failure()
+        run: |
+          echo "=== Traefik logs ==="
+          docker compose -f tests/e2e/docker/docker-compose.yml logs traefik
+          echo "=== WordPress logs ==="
+          docker compose -f tests/e2e/docker/docker-compose.yml logs wordpress
+          echo "=== WordPress API logs ==="
+          docker compose -f tests/e2e/docker/docker-compose.yml logs wordpress-api
+          echo "=== Client logs ==="
+          docker compose -f tests/e2e/docker/docker-compose.yml logs client
+
+      - name: Stop Docker services
+        if: always()
+        working-directory: tests/e2e/docker
+        run: docker compose down -v
+
+  test-report:
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    if: always()
+    name: Generate Test Report
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results
+
+      - name: Check for test artifacts
+        run: |
+          ls -la all-results/ || echo "No artifacts found"
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const suites = ['same-domain', 'cross-origin', 'protocol-matrix'];
+
+            let comment = '## 🧪 E2E Test Results\n\n';
+            comment += '| Test Suite | Status |\n';
+            comment += '|------------|--------|\n';
+
+            suites.forEach(suite => {
+              const status = '${{ needs.e2e-tests.result }}' === 'success' ? '✅ Passed' : '❌ Failed';
+              comment += `| ${suite} | ${status} |\n`;
+            });
+
+            comment += '\n📊 [View detailed test reports in artifacts](';
+            comment += `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

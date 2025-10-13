@@ -1,0 +1,71 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "🔐 JWT Auth Test Client" [level=1] [ref=e4]
+    - paragraph [ref=e5]: Test JWT authentication with HTTPOnly cookies across different scenarios
+    - generic [ref=e6]:
+      - heading "ℹ️ About This Tool" [level=3] [ref=e7]
+      - paragraph [ref=e8]: This test client simulates a React/SPA application connecting to WordPress REST API with JWT authentication. It tests HTTPOnly cookies, CORS, and token refresh flows.
+  - generic [ref=e9]:
+    - heading "⚙️ Configuration" [level=2] [ref=e10]
+    - generic [ref=e11]:
+      - generic [ref=e12]: WordPress API URL
+      - textbox "WordPress API URL" [ref=e13]:
+        - /placeholder: https://example.com/wp-json/jwt/v1
+        - text: http://localhost:8889/wp-json/jwt/v1
+    - generic [ref=e14]:
+      - generic [ref=e15]: Test Scenario
+      - combobox "Test Scenario" [ref=e16]:
+        - option "Same Domain (Lax)"
+        - option "Cross-Origin (None + Secure)" [selected]
+        - option "Localhost Development (None + No Secure)"
+      - generic [ref=e17]:
+        - generic [ref=e18]: Cross-Origin (None + Secure)
+        - strong [ref=e19]: "Description:"
+        - text: React app on different domain. SameSite=None, Secure=true, CORS required
+        - strong [ref=e20]: "Expected Cookie:"
+        - code [ref=e21]: SameSite=None; Secure
+        - strong [ref=e22]: "CORS Required:"
+        - text: ✅ Yes
+    - button "Load Saved Config" [ref=e23] [cursor=pointer]
+    - button "Save Config" [ref=e24] [cursor=pointer]
+  - generic [ref=e25]:
+    - heading "1️⃣ Login (Get Tokens)" [level=2] [ref=e26]
+    - generic [ref=e27]:
+      - generic [ref=e28]: Username
+      - textbox "Username" [ref=e29]:
+        - /placeholder: admin
+        - text: admin
+    - generic [ref=e30]:
+      - generic [ref=e31]: Password
+      - textbox "Password" [ref=e32]:
+        - /placeholder: password
+        - text: S$genSlH%24GLe0k1hy(C6r3
+    - button "🔑 Login" [active] [ref=e33] [cursor=pointer]
+    - button "Clear" [ref=e34] [cursor=pointer]
+    - generic [ref=e35]: "❌ Error: Failed to fetch"
+  - generic [ref=e36]:
+    - heading "2️⃣ Cookie Information" [level=2] [ref=e37]
+    - button "🍪 Check Cookies" [ref=e38] [cursor=pointer]
+    - button "Show Expected" [ref=e39] [cursor=pointer]
+  - generic [ref=e40]:
+    - heading "3️⃣ Refresh Access Token" [level=2] [ref=e41]
+    - paragraph [ref=e42]: This will use the HTTPOnly cookie automatically (you won't see it in JavaScript)
+    - button "🔄 Refresh Token" [ref=e43] [cursor=pointer]
+    - button "Expire Current Token" [ref=e44] [cursor=pointer]
+  - generic [ref=e45]:
+    - heading "4️⃣ Verify Token" [level=2] [ref=e46]
+    - button "✅ Verify Current Token" [ref=e47] [cursor=pointer]
+  - generic [ref=e48]:
+    - heading "5️⃣ Logout" [level=2] [ref=e49]
+    - button "🚪 Logout (Clear Tokens)" [ref=e50] [cursor=pointer]
+  - generic [ref=e51]:
+    - heading "📊 Network Activity" [level=2] [ref=e52]
+    - button "Clear Logs" [ref=e53] [cursor=pointer]
+    - generic [ref=e54]:
+      - generic [ref=e55]: "[11:07:49 AM] App initialized"
+      - generic [ref=e56]: "[11:07:49 AM] POST http://localhost:8889/wp-json/jwt/v1/token"
+      - generic [ref=e57]: "[11:07:49 AM] Error: Failed to fetch"
+```
