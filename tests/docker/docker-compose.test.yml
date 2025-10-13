@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  # WordPress instance for testing
+  wordpress:
+    image: wordpress:latest
+    container_name: jwt-test-wordpress
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define('JWT_AUTH_PRO_SECRET', 'test-secret-key-for-ci-testing-only-do-not-use-in-production');
+        define('JWT_AUTH_PRO_ACCESS_TTL', 3600);
+        define('JWT_AUTH_PRO_REFRESH_TTL', 2592000);
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+    volumes:
+      - wordpress_data:/var/www/html
+      - ../../:/var/www/html/wp-content/plugins/jwt-auth-pro-wp-rest-api
+    depends_on:
+      - db
+    networks:
+      - jwt-test-network
+
+  # WordPress on different domain (for cross-origin tests)
+  wordpress-api:
+    image: wordpress:latest
+    container_name: jwt-test-wordpress-api
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress_api
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define('JWT_AUTH_PRO_SECRET', 'test-secret-key-for-ci-testing-only-do-not-use-in-production');
+        define('JWT_AUTH_COOKIE_SAMESITE', 'None');
+        define('JWT_AUTH_COOKIE_SECURE', true);
+        define('JWT_AUTH_COOKIE_AUTO_DETECT', false);
+    volumes:
+      - wordpress_api_data:/var/www/html
+      - ../../:/var/www/html/wp-content/plugins/jwt-auth-pro-wp-rest-api
+    depends_on:
+      - db
+    networks:
+      - jwt-test-network
+
+  # Database for WordPress
+  db:
+    image: mysql:8.0
+    container_name: jwt-test-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - jwt-test-network
+
+  # React app (built version for testing)
+  react-app:
+    build:
+      context: ../..
+      dockerfile: tests/docker/Dockerfile.react
+    container_name: jwt-test-react-app
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://wordpress:80/wp-json
+      VITE_WORDPRESS_URL: http://wordpress:80
+    depends_on:
+      - wordpress
+    networks:
+      - jwt-test-network
+
+  # React app for cross-origin testing
+  react-app-cross:
+    build:
+      context: ../..
+      dockerfile: tests/docker/Dockerfile.react
+    container_name: jwt-test-react-app-cross
+    ports:
+      - "5174:5173"
+    environment:
+      VITE_API_URL: http://wordpress-api:80/wp-json
+      VITE_WORDPRESS_URL: http://wordpress-api:80
+    depends_on:
+      - wordpress-api
+    networks:
+      - jwt-test-network
+
+  # Nginx for HTTPS testing
+  nginx-ssl:
+    image: nginx:alpine
+    container_name: jwt-test-nginx-ssl
+    ports:
+      - "443:443"
+      - "8443:8443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - wordpress
+      - wordpress-api
+      - react-app
+      - react-app-cross
+    networks:
+      - jwt-test-network
+
+  # Playwright test runner
+  playwright:
+    build:
+      context: ../..
+      dockerfile: tests/docker/Dockerfile.playwright
+    container_name: jwt-test-playwright
+    volumes:
+      - ../..:/app
+      - /app/node_modules
+    environment:
+      CI: ${CI:-false}
+      PLAYWRIGHT_BASE_URL: http://react-app:5173
+      PLAYWRIGHT_API_URL: http://wordpress:80
+    depends_on:
+      - wordpress
+      - wordpress-api
+      - react-app
+      - react-app-cross
+    networks:
+      - jwt-test-network
+    command: npm run test:e2e
+
+volumes:
+  db_data:
+  wordpress_data:
+  wordpress_api_data:
+
+networks:
+  jwt-test-network:
+    driver: bridge

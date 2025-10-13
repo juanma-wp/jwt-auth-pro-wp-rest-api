@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Auth Test Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: #48bb78;
+        }
+
+        button.secondary:hover {
+            background: #38a169;
+        }
+
+        button.danger {
+            background: #f56565;
+        }
+
+        button.danger:hover {
+            background: #e53e3e;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #f56565;
+        }
+
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border-left: 4px solid #4299e1;
+        }
+
+        .token-display {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .cookie-info {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .cookie-info h3 {
+            color: #d68910;
+            margin-bottom: 10px;
+        }
+
+        .cookie-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .cookie-info li {
+            padding: 5px 0;
+            color: #7d6608;
+        }
+
+        .cookie-info li strong {
+            color: #5d4e03;
+        }
+
+        .info-box {
+            background: #ebf8ff;
+            border: 1px solid #90cdf4;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #2c5282;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .scenario-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .grid-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .grid-item strong {
+            display: block;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .grid-item span {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        code {
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #d53f8c;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🔐 JWT Auth Test Client</h1>
+            <p class="subtitle">Test JWT authentication with HTTPOnly cookies across different scenarios</p>
+
+            <div class="info-box">
+                <h3>ℹ️ About This Tool</h3>
+                <p>This test client simulates a React/SPA application connecting to WordPress REST API with JWT authentication. It tests HTTPOnly cookies, CORS, and token refresh flows.</p>
+            </div>
+        </div>
+
+        <!-- Configuration -->
+        <div class="card">
+            <h2>⚙️ Configuration</h2>
+            <div class="form-group">
+                <label for="apiUrl">WordPress API URL</label>
+                <input type="text" id="apiUrl" value="https://rest-api-tests.wp.local/wp-json/jwt/v1" placeholder="https://example.com/wp-json/jwt/v1">
+            </div>
+
+            <div class="form-group">
+                <label for="scenario">Test Scenario</label>
+                <select id="scenario">
+                    <option value="same-domain">Same Domain (Lax)</option>
+                    <option value="cross-origin" selected>Cross-Origin (None + Secure)</option>
+                    <option value="localhost">Localhost Development (None + No Secure)</option>
+                </select>
+                <div id="scenarioInfo" class="status info" style="margin-top: 10px;"></div>
+            </div>
+
+            <button onclick="loadConfig()">Load Saved Config</button>
+            <button onclick="saveConfig()" class="secondary">Save Config</button>
+        </div>
+
+        <!-- Login -->
+        <div class="card">
+            <h2>1️⃣ Login (Get Tokens)</h2>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" value="admin" placeholder="admin">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" value="S$genSlH%24GLe0k1hy(C6r3" placeholder="password">
+            </div>
+
+            <button onclick="login()">🔑 Login</button>
+            <button onclick="clearStatus()" class="secondary">Clear</button>
+
+            <div id="loginStatus"></div>
+            <div id="tokenDisplay" class="token-display hidden"></div>
+        </div>
+
+        <!-- Cookie Info -->
+        <div class="card">
+            <h2>2️⃣ Cookie Information</h2>
+            <button onclick="checkCookies()">🍪 Check Cookies</button>
+            <button onclick="showExpectedCookie()" class="secondary">Show Expected</button>
+
+            <div id="cookieStatus"></div>
+            <div id="cookieInfo"></div>
+        </div>
+
+        <!-- Refresh Token -->
+        <div class="card">
+            <h2>3️⃣ Refresh Access Token</h2>
+            <p style="color: #718096; margin-bottom: 15px;">
+                This will use the HTTPOnly cookie automatically (you won't see it in JavaScript)
+            </p>
+            <button onclick="refreshToken()">🔄 Refresh Token</button>
+            <button onclick="expireToken()" class="secondary">Expire Current Token</button>
+
+            <div id="refreshStatus"></div>
+        </div>
+
+        <!-- Verify Token -->
+        <div class="card">
+            <h2>4️⃣ Verify Token</h2>
+            <button onclick="verifyToken()">✅ Verify Current Token</button>
+
+            <div id="verifyStatus"></div>
+        </div>
+
+        <!-- Logout -->
+        <div class="card">
+            <h2>5️⃣ Logout</h2>
+            <button onclick="logout()" class="danger">🚪 Logout (Clear Tokens)</button>
+
+            <div id="logoutStatus"></div>
+        </div>
+
+        <!-- Network Logs -->
+        <div class="card">
+            <h2>📊 Network Activity</h2>
+            <button onclick="clearLogs()" class="secondary">Clear Logs</button>
+            <div id="networkLogs" class="token-display" style="max-height: 300px;"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
