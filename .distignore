@@ -13,6 +13,14 @@
 .gitattributes
 .travis.yml
 .distignore
+.husky
+.vscode
+.wp-env
+.wp-env.json
+.wp-env.override.json
+.wp-env.override.json.dist
+.wp-env.override.json.dist.dist
+.claude
 
 # Composer files
 composer.lock
@@ -51,3 +59,11 @@ excalidraw.log
 
 # OS files
 Thumbs.db
+
+/config
+/logs
+/mu-plugins
+*.sh
+composer.json
+
+/tests/e2e/node_modules/
