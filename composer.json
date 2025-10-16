@@ -65,13 +65,15 @@
     "behat": "vendor/bin/behat",
     "behat-init": "vendor/bin/behat --init",
     "toolkit:dev": [
+      "composer run toolkit:clean",
       "ln -s ~/PROJECTS/2025/wp-rest-auth-toolkit vendor/wp-rest-auth/auth-toolkit",
       "@composer dump-autoload"
     ],
     "toolkit:prod": [
-      "rm vendor/wp-rest-auth/auth-toolkit",
+      "composer run toolkit:clean",
       "@composer install --prefer-dist"
-    ]
+    ],
+    "toolkit:clean": "./scripts/clean-toolkit.sh"
   },
   "config": {
     "allow-plugins": {
