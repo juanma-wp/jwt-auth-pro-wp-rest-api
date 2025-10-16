@@ -23,14 +23,21 @@
   ],
   "require": {
     "php": ">=7.4",
-    "wp-rest-auth/auth-toolkit": "dev-main"
+    "wp-rest-auth/auth-toolkit": "@dev"
   },
-  "repositories": [
-    {
+  "repositories": {
+    "local-toolkit": {
+      "type": "path",
+      "url": "/Users/juanmanuelgarrido/PROJECTS/2025/wp-rest-auth-toolkit",
+      "options": {
+        "symlink": true
+      }
+    },
+    "0": {
       "type": "vcs",
       "url": "https://github.com/juanma-wp/wp-rest-auth-toolkit.git"
     }
-  ],
+  },
   "require-dev": {
     "phpunit/phpunit": "^9.0",
     "wp-phpunit/wp-phpunit": "^6.0",
@@ -60,7 +67,10 @@
     "phpstan": "vendor/bin/phpstan analyse --memory-limit=512M",
     "phpstan-baseline": "vendor/bin/phpstan analyse --generate-baseline --memory-limit=512M",
     "behat": "vendor/bin/behat",
-    "behat-init": "vendor/bin/behat --init"
+    "behat-init": "vendor/bin/behat --init",
+    "dev-mode": "./scripts/composer-toolkit.sh dev",
+    "prod-mode": "./scripts/composer-toolkit.sh prod",
+    "check-mode": "./scripts/composer-toolkit.sh check"
   },
   "config": {
     "allow-plugins": {

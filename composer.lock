@@ -4,21 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe9bcc4c0e95539dac3e4f791d7c0281",
+    "content-hash": "a4a1833d84e983256863347042eb90c8",
     "packages": [
         {
             "name": "wp-rest-auth/auth-toolkit",
             "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/juanma-wp/wp-rest-auth-toolkit.git",
-                "reference": "73ee77f127b2818b9aa04b4499830033754fff38"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/juanma-wp/wp-rest-auth-toolkit/zipball/73ee77f127b2818b9aa04b4499830033754fff38",
-                "reference": "73ee77f127b2818b9aa04b4499830033754fff38",
-                "shasum": ""
+                "type": "path",
+                "url": "/Users/juanmanuelgarrido/PROJECTS/2025/wp-rest-auth-toolkit",
+                "reference": "62f9621a3abbc1a7a8ad579142ef1833280d041a"
             },
             "require": {
                 "php": ">=7.4"
@@ -28,7 +22,6 @@
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.12"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -75,11 +68,10 @@
                 "security",
                 "wordpress"
             ],
-            "support": {
-                "source": "https://github.com/juanma-wp/wp-rest-auth-toolkit/tree/main",
-                "issues": "https://github.com/juanma-wp/wp-rest-auth-toolkit/issues"
-            },
-            "time": "2025-10-09T21:57:33+00:00"
+            "transport-options": {
+                "symlink": true,
+                "relative": false
+            }
         }
     ],
     "packages-dev": [
