@@ -26,13 +26,6 @@
     "wp-rest-auth/auth-toolkit": "@dev"
   },
   "repositories": {
-    "local-toolkit": {
-      "type": "path",
-      "url": "/Users/juanmanuelgarrido/PROJECTS/2025/wp-rest-auth-toolkit",
-      "options": {
-        "symlink": true
-      }
-    },
     "0": {
       "type": "vcs",
       "url": "https://github.com/juanma-wp/wp-rest-auth-toolkit.git"
@@ -71,9 +64,14 @@
     "phpstan-baseline": "vendor/bin/phpstan analyse --generate-baseline --memory-limit=512M",
     "behat": "vendor/bin/behat",
     "behat-init": "vendor/bin/behat --init",
-    "dev-mode": "./scripts/composer-toolkit.sh dev",
-    "prod-mode": "./scripts/composer-toolkit.sh prod",
-    "check-mode": "./scripts/composer-toolkit.sh check"
+    "toolkit:dev": [
+      "ln -s ~/PROJECTS/2025/wp-rest-auth-toolkit vendor/wp-rest-auth/auth-toolkit",
+      "@composer dump-autoload"
+    ],
+    "toolkit:prod": [
+      "rm vendor/wp-rest-auth/auth-toolkit",
+      "@composer install --prefer-dist"
+    ]
   },
   "config": {
     "allow-plugins": {
