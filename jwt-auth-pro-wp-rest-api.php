@@ -109,9 +109,14 @@ class JWT_Auth_Pro {
 	 * Load plugin dependencies.
 	 */
 	private function load_dependencies(): void {
+		// Load non-class files that contain helper functions.
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/helpers.php';
+
+		// The JWT_Auth_Pro_Admin_Settings class is namespaced but uses WordPress naming convention.
+		// It will be autoloaded via Composer classmap when needed (JWTAuthPro\JWT_Auth_Pro_Admin_Settings).
+
+		// Legacy files without namespaces still need require_once.
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-jwt-cookie-config.php';
-		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-admin-settings.php';
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-auth-jwt.php';
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-openapi-spec.php';
 	}
@@ -120,7 +125,7 @@ class JWT_Auth_Pro {
 	 * Setup plugin constants.
 	 */
 	private function setup_constants(): void {
-		$jwt_settings = JWT_Auth_Pro_Admin_Settings::get_jwt_settings();
+		$jwt_settings = JWTAuthPro\JWT_Auth_Pro_Admin_Settings::get_jwt_settings();
 
 		// Setup JWT constants from admin settings or fallback to wp-config.php.
 		if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
@@ -151,7 +156,7 @@ class JWT_Auth_Pro {
 	private function init_components(): void {
 		// Initialize admin settings.
 		if ( is_admin() ) {
-			new JWT_Auth_Pro_Admin_Settings();
+			new JWTAuthPro\JWT_Auth_Pro_Admin_Settings();
 		}
 
 		$this->auth_jwt     = new Auth_JWT();
@@ -181,7 +186,7 @@ class JWT_Auth_Pro {
 	 */
 	private function init_cors(): void {
 		// Get CORS settings from admin panel.
-		$general_settings = JWT_Auth_Pro_Admin_Settings::get_general_settings();
+		$general_settings = JWTAuthPro\JWT_Auth_Pro_Admin_Settings::get_general_settings();
 		$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
 
 		// Enable CORS using the toolkit's Cors class.
@@ -275,8 +280,8 @@ class JWT_Auth_Pro {
 		$wpdb->query( "DROP TABLE IF EXISTS {$table_name}" );
 
 		// Delete WordPress options.
-		delete_option( JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS );
-		delete_option( JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS );
+		delete_option( JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS );
+		delete_option( JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS );
 		delete_option( 'jwt_auth_cookie_config' );
 
 		// Clear any transients that might have been set.

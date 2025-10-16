@@ -54,7 +54,10 @@
   "autoload": {
     "psr-4": {
       "JWTAuthPro\\": "includes/"
-    }
+    },
+    "classmap": [
+      "includes/class-jwt-auth-pro-admin-settings.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

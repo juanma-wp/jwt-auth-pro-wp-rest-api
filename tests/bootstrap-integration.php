@@ -68,6 +68,11 @@ function _manually_load_jwt_plugin() {
 		define( 'JWT_AUTH_REFRESH_TTL', 86400 );
 	}
 
+	// Load the composer autoloader first
+	if ( file_exists( dirname( __DIR__ ) . '/vendor/autoload.php' ) ) {
+		require_once dirname( __DIR__ ) . '/vendor/autoload.php';
+	}
+
 	// Load the plugin
 	require dirname( __DIR__ ) . '/jwt-auth-pro-wp-rest-api.php';
 }

@@ -5,8 +5,8 @@
  *
  * This class handles the WordPress admin interface for configuring JWT authentication
  * settings with advanced security features including refresh token management.
- * It provides options for JWT token configuration, CORS settings, security
- * options, and other plugin-related settings through the WordPress settings API.
+ * It extends BaseAdminSettings from wp-rest-auth-toolkit to reuse common functionality
+ * for general settings and cookie configuration display.
  *
  * The class creates admin pages, registers settings, validates input, and provides
  * methods to retrieve configuration values used throughout the plugin.
@@ -15,10 +15,14 @@
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later
- * @since     1.0.0
+ * @since     2.0.0
  *
  * @link      https://github.com/juanma-wp/jwt-auth-pro
  */
+
+namespace JWTAuthPro;
+
+use WPRestAuth\AuthToolkit\Admin\BaseAdminSettings;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,14 +30,89 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Admin settings class for JWT Auth Pro plugin.
+ * Extends BaseAdminSettings to leverage common settings functionality.
  */
-class JWT_Auth_Pro_Admin_Settings {
+class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 
 
 
 	const OPTION_GROUP            = 'jwt_auth_pro_settings';
 	const OPTION_JWT_SETTINGS     = 'jwt_auth_pro_settings';
 	const OPTION_GENERAL_SETTINGS = 'jwt_auth_pro_general_settings';
+	const OPTION_COOKIE_SETTINGS  = 'jwt_auth_cookie_config';
+
+	/**
+	 * Implement abstract methods from BaseAdminSettings
+	 */
+
+	/**
+	 * Get the option group name for settings.
+	 *
+	 * @return string The option group name.
+	 */
+	protected function getOptionGroup(): string {
+		return self::OPTION_GROUP;
+	}
+
+	/**
+	 * Get the general settings option name.
+	 *
+	 * @return string The general settings option name.
+	 */
+	protected function getGeneralSettingsOption(): string {
+		return self::OPTION_GENERAL_SETTINGS;
+	}
+
+	/**
+	 * Get the cookie settings option name.
+	 *
+	 * @return string The cookie settings option name.
+	 */
+	protected function getCookieSettingsOption(): string {
+		return self::OPTION_COOKIE_SETTINGS;
+	}
+
+	/**
+	 * Get the admin page slug.
+	 *
+	 * @return string The admin page slug.
+	 */
+	protected function getPageSlug(): string {
+		return 'jwt-auth-pro-wp-rest-api';
+	}
+
+	/**
+	 * Get the cookie configuration class name.
+	 *
+	 * @return string The cookie configuration class name.
+	 */
+	protected function getCookieConfigClass(): string {
+		return 'JWT_Cookie_Config';
+	}
+
+	/**
+	 * Override to provide the cookie name from Auth_JWT class
+	 */
+	protected function getCookieName(): ?string {
+		if ( class_exists( 'Auth_JWT' ) ) {
+			return Auth_JWT::REFRESH_COOKIE_NAME;
+		}
+		return 'wp_jwt_refresh_token';
+	}
+
+	/**
+	 * Override to provide JWT-specific constant prefix
+	 */
+	protected function getCookieConstantPrefix(): string {
+		return 'JWT_AUTH_COOKIE';
+	}
+
+	/**
+	 * Override to provide JWT-specific filter prefix
+	 */
+	protected function getCookieFilterPrefix(): string {
+		return 'jwt_auth_cookie';
+	}
 
 	/**
 	 * Constructor. Initialize admin hooks.
@@ -62,35 +141,12 @@ class JWT_Auth_Pro_Admin_Settings {
 	 * Register WordPress settings and fields.
 	 */
 	public function register_settings(): void {
-		// Register setting groups.
+		// Register JWT-specific settings.
 		register_setting(
 			self::OPTION_GROUP,
 			self::OPTION_JWT_SETTINGS,
 			array(
 				'sanitize_callback' => array( $this, 'sanitize_jwt_settings' ),
-			)
-		);
-
-		register_setting(
-			self::OPTION_GROUP,
-			self::OPTION_GENERAL_SETTINGS,
-			array(
-				'sanitize_callback' => array( $this, 'sanitize_general_settings' ),
-			)
-		);
-
-		register_setting(
-			self::OPTION_GROUP,
-			'jwt_auth_cookie_config',
-			array(
-				'type'              => 'array',
-				'sanitize_callback' => array( $this, 'sanitize_cookie_settings' ),
-				'default'           => array(
-					'samesite' => 'auto',
-					'secure'   => 'auto',
-					'path'     => 'auto',
-					'domain'   => 'auto',
-				),
 			)
 		);
 
@@ -126,39 +182,11 @@ class JWT_Auth_Pro_Admin_Settings {
 			'jwt_settings'
 		);
 
-		// General Settings Section.
-		add_settings_section(
-			'general_settings',
-			'General Settings',
-			array( $this, 'general_settings_section' ),
-			'jwt-auth-pro-wp-rest-api-general'
-		);
+		// Use parent class for General Settings (no duplication!).
+		$this->registerGeneralSettings( 'jwt-auth-pro-wp-rest-api-general' );
 
-		add_settings_field(
-			'enable_debug_logging',
-			'Enable Debug Logging',
-			array( $this, 'enable_debug_logging_field' ),
-			'jwt-auth-pro-wp-rest-api-general',
-			'general_settings'
-		);
-
-		add_settings_field(
-			'cors_allowed_origins',
-			'CORS Allowed Origins',
-			array( $this, 'cors_allowed_origins_field' ),
-			'jwt-auth-pro-wp-rest-api-general',
-			'general_settings'
-		);
-
-		// Cookie Configuration Section (on its own tab).
-		add_settings_section(
-			'cookie_config_section',
-			'Cookie Configuration',
-			array( $this, 'cookie_config_section' ),
-			'jwt-auth-pro-wp-rest-api-cookies'
-		);
-
-		// No form fields - read-only display only.
+		// Use parent class for Cookie Settings (no duplication!).
+		$this->registerCookieSettings( 'jwt-auth-pro-wp-rest-api-cookies' );
 	}
 
 	/**
@@ -240,7 +268,7 @@ class JWT_Auth_Pro_Admin_Settings {
 						submit_button();
 					} elseif ( 'cookies' === $active_tab ) {
 						do_settings_sections( 'jwt-auth-pro-wp-rest-api-cookies' );
-						submit_button();
+						// No submit button for read-only cookie settings.
 					}
 					?>
 				</form>
@@ -427,14 +455,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	}
 
 	/**
-	 * Render general settings section description.
-	 */
-	public function general_settings_section(): void {
-		echo '<p>General plugin settings and security options.</p>';
-	}
-
-	/**
-	 * Field callbacks.
+	 * JWT-specific field callbacks.
 	 */
 
 	/**
@@ -563,33 +584,6 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	}
 
 	/**
-	 * Render the debug logging enable field.
-	 */
-	public function enable_debug_logging_field(): void {
-		$settings = get_option( self::OPTION_GENERAL_SETTINGS, array() );
-		$checked  = isset( $settings['enable_debug_logging'] ) && $settings['enable_debug_logging'];
-		?>
-		<label>
-			<input type="checkbox" name="<?php echo esc_attr( self::OPTION_GENERAL_SETTINGS ); ?>[enable_debug_logging]" value="1" <?php checked( $checked ); ?> />
-			Enable detailed logging for authentication events
-		</label>
-		<p class="description">Logs will be written to your WordPress debug log. Ensure WP_DEBUG_LOG is enabled.</p>
-		<?php
-	}
-
-	/**
-	 * Render the CORS allowed origins field.
-	 */
-	public function cors_allowed_origins_field(): void {
-		$settings = get_option( self::OPTION_GENERAL_SETTINGS, array() );
-		$value    = $settings['cors_allowed_origins'] ?? '';
-		?>
-		<textarea name="<?php echo esc_attr( self::OPTION_GENERAL_SETTINGS ); ?>[cors_allowed_origins]" class="large-text" rows="5" placeholder=""><?php echo esc_textarea( $value ); ?></textarea>
-		<p class="description">One origin (for example: https://example.com or http://localhost:5174) per line. Use * to allow all origins (not recommended for production).</p>
-		<?php
-	}
-
-	/**
 	 * Sanitization callbacks.
 	 */
 	/**
@@ -632,58 +626,6 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	}
 
 	/**
-	 * Sanitize general settings input.
-	 *
-	 * @param array|null $input Raw input values.
-	 * @return array Sanitized values.
-	 */
-	public function sanitize_general_settings( $input ): array {
-		// Get existing settings to preserve them when saving other tabs.
-		$existing = get_option( self::OPTION_GENERAL_SETTINGS, array() );
-
-		// If no input or not an array (saving from a different tab), return existing.
-		if ( ! is_array( $input ) || empty( $input ) ) {
-			return $existing;
-		}
-
-		$sanitized = array();
-
-		$sanitized['enable_debug_logging'] = isset( $input['enable_debug_logging'] ) && $input['enable_debug_logging'];
-
-		if ( isset( $input['cors_allowed_origins'] ) ) {
-			$origins                           = sanitize_textarea_field( $input['cors_allowed_origins'] );
-			$sanitized['cors_allowed_origins'] = $origins;
-		}
-
-		return $sanitized;
-	}
-
-	/**
-	 * Sanitize cookie settings input.
-	 *
-	 * Cookie settings are read-only and managed automatically by JWT_Cookie_Config.
-	 * This method exists to satisfy WordPress settings API requirements.
-	 *
-	 * @param array|null $input Raw input values.
-	 * @return array Sanitized values.
-	 */
-	public function sanitize_cookie_settings( $input ): array {
-		// Get existing settings to preserve them.
-		$existing = get_option(
-			'jwt_auth_cookie_config',
-			array(
-				'samesite' => 'auto',
-				'secure'   => 'auto',
-				'path'     => 'auto',
-				'domain'   => 'auto',
-			)
-		);
-
-		// Cookie settings are read-only, so just return the existing values.
-		return $existing;
-	}
-
-	/**
 	 * Helper methods to get settings.
 	 */
 	/**
@@ -703,16 +645,17 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 	}
 
 	/**
-	 * Get general settings with default values.
+	 * Get general settings.
 	 *
-	 * @return array General settings.
+	 * @return array General settings array with defaults.
 	 */
 	public static function get_general_settings(): array {
 		return get_option(
 			self::OPTION_GENERAL_SETTINGS,
 			array(
-				'enable_debug_logging' => false,
+				'cors_enabled'         => false,
 				'cors_allowed_origins' => '',
+				'debug_mode'           => false,
 			)
 		);
 	}
@@ -744,153 +687,5 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 		}
 
 		return $location;
-	}
-
-	/**
-	 * Render cookie configuration section (read-only display).
-	 */
-	public function cookie_config_section(): void {
-		if ( ! class_exists( 'JWT_Cookie_Config' ) ) {
-			?>
-			<div class="notice notice-error inline">
-				<p><?php esc_html_e( 'Cookie configuration class not loaded. Please check plugin installation.', 'jwt-auth-pro-wp-rest-api' ); ?></p>
-			</div>
-			<?php
-			return;
-		}
-
-		$environment    = JWT_Cookie_Config::get_environment();
-		$current_config = JWT_Cookie_Config::get_config();
-
-		// Override with actual runtime values used by Auth_JWT class.
-		if ( class_exists( 'Auth_JWT' ) ) {
-			$current_config['name'] = Auth_JWT::REFRESH_COOKIE_NAME;
-		}
-
-		// In development, show the actual secure flag based on current request.
-		// (config might show cached value from different context).
-		if ( 'development' === $environment ) {
-			$current_config['secure'] = is_ssl();
-		}
-		?>
-		<p style="font-size: 14px; line-height: 1.6;">
-			<?php esc_html_e( 'Cookie security settings are automatically configured based on your environment. Configuration can be customized using constants or filters.', 'jwt-auth-pro-wp-rest-api' ); ?>
-			<a href="https://github.com/juanma-wp/jwt-auth-pro-wp-rest-api/blob/main/DOCS/cookie-configuration.md" target="_blank" style="text-decoration: none;">
-				<?php esc_html_e( 'View Documentation', 'jwt-auth-pro-wp-rest-api' ); ?> &rarr;
-			</a>
-		</p>
-
-		<!-- Detected Environment -->
-		<div class="notice notice-info inline" style="margin: 20px 0 15px 0;">
-			<h3 style="margin: 0 0 10px 0;">🌍 <?php esc_html_e( 'Detected Environment', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
-			<p style="font-size: 16px; margin: 5px 0;">
-				<code style="font-size: 15px; padding: 5px 10px; background: #fff; border-radius: 3px; font-weight: bold;">
-					<?php echo esc_html( ucfirst( $environment ) ); ?>
-				</code>
-			</p>
-			<p class="description" style="margin-top: 8px;">
-				<?php
-				switch ( $environment ) {
-					case 'development':
-						esc_html_e( 'Detected via: localhost, *.local, *.test domains, or WP_DEBUG=true', 'jwt-auth-pro-wp-rest-api' );
-						break;
-					case 'staging':
-						esc_html_e( 'Detected via: domain contains "staging", "dev", or "test"', 'jwt-auth-pro-wp-rest-api' );
-						break;
-					case 'production':
-						esc_html_e( 'Detected via: standard production domain', 'jwt-auth-pro-wp-rest-api' );
-						break;
-				}
-				?>
-			</p>
-		</div>
-
-		<!-- Active Cookie Configuration -->
-		<div class="notice notice-success inline" style="margin: 15px 0;">
-			<h3 style="margin: 0 0 10px 0;">🍪 <?php esc_html_e( 'Active Cookie Configuration', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
-			<table class="widefat striped" style="max-width: 100%; margin-top: 10px;">
-				<thead>
-					<tr>
-						<th style="width: 25%;"><?php esc_html_e( 'Setting', 'jwt-auth-pro-wp-rest-api' ); ?></th>
-						<th style="width: 20%;"><?php esc_html_e( 'Value', 'jwt-auth-pro-wp-rest-api' ); ?></th>
-						<th><?php esc_html_e( 'Description', 'jwt-auth-pro-wp-rest-api' ); ?></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><strong><?php esc_html_e( 'Cookie Name', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
-						<td><code><?php echo esc_html( $current_config['name'] ); ?></code></td>
-						<td><?php esc_html_e( 'Name of the HTTP-only cookie storing the refresh token', 'jwt-auth-pro-wp-rest-api' ); ?></td>
-					</tr>
-					<tr>
-						<td><strong><?php esc_html_e( 'SameSite', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
-						<td><code><?php echo esc_html( $current_config['samesite'] ); ?></code></td>
-						<td>
-							<?php
-							if ( 'None' === $current_config['samesite'] ) {
-								esc_html_e( 'Cross-origin allowed (for SPAs on different domains)', 'jwt-auth-pro-wp-rest-api' );
-							} elseif ( 'Lax' === $current_config['samesite'] ) {
-								esc_html_e( 'Relaxed protection, top-level navigation allowed', 'jwt-auth-pro-wp-rest-api' );
-							} else {
-								esc_html_e( 'Strict protection, same-origin requests only', 'jwt-auth-pro-wp-rest-api' );
-							}
-							?>
-						</td>
-					</tr>
-					<tr>
-						<td><strong><?php esc_html_e( 'Secure', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
-						<td><code><?php echo esc_html( $current_config['secure'] ? 'true' : 'false' ); ?></code></td>
-						<td><?php echo esc_html( $current_config['secure'] ? __( 'Cookie only sent over HTTPS', 'jwt-auth-pro-wp-rest-api' ) : __( 'Cookie sent over HTTP (⚠️ not recommended for production)', 'jwt-auth-pro-wp-rest-api' ) ); ?></td>
-					</tr>
-					<tr>
-						<td><strong><?php esc_html_e( 'HttpOnly', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
-						<td><code><?php echo esc_html( $current_config['httponly'] ? 'true' : 'false' ); ?></code></td>
-						<td><?php esc_html_e( 'Cookie not accessible via JavaScript (XSS protection)', 'jwt-auth-pro-wp-rest-api' ); ?></td>
-					</tr>
-					<tr>
-						<td><strong><?php esc_html_e( 'Path', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
-						<td><code><?php echo esc_html( $current_config['path'] ); ?></code></td>
-						<td><?php esc_html_e( 'URL path scope where cookie is valid', 'jwt-auth-pro-wp-rest-api' ); ?></td>
-					</tr>
-					<tr>
-						<td><strong><?php esc_html_e( 'Domain', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
-						<td><code><?php echo esc_html( $current_config['domain'] ? $current_config['domain'] : '(current domain)' ); ?></code></td>
-						<td><?php esc_html_e( 'Domain scope where cookie is valid', 'jwt-auth-pro-wp-rest-api' ); ?></td>
-					</tr>
-					<tr>
-						<td><strong><?php esc_html_e( 'Lifetime', 'jwt-auth-pro-wp-rest-api' ); ?></strong></td>
-						<td><code><?php echo esc_html( human_time_diff( 0, $current_config['lifetime'] ) ); ?></code></td>
-						<td><?php esc_html_e( 'Duration the refresh token remains valid', 'jwt-auth-pro-wp-rest-api' ); ?></td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-
-		<!-- Configuration Priority -->
-		<div class="notice notice-info inline" style="margin: 15px 0;">
-			<h3 style="margin: 0 0 10px 0;">⚙️ <?php esc_html_e( 'Configuration Priority', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
-			<p><?php esc_html_e( 'Settings are applied in the following order (highest to lowest priority):', 'jwt-auth-pro-wp-rest-api' ); ?></p>
-			<ol style="line-height: 2.2; margin: 10px 0 10px 20px;">
-				<li>
-					<strong><?php esc_html_e( 'Constants', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
-					<code style="font-size: 12px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">JWT_AUTH_COOKIE_*</code>
-					<em class="description"> — <?php esc_html_e( 'in wp-config.php', 'jwt-auth-pro-wp-rest-api' ); ?></em>
-				</li>
-				<li>
-					<strong><?php esc_html_e( 'Filters', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
-					<code style="font-size: 12px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">jwt_auth_cookie_*</code>
-					<em class="description"> — <?php esc_html_e( 'in theme/plugin code', 'jwt-auth-pro-wp-rest-api' ); ?></em>
-				</li>
-				<li>
-					<strong><?php esc_html_e( 'Environment Defaults', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
-					<em class="description"> — <?php esc_html_e( 'auto-detected based on environment', 'jwt-auth-pro-wp-rest-api' ); ?></em>
-				</li>
-				<li>
-					<strong><?php esc_html_e( 'Hard-coded Defaults', 'jwt-auth-pro-wp-rest-api' ); ?></strong>
-					<em class="description"> — <?php esc_html_e( 'fallback values', 'jwt-auth-pro-wp-rest-api' ); ?></em>
-				</li>
-			</ol>
-		</div>
-		<?php
 	}
 }

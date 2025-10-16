@@ -292,7 +292,7 @@ class MainPluginTest extends TestCase
 			$property->setAccessible(true);
 			$admin_settings = $property->getValue($this->plugin);
 			// May be null if not in admin context.
-			$this->assertTrue(null === $admin_settings || $admin_settings instanceof JWT_Auth_Pro_Admin_Settings);
+			$this->assertTrue(null === $admin_settings || $admin_settings instanceof JWTAuthPro\JWT_Auth_Pro_Admin_Settings);
 		}
 	}
 
