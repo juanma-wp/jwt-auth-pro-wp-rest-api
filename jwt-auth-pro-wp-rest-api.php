@@ -351,7 +351,7 @@ class JWT_Auth_Pro {
 	 */
 	public function check_jwt_secret(): void {
 		// Check if secret is defined in constant.
-		if ( defined( 'JWT_AUTH_PRO_SECRET' ) && ! empty( JWT_AUTH_PRO_SECRET ) ) {
+		if ( defined( 'JWT_AUTH_PRO_SECRET' ) && JWT_AUTH_PRO_SECRET !== '' ) {
 			return;
 		}
 
