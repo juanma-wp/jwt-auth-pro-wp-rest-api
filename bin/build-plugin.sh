@@ -3,8 +3,14 @@
 
 set -e
 
+echo "==> Removing symlink if it exists..."
+if [ -L "vendor/wp-rest-auth/auth-toolkit" ]; then
+    rm -f vendor/wp-rest-auth/auth-toolkit
+    echo "Symlink removed"
+fi
+
 echo "==> Installing production dependencies..."
-composer install --no-dev --prefer-dist --no-interaction
+composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
 echo "==> Checking for zip utility..."
 if ! command -v zip > /dev/null 2>&1; then

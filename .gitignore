@@ -36,3 +36,5 @@ debug.log
 .claude/
 CLAUDE.local.md
 .phpunit.result.cache
+
+build/

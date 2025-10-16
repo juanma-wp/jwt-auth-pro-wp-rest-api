@@ -149,7 +149,7 @@ class Auth_JWT {
 	public function generate_access_token( int $user_id, array $extra_claims = array() ): string {
 		// Get JWT settings with fallbacks.
 		// Always use direct database query for REST API requests.
-		$jwt_settings = get_option( 'jwt_auth_jwt', array() );
+		$jwt_settings = get_option( 'jwt_auth_pro_settings', array() );
 		$secret       = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : ( $jwt_settings['secret_key'] ?? '' );
 		$ttl          = defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ? JWT_AUTH_PRO_ACCESS_TTL : ( $jwt_settings['access_token_expiry'] ?? 3600 );
 
@@ -214,7 +214,7 @@ class Auth_JWT {
 
 		// Get JWT settings with fallbacks.
 		// Always use direct database query for REST API requests.
-		$jwt_settings = get_option( 'jwt_auth_jwt', array() );
+		$jwt_settings = get_option( 'jwt_auth_pro_settings', array() );
 		$access_ttl   = defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ? JWT_AUTH_PRO_ACCESS_TTL : ( $jwt_settings['access_token_expiry'] ?? 3600 );
 		$refresh_ttl  = defined( 'JWT_AUTH_PRO_REFRESH_TTL' ) ? JWT_AUTH_PRO_REFRESH_TTL : ( $jwt_settings['refresh_token_expiry'] ?? 2592000 );
 
