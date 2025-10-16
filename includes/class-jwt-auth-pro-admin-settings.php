@@ -87,15 +87,15 @@ class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 	 * @return string The cookie configuration class name.
 	 */
 	protected function getCookieConfigClass(): string {
-		return 'JWT_Cookie_Config';
+		return '\JWT_Cookie_Config';
 	}
 
 	/**
 	 * Override to provide the cookie name from Auth_JWT class
 	 */
 	protected function getCookieName(): ?string {
-		if ( class_exists( 'Auth_JWT' ) ) {
-			return Auth_JWT::REFRESH_COOKIE_NAME;
+		if ( class_exists( '\Auth_JWT' ) ) {
+			return \Auth_JWT::REFRESH_COOKIE_NAME;
 		}
 		return 'wp_jwt_refresh_token';
 	}
