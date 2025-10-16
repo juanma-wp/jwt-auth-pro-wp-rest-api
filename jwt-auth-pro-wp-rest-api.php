@@ -123,30 +123,26 @@ class JWT_Auth_Pro {
 
 	/**
 	 * Setup plugin constants.
+	 *
+	 * These constants can be defined in wp-config.php for early availability.
+	 * Admin panel settings will be used at runtime when actually needed.
 	 */
 	private function setup_constants(): void {
-		$jwt_settings = JWTAuthPro\JWT_Auth_Pro_Admin_Settings::get_jwt_settings();
+		// Don't load admin settings here - use wp-config.php constants or defaults.
+		// Admin settings will be checked lazily when needed (e.g., in Auth_JWT class).
 
-		// Setup JWT constants from admin settings or fallback to wp-config.php.
-		if ( ! defined( 'JWT_AUTH_PRO_SECRET' ) ) {
-			$secret = $jwt_settings['secret_key'] ?? '';
-			if ( ! empty( $secret ) ) {
-				define( 'JWT_AUTH_PRO_SECRET', $secret );
-			} else {
-				// Check if it's defined in wp-config.php as fallback.
-				add_action( 'admin_notices', array( $this, 'missing_config_notice' ) );
-				// Don't return early - let the plugin initialize even without a secret.
-				// The auth endpoints won't work but at least REST API won't break.
-			}
-		}
+		// The secret is critical and must be set either in wp-config.php or admin.
+		// We'll check for it when actually needed, not during initialization.
+		// Don't define JWT_AUTH_PRO_SECRET here - let Auth_JWT check admin settings when needed.
+		// This avoids loading admin classes during plugin initialization.
 
-		// Set token expiration times from admin settings.
+		// Set default token expiration times if not defined in wp-config.php.
 		if ( ! defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ) {
-			define( 'JWT_AUTH_PRO_ACCESS_TTL', $jwt_settings['access_token_expiry'] ?? 3600 );
+			define( 'JWT_AUTH_PRO_ACCESS_TTL', 3600 ); // 1 hour default
 		}
 
 		if ( ! defined( 'JWT_AUTH_PRO_REFRESH_TTL' ) ) {
-			define( 'JWT_AUTH_PRO_REFRESH_TTL', $jwt_settings['refresh_token_expiry'] ?? 2592000 );
+			define( 'JWT_AUTH_PRO_REFRESH_TTL', 2592000 ); // 30 days default
 		}
 	}
 
@@ -156,7 +152,22 @@ class JWT_Auth_Pro {
 	private function init_components(): void {
 		// Initialize admin settings.
 		if ( is_admin() ) {
-			new JWTAuthPro\JWT_Auth_Pro_Admin_Settings();
+			// Check if the base class exists before trying to instantiate.
+			if ( class_exists( 'WPRestAuth\AuthToolkit\Admin\BaseAdminSettings' ) ) {
+				new JWTAuthPro\JWT_Auth_Pro_Admin_Settings();
+			} else {
+				// Log error or show admin notice about missing dependency.
+				add_action(
+					'admin_notices',
+					function () {
+						?>
+					<div class="notice notice-error">
+						<p><?php esc_html_e( 'JWT Auth Pro: Required dependency "wp-rest-auth-toolkit" is not loaded. Please check your installation.', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+					</div>
+						<?php
+					}
+				);
+			}
 		}
 
 		$this->auth_jwt     = new Auth_JWT();
@@ -170,6 +181,11 @@ class JWT_Auth_Pro {
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'maybe_auth_bearer' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+
+		// Check if JWT secret is configured and show admin notice if not.
+		if ( is_admin() ) {
+			add_action( 'admin_init', array( $this, 'check_jwt_secret' ) );
+		}
 
 		// Initialize CORS support.
 		$this->init_cors();
@@ -185,8 +201,9 @@ class JWT_Auth_Pro {
 	 * - Pattern matching for origins
 	 */
 	private function init_cors(): void {
-		// Get CORS settings from admin panel.
-		$general_settings = JWTAuthPro\JWT_Auth_Pro_Admin_Settings::get_general_settings();
+		// Get CORS settings directly from database (lazy loading).
+		// Avoid loading admin settings class during initialization.
+		$general_settings = get_option( 'jwt_auth_pro_general_settings', array() );
 		$allowed_origins  = $general_settings['cors_allowed_origins'] ?? '';
 
 		// Enable CORS using the toolkit's Cors class.
@@ -326,6 +343,26 @@ class JWT_Auth_Pro {
 	 */
 	public function create_jwt_tables(): void {
 		$this->create_refresh_tokens_table();
+	}
+
+	/**
+	 * Check if JWT secret is configured.
+	 * Shows admin notice if not configured.
+	 */
+	public function check_jwt_secret(): void {
+		// Check if secret is defined in constant.
+		if ( defined( 'JWT_AUTH_PRO_SECRET' ) && ! empty( JWT_AUTH_PRO_SECRET ) ) {
+			return;
+		}
+
+		// Check if secret is in admin settings (lazy check without loading admin class).
+		$jwt_settings = get_option( 'jwt_auth_pro_settings', array() );
+		if ( ! empty( $jwt_settings['secret_key'] ) ) {
+			return;
+		}
+
+		// No secret found - show admin notice.
+		add_action( 'admin_notices', array( $this, 'missing_config_notice' ) );
 	}
 
 	/**

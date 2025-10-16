@@ -54,16 +54,24 @@ class Auth_JWT {
 	public function __construct() {
 		global $wpdb;
 
-		// Get secret - fail fast if not configured.
-		$secret = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : '';
-
-		if ( empty( $secret ) ) {
-			// Secret not configured - skip initialization.
-			// Admin notice is handled by JWT_Auth_Pro::missing_config_notice().
-			return;
+		// Get secret but don't fail if not configured yet.
+		// Use a placeholder if not set - actual operations will check for valid secret.
+		$secret = '';
+		if ( defined( 'JWT_AUTH_PRO_SECRET' ) ) {
+			$secret = JWT_AUTH_PRO_SECRET;
+		} else {
+			// Try to get from database (lazy load).
+			$jwt_settings = get_option( 'jwt_auth_pro_settings', array() );
+			$secret       = $jwt_settings['secret_key'] ?? '';
 		}
 
-		// Initialize refresh token manager with validated secret.
+		// If no secret found, use a placeholder to avoid fatal error.
+		// Actual JWT operations will validate the secret when needed.
+		if ( empty( $secret ) ) {
+			$secret = 'placeholder-secret-not-configured';
+		}
+
+		// Initialize refresh token manager.
 		$this->refresh_token_manager = new \WPRestAuth\AuthToolkit\Token\RefreshTokenManager(
 			$wpdb->prefix . 'jwt_refresh_tokens',
 			$secret,
@@ -379,7 +387,22 @@ class Auth_JWT {
 	 * @return WP_User|WP_Error User object or error.
 	 */
 	public function authenticate_bearer( string $token ) {
-		$payload = wp_auth_jwt_decode( $token, JWT_AUTH_PRO_SECRET );
+		// Get secret lazily - check constant first, then admin settings.
+		$secret = defined( 'JWT_AUTH_PRO_SECRET' ) ? JWT_AUTH_PRO_SECRET : '';
+		if ( empty( $secret ) ) {
+			$jwt_settings = get_option( 'jwt_auth_pro_settings', array() );
+			$secret       = $jwt_settings['secret_key'] ?? '';
+		}
+
+		if ( empty( $secret ) ) {
+			return new WP_Error(
+				'jwt_secret_missing',
+				'JWT secret not configured',
+				array( 'status' => 500 )
+			);
+		}
+
+		$payload = wp_auth_jwt_decode( $token, $secret );
 
 		if ( ! $payload ) {
 			return new WP_Error(
