@@ -4,6 +4,7 @@
 
 # wp-env
 /.wp-env/
+.wp-env.override.json
 
 # Test coverage
 /tests/coverage/
