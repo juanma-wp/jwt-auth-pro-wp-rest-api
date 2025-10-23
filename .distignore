@@ -67,3 +67,6 @@ Thumbs.db
 composer.json
 
 /tests/e2e/node_modules/
+scripts/clean-toolkit.sh
+.husky/_/husky.sh
+mu-plugins/enable-permalinks.php

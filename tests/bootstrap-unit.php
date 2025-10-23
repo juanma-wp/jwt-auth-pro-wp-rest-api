@@ -11,7 +11,7 @@
  * methods without relying on WordPress core functionality, database connections,
  * or complex integrations.
  *
- * @package   JWTAuthProWPRestAPI
+ * @package   JM_JWTAuthProWPRestAPI
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later

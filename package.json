@@ -1,5 +1,5 @@
 {
-  "name": "jwt-auth-pro-wp-rest-api",
+  "name": "juanma-jwt-auth-pro",
   "version": "1.1.0",
   "description": "Simple, secure JWT authentication for WordPress REST API",
   "private": true,
@@ -14,17 +14,17 @@
     "env:reset": "wp-env destroy && wp-env start",
     "env:update": "wp-env start --update",
     "env:bash": "wp-env run cli bash",
-    "composer:install": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer install --no-interaction --prefer-dist'",
-    "composer:update": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api bash -lc 'composer update --no-interaction --prefer-dist'",
-    "test:setup": "wp-env run tests-cli bash -c 'wp plugin activate jwt-auth-pro-wp-rest-api 2>/dev/null || true'",
+    "composer:install": "wp-env run tests-cli --env-cwd=wp-content/plugins/juanma-jwt-auth-pro bash -lc 'composer install --no-interaction --prefer-dist'",
+    "composer:update": "wp-env run tests-cli --env-cwd=wp-content/plugins/juanma-jwt-auth-pro bash -lc 'composer update --no-interaction --prefer-dist'",
+    "test:setup": "wp-env run tests-cli bash -c 'wp plugin activate juanma-jwt-auth-pro 2>/dev/null || true'",
     "test": "npm run test:setup && npm run test:unit && npm run test:integration && npm run test:behat",
-    "test:unit": "npm run test:setup && wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=unit --testdox",
-    "test:integration": "npm run test:setup && wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api vendor/bin/phpunit --testsuite=integration --testdox",
+    "test:unit": "npm run test:setup && wp-env run tests-cli --env-cwd=wp-content/plugins/juanma-jwt-auth-pro vendor/bin/phpunit --testsuite=unit --testdox",
+    "test:integration": "npm run test:setup && wp-env run tests-cli --env-cwd=wp-content/plugins/juanma-jwt-auth-pro vendor/bin/phpunit --testsuite=integration --testdox",
     "test:behat": "npm run test:setup && composer run behat",
     "test:behat:verbose": "npm run test:setup && vendor/bin/behat --verbose",
-    "plugin:check": "wp-env run tests-cli wp plugin check jwt-auth-pro-wp-rest-api --exclude-directories=tests,bin --exclude-files=.gitignore,.phpunit.result.cache,.distignore",
+    "plugin:check": "wp-env run tests-cli wp plugin check juanma-jwt-auth-pro --exclude-directories=tests,bin --exclude-files=.gitignore,.phpunit.result.cache,.distignore",
     "preplugin:build": "docker ps --format '{{.Names}}' | grep tests-cli | xargs -I {} docker exec -u root {} apk add --no-cache zip 2>/dev/null || true",
-    "plugin:build": "wp-env run tests-cli --env-cwd=wp-content/plugins/jwt-auth-pro-wp-rest-api sh bin/build-plugin.sh $npm_package_version",
+    "plugin:build": "wp-env run tests-cli --env-cwd=wp-content/plugins/juanma-jwt-auth-pro sh bin/build-plugin.sh $npm_package_version",
     "prepare": "husky",
     "review": "coderabbit review --plain --type uncommitted",
     "review:staged": "coderabbit review --plain --type uncommitted",
@@ -43,7 +43,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/juanma-wp/jwt-auth-pro-wp-rest-api"
+    "url": "https://github.com/juanma-wp/juanma-jwt-auth-pro"
   },
   "keywords": [
     "wordpress",

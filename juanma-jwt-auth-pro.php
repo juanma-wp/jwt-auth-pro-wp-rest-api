@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Plugin Name: JWT Auth Pro WP REST API
+ * Plugin Name: JuanMa JWT Auth Pro
  * Description: Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps
  * Version: 1.1.0
  * Author: Juan Manuel Garrido
  * Author URI: https://juanma.codes
  * Plugin URI: https://github.com/juanma-wp/jwt-auth-pro-wp-rest-api
- * Text Domain: jwt-auth-pro-wp-rest-api
+ * Text Domain: juanma-jwt-auth-pro
  * Domain Path: /languages
  * Requires at least: 5.6
  * Tested up to: 6.8
@@ -33,7 +33,7 @@
  * Perfect for developers building modern applications that require enterprise-grade
  * JWT security without the complexity of full OAuth 2.0 implementations.
  *
- * @package   JWTAuthPro
+ * @package   JM_JWTAuthPro
  * @author    Juan Manuel Garrido
  * @copyright 2025 Juan Manuel Garrido
  * @license   GPL-2.0-or-later
@@ -64,7 +64,7 @@ if ( ! defined( 'JWT_AUTH_PRO_LOADED' ) ) {
 /**
  * Main plugin class for JWT Auth Pro.
  *
- * @package JWTAuthPro
+ * @package JM_JWTAuthPro
  */
 class JWT_Auth_Pro {
 
@@ -113,7 +113,7 @@ class JWT_Auth_Pro {
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/helpers.php';
 
 		// The JWT_Auth_Pro_Admin_Settings class is namespaced but uses WordPress naming convention.
-		// It will be autoloaded via Composer classmap when needed (JWTAuthPro\JWT_Auth_Pro_Admin_Settings).
+		// It will be autoloaded via Composer classmap when needed (JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings).
 
 		// Legacy files without namespaces still need require_once.
 		require_once JWT_AUTH_PRO_PLUGIN_DIR . 'includes/class-jwt-cookie-config.php';
@@ -154,7 +154,7 @@ class JWT_Auth_Pro {
 		if ( is_admin() ) {
 			// Check if the base class exists before trying to instantiate.
 			if ( class_exists( 'WPRestAuth\AuthToolkit\Admin\BaseAdminSettings' ) ) {
-				new JWTAuthPro\JWT_Auth_Pro_Admin_Settings();
+				new JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings();
 			} else {
 				// Log error or show admin notice about missing dependency.
 				add_action(
@@ -162,7 +162,7 @@ class JWT_Auth_Pro {
 					function () {
 						?>
 					<div class="notice notice-error">
-						<p><?php esc_html_e( 'JWT Auth Pro: Required dependency "wp-rest-auth-toolkit" is not loaded. Please check your installation.', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+						<p><?php esc_html_e( 'JWT Auth Pro: Required dependency "wp-rest-auth-toolkit" is not loaded. Please check your installation.', 'juanma-jwt-auth-pro' ); ?></p>
 					</div>
 						<?php
 					}
@@ -180,7 +180,6 @@ class JWT_Auth_Pro {
 	private function init_hooks(): void {
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'maybe_auth_bearer' ), 20 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 		// Check if JWT secret is configured and show admin notice if not.
 		if ( is_admin() ) {
@@ -297,8 +296,8 @@ class JWT_Auth_Pro {
 		$wpdb->query( "DROP TABLE IF EXISTS {$table_name}" );
 
 		// Delete WordPress options.
-		delete_option( JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS );
-		delete_option( JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS );
+		delete_option( 'jwt_auth_pro_settings' );
+		delete_option( 'jwt_auth_pro_general_settings' );
 		delete_option( 'jwt_auth_cookie_config' );
 
 		// Clear any transients that might have been set.
@@ -369,37 +368,12 @@ class JWT_Auth_Pro {
 	 * Display missing configuration notice.
 	 */
 	public function missing_config_notice(): void {
-		$settings_url = admin_url( 'options-general.php?page=jwt-auth-pro-wp-rest-api' );
+		$settings_url = admin_url( 'options-general.php?page=juanma-jwt-auth-pro' );
 		echo '<div class="notice notice-error"><p>';
-		echo '<strong>JWT Auth Pro:</strong> JWT Secret Key is required for the plugin to work. ';
+		echo '<strong>JuanMa JWT Auth Pro:</strong> JWT Secret Key is required for the plugin to work. ';
 		echo '<a href="' . esc_url( $settings_url ) . '">Configure it in the plugin settings</a> ';
 		echo 'or define <code>JWT_AUTH_PRO_SECRET</code> in your wp-config.php file.';
 		echo '</p></div>';
-	}
-
-	/**
-	 * Enqueue scripts and styles.
-	 */
-	public function enqueue_scripts(): void {
-		if ( is_admin() ) {
-			wp_enqueue_script(
-				'jwt-auth-pro-admin',
-				JWT_AUTH_PRO_PLUGIN_URL . 'assets/admin.js',
-				array( 'jquery' ),
-				JWT_AUTH_PRO_VERSION,
-				true
-			);
-
-			wp_localize_script(
-				'jwt-auth-pro-admin',
-				'jwtAuthPro',
-				array(
-					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-					'nonce'   => wp_create_nonce( 'jwt_auth_pro_nonce' ),
-					'restUrl' => rest_url(),
-				)
-			);
-		}
 	}
 }
 

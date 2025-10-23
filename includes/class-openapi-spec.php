@@ -6,7 +6,7 @@
  * This class generates the OpenAPI 3.0 specification for the JWT Auth Pro plugin endpoints.
  * It provides a dynamic API documentation that can be consumed by Swagger UI and other OpenAPI tools.
  *
- * @package   JWTAuthPro
+ * @package   JM_JWTAuthPro
  * @author    Juan Manuel Garrido
  * @copyright 2025 Juan Manuel Garrido
  * @license   GPL-2.0-or-later

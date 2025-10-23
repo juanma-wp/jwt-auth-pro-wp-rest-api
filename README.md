@@ -1,25 +1,25 @@
-# JWT Auth Pro WP REST API - Secure Refresh Tokens
+# Juanma JWT Auth Pro - Secure Refresh Tokens
 
-[![Plugin Check](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/plugin-check.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/plugin-check.yml)
-[![Unit Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/unit-tests.yml)
-[![Integration Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/integration-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/integration-tests.yml)
-[![Behat Tests](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/behat-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/behat-tests.yml)
-[![PHPCS](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpcs.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpcs.yml)
-[![PHPStan](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpstan.yml/badge.svg?branch=main)](https://github.com/juanma-wp/wp-rest-auth-jwt/actions/workflows/phpstan.yml)
+[![Plugin Check](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/plugin-check.yml/badge.svg?branch=main)](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/plugin-check.yml)
+[![Unit Tests](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/unit-tests.yml)
+[![Integration Tests](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/integration-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/integration-tests.yml)
+[![Behat Tests](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/behat-tests.yml/badge.svg?branch=main)](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/behat-tests.yml)
+[![PHPCS](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/phpcs.yml/badge.svg?branch=main)](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/phpcs.yml)
+[![PHPStan](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/phpstan.yml/badge.svg?branch=main)](https://github.com/juanma-wp/juanma-jwt-auth-pro/actions/workflows/phpstan.yml)
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) [![WordPress](https://img.shields.io/badge/WordPress-%3E%3D5.6-blue.svg)](https://wordpress.org) [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-blue.svg)](https://php.net)
 
 Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps
 
 
-## 🚀 Why JWT Auth Pro?
+## 🚀 Why Juanma JWT Auth Pro?
 
-Unlike basic JWT plugins that use **single long-lived tokens**, JWT Auth Pro implements **modern OAuth 2.0 security best practices** with short-lived access tokens and secure refresh tokens.
+Unlike basic JWT plugins that use **single long-lived tokens**, Juanma JWT Auth Pro implements **modern OAuth 2.0 security best practices** with short-lived access tokens and secure refresh tokens.
 
 ### ⚡ Security Comparison
 
-| Feature | Basic JWT Plugins | JWT Auth Pro |
-|---------|-------------------|--------------|
+| Feature | Basic JWT Plugins | Juanma JWT Auth Pro |
+|---------|-------------------|---------------------|
 | **Token Lifetime** | Long (hours/days) ❌ | Short (1 hour) ✅ |
 | **Refresh Tokens** | None ❌ | Secure HTTP-only ✅ |
 | **XSS Protection** | Limited ❌ | HTTP-only cookies ✅ |
@@ -33,7 +33,7 @@ Unlike basic JWT plugins that use **single long-lived tokens**, JWT Auth Pro imp
 - **XSS vulnerable** = Tokens stored in localStorage
 - **No revocation** = Can't invalidate compromised tokens
 
-### ✅ **JWT Auth Pro Solution:**
+### ✅ **Juanma JWT Auth Pro Solution:**
 - **Short-lived access tokens** (1h default) = Minimal attack window
 - **Secure refresh tokens** = HTTP-only cookies, XSS protected
 - **Automatic token rotation** = Fresh tokens on each refresh

@@ -1,4 +1,4 @@
-=== JWT Auth Pro WP REST API ===
+=== JuanMa JWT Auth Pro ===
 Contributors: juanmaguitar
 Tags: jwt, authentication, rest-api, security, tokens
 Requires at least: 5.6

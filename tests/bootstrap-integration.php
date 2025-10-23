@@ -12,7 +12,7 @@
  * including WordPress hooks, database queries, REST API responses, and user
  * authentication flows.
  *
- * @package   JWTAuthProWPRestAPI
+ * @package   JM_JWTAuthProWPRestAPI
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later
@@ -74,7 +74,7 @@ function _manually_load_jwt_plugin() {
 	}
 
 	// Load the plugin
-	require dirname( __DIR__ ) . '/jwt-auth-pro-wp-rest-api.php';
+	require dirname( __DIR__ ) . '/juanma-jwt-auth-pro.php';
 }
 
 if ( function_exists( 'tests_add_filter' ) ) {

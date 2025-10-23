@@ -7,12 +7,18 @@
  * functions needed for analysis without loading unnecessary WordPress stubs or
  * external dependencies.
  *
- * @package   JWTAuthProWPRestAPI
+ * @package   JM_JWTAuthProWPRestAPI
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later
  * @since     1.0.0
  */
+
+// Load Composer autoloader to find wp-rest-auth-toolkit classes
+$composer_autoloader = dirname( __DIR__ ) . '/vendor/autoload.php';
+if ( file_exists( $composer_autoloader ) ) {
+	require_once $composer_autoloader;
+}
 
 // Only define essential constants that PHPStan actually needs
 if ( ! defined( 'ABSPATH' ) ) {

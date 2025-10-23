@@ -151,11 +151,13 @@ function wp_auth_jwt_set_cookie(
 	$domain   = $config['domain'];
 
 	// Debug log the cookie configuration.
-	error_log( 'JWT Cookie Debug - Setting cookie: ' . $name );
-	error_log( 'JWT Cookie Debug - Path: ' . $path );
-	error_log( 'JWT Cookie Debug - Secure: ' . ( $secure ? 'true' : 'false' ) );
-	error_log( 'JWT Cookie Debug - SameSite: ' . $samesite );
-	error_log( 'JWT Cookie Debug - Domain: ' . $domain );
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		error_log( 'JWT Cookie Debug - Setting cookie: ' . $name );
+		error_log( 'JWT Cookie Debug - Path: ' . $path );
+		error_log( 'JWT Cookie Debug - Secure: ' . ( $secure ? 'true' : 'false' ) );
+		error_log( 'JWT Cookie Debug - SameSite: ' . $samesite );
+		error_log( 'JWT Cookie Debug - Domain: ' . $domain );
+	}
 
 	// Delegate to Cookie class which handles CLI detection and PHP version compatibility.
 	$result = Cookie::set(
@@ -171,7 +173,9 @@ function wp_auth_jwt_set_cookie(
 		)
 	);
 
-	error_log( 'JWT Cookie Debug - Set result: ' . ( $result ? 'success' : 'failed' ) );
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		error_log( 'JWT Cookie Debug - Set result: ' . ( $result ? 'success' : 'failed' ) );
+	}
 	return $result;
 }
 
@@ -202,7 +206,7 @@ function wp_auth_jwt_delete_cookie( string $name, ?string $path = null ): bool {
  */
 function wp_auth_jwt_maybe_add_cors_headers(): void {
 	// No-op: CORS is now handled centrally by the toolkit's Cors class.
-	// See JWT_Auth_Pro::init_cors() in jwt-auth-pro-wp-rest-api.php.
+	// See JWT_Auth_Pro::init_cors() in the main plugin file.
 }
 
 /**

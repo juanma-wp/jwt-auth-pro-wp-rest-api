@@ -1,5 +1,5 @@
 {
-  "name": "jwt-auth-pro-wp-rest-api/secure-refresh-tokens",
+  "name": "juanma/jwt-auth-pro",
   "description": "Modern JWT authentication with refresh tokens for WordPress REST API - built for SPAs and mobile apps",
   "type": "wordpress-plugin",
   "keywords": [
@@ -17,7 +17,9 @@
   "license": "GPL-2.0-or-later",
   "authors": [
     {
-      "name": "WordPress Developer",
+      "name": "Juan Manuel Garrido",
+      "email": "juanma.garrido@gmail.com",
+      "homepage": "https://juanma.codes",
       "role": "Developer"
     }
   ],
@@ -46,11 +48,8 @@
   },
   "autoload": {
     "psr-4": {
-      "JWTAuthPro\\": "includes/"
-    },
-    "classmap": [
-      "includes/class-jwt-auth-pro-admin-settings.php"
-    ]
+      "JM_JWTAuthPro\\": "includes/"
+    }
   },
   "autoload-dev": {
     "psr-4": {

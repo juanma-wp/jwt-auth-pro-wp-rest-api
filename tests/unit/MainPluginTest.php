@@ -259,11 +259,9 @@ class MainPluginTest extends TestCase
 	 */
 	public function testScriptEnqueuing(): void
 	{
-		// Test that enqueue_scripts method exists.
-		$this->assertTrue(method_exists($this->plugin, 'enqueue_scripts'));
-
-		// Test script enqueuing can be called.
-		$this->plugin->enqueue_scripts();
+		// Script enqueuing is now handled by the admin settings class
+		// Just verify the plugin initializes without errors
+		$this->plugin->init();
 		$this->assertTrue(true); // Should not throw errors.
 	}
 
@@ -292,7 +290,7 @@ class MainPluginTest extends TestCase
 			$property->setAccessible(true);
 			$admin_settings = $property->getValue($this->plugin);
 			// May be null if not in admin context.
-			$this->assertTrue(null === $admin_settings || $admin_settings instanceof JWTAuthPro\JWT_Auth_Pro_Admin_Settings);
+			$this->assertTrue(null === $admin_settings || $admin_settings instanceof JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings);
 		}
 	}
 
@@ -318,7 +316,7 @@ class MainPluginTest extends TestCase
 		// Test that WordPress hooks are properly set up.
 		$this->assertTrue(method_exists($this->plugin, 'register_rest_routes'));
 		$this->assertTrue(method_exists($this->plugin, 'maybe_auth_bearer'));
-		$this->assertTrue(method_exists($this->plugin, 'enqueue_scripts'));
+		// Script enqueuing is now handled by the admin settings class
 	}
 
 	/**
