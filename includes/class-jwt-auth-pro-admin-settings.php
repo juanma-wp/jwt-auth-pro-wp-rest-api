@@ -78,7 +78,7 @@ class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 	 * @return string The admin page slug.
 	 */
 	protected function getPageSlug(): string {
-		return 'jwt-auth-pro-wp-rest-api';
+		return 'juanma-jwt-auth-pro';
 	}
 
 	/**
@@ -132,7 +132,7 @@ class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 			'JuanMa JWT Auth Pro Settings',
 			'JuanMa JWT Auth Pro',
 			'activate_plugins',
-			'jwt-auth-pro-wp-rest-api',
+			'juanma-jwt-auth-pro',
 			array( $this, 'admin_page' )
 		);
 	}
@@ -224,7 +224,7 @@ class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 	public function admin_page(): void {
 		// Check for valid admin page access - requires plugin activation permissions.
 		if ( ! current_user_can( 'activate_plugins' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'jwt-auth-pro-wp-rest-api' ) );
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'juanma-jwt-auth-pro' ) );
 		}
 
 		// For tab navigation, we'll validate the tab parameter directly instead of requiring nonce.
@@ -241,15 +241,15 @@ class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 		}
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html__( '🚀 JuanMa JWT Auth Pro Settings', 'jwt-auth-pro-wp-rest-api' ); ?></h1>
-			<p class="description"><?php echo esc_html__( 'Modern JWT authentication with secure refresh tokens for WordPress REST API', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+			<h1><?php echo esc_html__( '🚀 JuanMa JWT Auth Pro Settings', 'juanma-jwt-auth-pro' ); ?></h1>
+			<p class="description"><?php echo esc_html__( 'Modern JWT authentication with secure refresh tokens for WordPress REST API', 'juanma-jwt-auth-pro' ); ?></p>
 
 			<nav class="nav-tab-wrapper">
-				<a href="?page=juanma-jwt-auth-pro&tab=jwt" class="nav-tab <?php echo esc_attr( 'jwt' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'JWT Settings', 'jwt-auth-pro-wp-rest-api' ); ?></a>
-				<a href="?page=juanma-jwt-auth-pro&tab=general" class="nav-tab <?php echo esc_attr( 'general' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'General Settings', 'jwt-auth-pro-wp-rest-api' ); ?></a>
-				<a href="?page=juanma-jwt-auth-pro&tab=cookies" class="nav-tab <?php echo esc_attr( 'cookies' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Cookie Settings', 'jwt-auth-pro-wp-rest-api' ); ?></a>
-				<a href="?page=juanma-jwt-auth-pro&tab=api-docs" class="nav-tab <?php echo esc_attr( 'api-docs' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'API Documentation', 'jwt-auth-pro-wp-rest-api' ); ?></a>
-				<a href="?page=juanma-jwt-auth-pro&tab=help" class="nav-tab <?php echo esc_attr( 'help' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Help & Documentation', 'jwt-auth-pro-wp-rest-api' ); ?></a>
+				<a href="?page=juanma-jwt-auth-pro&tab=jwt" class="nav-tab <?php echo esc_attr( 'jwt' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'JWT Settings', 'juanma-jwt-auth-pro' ); ?></a>
+				<a href="?page=juanma-jwt-auth-pro&tab=general" class="nav-tab <?php echo esc_attr( 'general' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'General Settings', 'juanma-jwt-auth-pro' ); ?></a>
+				<a href="?page=juanma-jwt-auth-pro&tab=cookies" class="nav-tab <?php echo esc_attr( 'cookies' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Cookie Settings', 'juanma-jwt-auth-pro' ); ?></a>
+				<a href="?page=juanma-jwt-auth-pro&tab=api-docs" class="nav-tab <?php echo esc_attr( 'api-docs' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'API Documentation', 'juanma-jwt-auth-pro' ); ?></a>
+				<a href="?page=juanma-jwt-auth-pro&tab=help" class="nav-tab <?php echo esc_attr( 'help' === $active_tab ? 'nav-tab-active' : '' ); ?>"><?php esc_html_e( 'Help & Documentation', 'juanma-jwt-auth-pro' ); ?></a>
 			</nav>
 
 			<?php if ( 'api-docs' === $active_tab ) : ?>
@@ -340,23 +340,23 @@ class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 	private function render_help_tab(): void {
 		?>
 		<div class="help-tab">
-			<h2><?php esc_html_e( 'Help & Documentation', 'jwt-auth-pro-wp-rest-api' ); ?></h2>
+			<h2><?php esc_html_e( 'Help & Documentation', 'juanma-jwt-auth-pro' ); ?></h2>
 
 			<div class="help-section">
-				<h3><?php esc_html_e( '🚀 What makes JWT Auth Pro different?', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
-				<p><?php esc_html_e( 'JWT Auth Pro implements modern OAuth 2.0 security best practices with refresh tokens - unlike basic JWT plugins that use single long-lived tokens. Perfect for:', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+				<h3><?php esc_html_e( '🚀 What makes JWT Auth Pro different?', 'juanma-jwt-auth-pro' ); ?></h3>
+				<p><?php esc_html_e( 'JWT Auth Pro implements modern OAuth 2.0 security best practices with refresh tokens - unlike basic JWT plugins that use single long-lived tokens. Perfect for:', 'juanma-jwt-auth-pro' ); ?></p>
 				<ul>
-					<li><strong><?php esc_html_e( 'Single Page Applications (SPAs)', 'jwt-auth-pro-wp-rest-api' ); ?></strong> - <?php esc_html_e( 'React, Vue, Angular apps', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'Mobile Applications', 'jwt-auth-pro-wp-rest-api' ); ?></strong> - <?php esc_html_e( 'iOS, Android apps with secure token storage', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'API Integrations', 'jwt-auth-pro-wp-rest-api' ); ?></strong> - <?php esc_html_e( 'Third-party services requiring enterprise security', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'Headless WordPress', 'jwt-auth-pro-wp-rest-api' ); ?></strong> - <?php esc_html_e( 'Decoupled architectures with enhanced security', 'jwt-auth-pro-wp-rest-api' ); ?></li>
+					<li><strong><?php esc_html_e( 'Single Page Applications (SPAs)', 'juanma-jwt-auth-pro' ); ?></strong> - <?php esc_html_e( 'React, Vue, Angular apps', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'Mobile Applications', 'juanma-jwt-auth-pro' ); ?></strong> - <?php esc_html_e( 'iOS, Android apps with secure token storage', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'API Integrations', 'juanma-jwt-auth-pro' ); ?></strong> - <?php esc_html_e( 'Third-party services requiring enterprise security', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'Headless WordPress', 'juanma-jwt-auth-pro' ); ?></strong> - <?php esc_html_e( 'Decoupled architectures with enhanced security', 'juanma-jwt-auth-pro' ); ?></li>
 				</ul>
-				<p><strong><?php esc_html_e( 'Key Security Advantage:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Short-lived access tokens (1 hour) + secure refresh tokens (30 days) = Better security than single long-lived JWT tokens!', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+				<p><strong><?php esc_html_e( 'Key Security Advantage:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Short-lived access tokens (1 hour) + secure refresh tokens (30 days) = Better security than single long-lived JWT tokens!', 'juanma-jwt-auth-pro' ); ?></p>
 			</div>
 
 			<div class="help-section">
-				<h3><?php esc_html_e( '🚀 Quick Start', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
-				<h4><?php esc_html_e( '1. Login to get tokens:', 'jwt-auth-pro-wp-rest-api' ); ?></h4>
+				<h3><?php esc_html_e( '🚀 Quick Start', 'juanma-jwt-auth-pro' ); ?></h3>
+				<h4><?php esc_html_e( '1. Login to get tokens:', 'juanma-jwt-auth-pro' ); ?></h4>
 				<pre><code>POST /wp-json/jwt/v1/token
 {
 	"username": "your_username",
@@ -374,71 +374,71 @@ Response:
 	}
 }</code></pre>
 
-				<h4><?php esc_html_e( '2. Use the access token for API calls:', 'jwt-auth-pro-wp-rest-api' ); ?></h4>
+				<h4><?php esc_html_e( '2. Use the access token for API calls:', 'juanma-jwt-auth-pro' ); ?></h4>
 				<pre><code>GET /wp-json/wp/v2/posts
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...</code></pre>
 
-				<h4><?php esc_html_e( '3. Refresh token when needed:', 'jwt-auth-pro-wp-rest-api' ); ?></h4>
+				<h4><?php esc_html_e( '3. Refresh token when needed:', 'juanma-jwt-auth-pro' ); ?></h4>
 				<pre><code>POST /wp-json/jwt/v1/refresh
 // Uses HTTPOnly cookie automatically</code></pre>
 			</div>
 
 			<div class="help-section">
-				<h3><?php esc_html_e( '🔒 Security Features', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
+				<h3><?php esc_html_e( '🔒 Security Features', 'juanma-jwt-auth-pro' ); ?></h3>
 				<ul>
-					<li><strong><?php esc_html_e( 'HTTPOnly Refresh Tokens:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Refresh tokens stored in secure, HTTPOnly cookies', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'Token Rotation:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Refresh tokens automatically rotate for better security', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'Configurable Expiration:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Set custom expiration times for tokens', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'CORS Support:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Proper CORS handling for cross-domain requests', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'IP & User Agent Tracking:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Additional security metadata for tokens', 'jwt-auth-pro-wp-rest-api' ); ?></li>
+					<li><strong><?php esc_html_e( 'HTTPOnly Refresh Tokens:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Refresh tokens stored in secure, HTTPOnly cookies', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'Token Rotation:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Refresh tokens automatically rotate for better security', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'Configurable Expiration:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Set custom expiration times for tokens', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'CORS Support:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Proper CORS handling for cross-domain requests', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'IP & User Agent Tracking:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Additional security metadata for tokens', 'juanma-jwt-auth-pro' ); ?></li>
 				</ul>
 			</div>
 
 			<div class="help-section">
-				<h3><?php esc_html_e( '🛠️ Available Endpoints', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
+				<h3><?php esc_html_e( '🛠️ Available Endpoints', 'juanma-jwt-auth-pro' ); ?></h3>
 				<ul>
-					<li><code>POST /wp-json/jwt/v1/token</code> - <?php esc_html_e( 'Login and get access token', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><code>POST /wp-json/jwt/v1/refresh</code> - <?php esc_html_e( 'Refresh access token', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><code>GET /wp-json/jwt/v1/verify</code> - <?php esc_html_e( 'Verify current token and get user info', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><code>POST /wp-json/jwt/v1/logout</code> - <?php esc_html_e( 'Logout and revoke refresh token', 'jwt-auth-pro-wp-rest-api' ); ?></li>
+					<li><code>POST /wp-json/jwt/v1/token</code> - <?php esc_html_e( 'Login and get access token', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><code>POST /wp-json/jwt/v1/refresh</code> - <?php esc_html_e( 'Refresh access token', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><code>GET /wp-json/jwt/v1/verify</code> - <?php esc_html_e( 'Verify current token and get user info', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><code>POST /wp-json/jwt/v1/logout</code> - <?php esc_html_e( 'Logout and revoke refresh token', 'juanma-jwt-auth-pro' ); ?></li>
 				</ul>
 			</div>
 
 			<div class="help-section">
-				<h3><?php esc_html_e( '⚙️ Configuration', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
-				<p><strong><?php esc_html_e( 'JWT Secret Key:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'A secure random string used to sign JWT tokens. Keep this secret and never share it.', 'jwt-auth-pro-wp-rest-api' ); ?></p>
-				<p><strong><?php esc_html_e( 'Access Token Expiry:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'How long access tokens remain valid (default: 3600 seconds / 1 hour).', 'jwt-auth-pro-wp-rest-api' ); ?></p>
-				<p><strong><?php esc_html_e( 'Refresh Token Expiry:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'How long refresh tokens remain valid (default: 2592000 seconds / 30 days).', 'jwt-auth-pro-wp-rest-api' ); ?></p>
-				<p><strong><?php esc_html_e( 'CORS Origins:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Domains allowed to make cross-origin requests to your API.', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+				<h3><?php esc_html_e( '⚙️ Configuration', 'juanma-jwt-auth-pro' ); ?></h3>
+				<p><strong><?php esc_html_e( 'JWT Secret Key:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'A secure random string used to sign JWT tokens. Keep this secret and never share it.', 'juanma-jwt-auth-pro' ); ?></p>
+				<p><strong><?php esc_html_e( 'Access Token Expiry:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'How long access tokens remain valid (default: 3600 seconds / 1 hour).', 'juanma-jwt-auth-pro' ); ?></p>
+				<p><strong><?php esc_html_e( 'Refresh Token Expiry:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'How long refresh tokens remain valid (default: 2592000 seconds / 30 days).', 'juanma-jwt-auth-pro' ); ?></p>
+				<p><strong><?php esc_html_e( 'CORS Origins:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Domains allowed to make cross-origin requests to your API.', 'juanma-jwt-auth-pro' ); ?></p>
 			</div>
 
 			<div class="help-section">
-				<h3><?php esc_html_e( '🔧 Troubleshooting', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
-				<h4><?php esc_html_e( 'Common Issues:', 'jwt-auth-pro-wp-rest-api' ); ?></h4>
+				<h3><?php esc_html_e( '🔧 Troubleshooting', 'juanma-jwt-auth-pro' ); ?></h3>
+				<h4><?php esc_html_e( 'Common Issues:', 'juanma-jwt-auth-pro' ); ?></h4>
 				<ul>
-					<li><strong><?php esc_html_e( 'Invalid JWT Token:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Check that your JWT secret key is properly configured', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'Token Expired:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Implement proper token refresh logic in your application', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'CORS Errors:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Add your frontend domain to the CORS allowed origins', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><strong><?php esc_html_e( 'Cookie Issues:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php esc_html_e( 'Ensure your site uses HTTPS for HTTPOnly cookies to work properly', 'jwt-auth-pro-wp-rest-api' ); ?></li>
+					<li><strong><?php esc_html_e( 'Invalid JWT Token:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Check that your JWT secret key is properly configured', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'Token Expired:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Implement proper token refresh logic in your application', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'CORS Errors:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Add your frontend domain to the CORS allowed origins', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><strong><?php esc_html_e( 'Cookie Issues:', 'juanma-jwt-auth-pro' ); ?></strong> <?php esc_html_e( 'Ensure your site uses HTTPS for HTTPOnly cookies to work properly', 'juanma-jwt-auth-pro' ); ?></li>
 				</ul>
 
-				<h4><?php esc_html_e( 'Debug Information:', 'jwt-auth-pro-wp-rest-api' ); ?></h4>
-				<p><strong><?php esc_html_e( 'Plugin Version:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php echo esc_html( JWT_AUTH_PRO_VERSION ); ?></p>
-				<p><strong><?php esc_html_e( 'WordPress Version:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php echo esc_html( get_bloginfo( 'version' ) ); ?></p>
-				<p><strong><?php esc_html_e( 'PHP Version:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php echo esc_html( PHP_VERSION ); ?></p>
-				<p><strong><?php esc_html_e( 'SSL Enabled:', 'jwt-auth-pro-wp-rest-api' ); ?></strong> <?php echo is_ssl() ? esc_html__( '✅ Yes', 'jwt-auth-pro-wp-rest-api' ) : esc_html__( '❌ No (HTTPOnly cookies may not work)', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+				<h4><?php esc_html_e( 'Debug Information:', 'juanma-jwt-auth-pro' ); ?></h4>
+				<p><strong><?php esc_html_e( 'Plugin Version:', 'juanma-jwt-auth-pro' ); ?></strong> <?php echo esc_html( JWT_AUTH_PRO_VERSION ); ?></p>
+				<p><strong><?php esc_html_e( 'WordPress Version:', 'juanma-jwt-auth-pro' ); ?></strong> <?php echo esc_html( get_bloginfo( 'version' ) ); ?></p>
+				<p><strong><?php esc_html_e( 'PHP Version:', 'juanma-jwt-auth-pro' ); ?></strong> <?php echo esc_html( PHP_VERSION ); ?></p>
+				<p><strong><?php esc_html_e( 'SSL Enabled:', 'juanma-jwt-auth-pro' ); ?></strong> <?php echo is_ssl() ? esc_html__( '✅ Yes', 'juanma-jwt-auth-pro' ) : esc_html__( '❌ No (HTTPOnly cookies may not work)', 'juanma-jwt-auth-pro' ); ?></p>
 			</div>
 
 			<div class="help-section">
-				<h3><?php esc_html_e( '📚 Need OAuth2?', 'jwt-auth-pro-wp-rest-api' ); ?></h3>
-				<p><?php esc_html_e( 'This plugin provides simple JWT authentication. If you need more advanced features like:', 'jwt-auth-pro-wp-rest-api' ); ?></p>
+				<h3><?php esc_html_e( '📚 Need OAuth2?', 'juanma-jwt-auth-pro' ); ?></h3>
+				<p><?php esc_html_e( 'This plugin provides simple JWT authentication. If you need more advanced features like:', 'juanma-jwt-auth-pro' ); ?></p>
 				<ul>
-					<li><?php esc_html_e( 'OAuth2 authorization flows', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><?php esc_html_e( 'Scoped permissions', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><?php esc_html_e( 'Third-party app authorization', 'jwt-auth-pro-wp-rest-api' ); ?></li>
-					<li><?php esc_html_e( 'API Proxy for enhanced security', 'jwt-auth-pro-wp-rest-api' ); ?></li>
+					<li><?php esc_html_e( 'OAuth2 authorization flows', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><?php esc_html_e( 'Scoped permissions', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><?php esc_html_e( 'Third-party app authorization', 'juanma-jwt-auth-pro' ); ?></li>
+					<li><?php esc_html_e( 'API Proxy for enhanced security', 'juanma-jwt-auth-pro' ); ?></li>
 				</ul>
-				<p><?php esc_html_e( 'Consider installing our companion plugin:', 'jwt-auth-pro-wp-rest-api' ); ?> <strong><?php esc_html_e( 'WP REST Auth OAuth2', 'jwt-auth-pro-wp-rest-api' ); ?></strong></p>
+				<p><?php esc_html_e( 'Consider installing our companion plugin:', 'juanma-jwt-auth-pro' ); ?> <strong><?php esc_html_e( 'WP REST Auth OAuth2', 'juanma-jwt-auth-pro' ); ?></strong></p>
 			</div>
 		</div>
 		<?php

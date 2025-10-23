@@ -154,7 +154,9 @@ class Auth_JWT {
 		$ttl          = defined( 'JWT_AUTH_PRO_ACCESS_TTL' ) ? JWT_AUTH_PRO_ACCESS_TTL : ( $jwt_settings['access_token_expiry'] ?? 3600 );
 
 		if ( empty( $secret ) ) {
-			error_log( 'JWT Auth: Secret not configured. Please set JWT_AUTH_PRO_SECRET constant or configure in settings.' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'JWT Auth: Secret not configured. Please set JWT_AUTH_PRO_SECRET constant or configure in settings.' );
+			}
 			throw new \Exception( 'JWT secret not configured' );
 		}
 
@@ -444,7 +446,9 @@ class Auth_JWT {
 	 */
 	public function store_refresh_token( int $user_id, string $refresh_token, int $expires_at ): bool {
 		if ( ! $this->refresh_token_manager ) {
-			error_log( 'JWT Auth: Cannot store refresh token - RefreshTokenManager not initialized' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'JWT Auth: Cannot store refresh token - RefreshTokenManager not initialized' );
+			}
 			return false;
 		}
 		return $this->refresh_token_manager->store(
@@ -496,7 +500,9 @@ class Auth_JWT {
 	 */
 	private function rotate_refresh_token( string $old_refresh_token, string $new_refresh_token, int $user_id, int $expires_at ): bool {
 		if ( ! $this->refresh_token_manager ) {
-			error_log( 'JWT Auth: Cannot rotate refresh token - RefreshTokenManager not initialized' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'JWT Auth: Cannot rotate refresh token - RefreshTokenManager not initialized' );
+			}
 			return false;
 		}
 		return $this->refresh_token_manager->rotate(
@@ -518,7 +524,9 @@ class Auth_JWT {
 	 */
 	public function revoke_refresh_token( string $refresh_token ): bool {
 		if ( ! $this->refresh_token_manager ) {
-			error_log( 'JWT Auth: Cannot revoke refresh token - RefreshTokenManager not initialized' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'JWT Auth: Cannot revoke refresh token - RefreshTokenManager not initialized' );
+			}
 			return false;
 		}
 		return $this->refresh_token_manager->revoke( $refresh_token );
@@ -546,7 +554,9 @@ class Auth_JWT {
 	 */
 	public function revoke_user_token( int $user_id, int $token_id ): bool {
 		if ( ! $this->refresh_token_manager ) {
-			error_log( 'JWT Auth: Cannot revoke user token - RefreshTokenManager not initialized' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'JWT Auth: Cannot revoke user token - RefreshTokenManager not initialized' );
+			}
 			return false;
 		}
 		return $this->refresh_token_manager->revokeById( $user_id, $token_id );

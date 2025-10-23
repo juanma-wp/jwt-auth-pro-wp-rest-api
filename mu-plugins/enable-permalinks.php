@@ -12,7 +12,9 @@ add_action(
 		if ( get_option( 'permalink_structure' ) !== $desired_structure ) {
 			update_option( 'permalink_structure', $desired_structure );
 			flush_rewrite_rules();
-			error_log( 'Permalinks updated and flushed.' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'Permalinks updated and flushed.' );
+			}
 		}
 	}
 );
