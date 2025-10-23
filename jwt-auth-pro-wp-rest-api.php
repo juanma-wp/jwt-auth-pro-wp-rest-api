@@ -296,8 +296,8 @@ class JWT_Auth_Pro {
 		$wpdb->query( "DROP TABLE IF EXISTS {$table_name}" );
 
 		// Delete WordPress options.
-		delete_option( JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS );
-		delete_option( JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS );
+		delete_option( 'jwt_auth_pro_settings' );
+		delete_option( 'jwt_auth_pro_general_settings' );
 		delete_option( 'jwt_auth_cookie_config' );
 
 		// Clear any transients that might have been set.
@@ -375,7 +375,6 @@ class JWT_Auth_Pro {
 		echo 'or define <code>JWT_AUTH_PRO_SECRET</code> in your wp-config.php file.';
 		echo '</p></div>';
 	}
-
 }
 
 new JWT_Auth_Pro();
