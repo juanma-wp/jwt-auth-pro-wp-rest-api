@@ -75,9 +75,7 @@ class Auth_JWT {
 		$this->refresh_token_manager = new \WPRestAuth\AuthToolkit\Token\RefreshTokenManager(
 			$wpdb->prefix . 'jwt_refresh_tokens',
 			$secret,
-			'jwt',
-			'wp_rest_auth_jwt',
-			300 // 5 minutes cache TTL.
+			'jwt'
 		);
 	}
 

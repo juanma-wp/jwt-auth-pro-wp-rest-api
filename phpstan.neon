@@ -1,7 +1,7 @@
 parameters:
 	level: 6
 	paths:
-		- jwt-auth-pro-wp-rest-api.php
+		- juanma-jwt-auth-pro.php
 		- includes/
 	bootstrapFiles:
 		- tests/bootstrap-phpstan.php
@@ -17,8 +17,6 @@ parameters:
 	tmpDir: %rootDir%/tmp/phpstan
 	resultCachePath: %rootDir%/tmp/phpstan/result-cache.php
 	# Disable memory-intensive checks
-	checkMissingIterableValueType: false
-	checkGenericClassInNonGenericObjectType: false
 	checkMissingCallableSignature: false
 	treatPhpDocTypesAsCertain: false
 	ignoreErrors:

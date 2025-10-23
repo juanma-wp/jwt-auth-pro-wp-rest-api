@@ -24,14 +24,14 @@ jobs:
 
     - name: Create distribution build
       run: |
-        mkdir -p jwt-auth-pro-wp-rest-api
-        rsync -a --exclude-from=.distignore ./ jwt-auth-pro-wp-rest-api/
+        mkdir -p juanma-jwt-auth-pro
+        rsync -a --exclude-from=.distignore ./ juanma-jwt-auth-pro/
 
     - name: Run plugin check
       uses: wordpress/plugin-check-action@v1
       with:
         repo-token: ''
-        build-dir: './jwt-auth-pro-wp-rest-api'
+        build-dir: './juanma-jwt-auth-pro'
         checks: ''
         exclude-checks: ''
         categories: 'plugin_repo'
