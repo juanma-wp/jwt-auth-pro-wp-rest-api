@@ -74,7 +74,7 @@ function _manually_load_jwt_plugin() {
 	}
 
 	// Load the plugin
-	require dirname( __DIR__ ) . '/jwt-auth-pro-wp-rest-api.php';
+	require dirname( __DIR__ ) . '/juanma-jwt-auth-pro.php';
 }
 
 if ( function_exists( 'tests_add_filter' ) ) {
