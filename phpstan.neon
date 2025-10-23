@@ -25,7 +25,7 @@ parameters:
 		# WordPress functions that may not be defined during static analysis
 		- '#Function (wp_|get_|is_|current_user_can|sanitize_|wp_json_encode|wp_unslash|wp_generate_password|apache_request_headers|rest_url|admin_url|plugin_dir_path|plugin_dir_url|is_ssl|apply_filters|add_action|add_filter|register_activation_hook|register_deactivation_hook|wp_create_nonce|wp_enqueue_script|wp_localize_script|dbDelta|error_log|http_response_code|setcookie|esc_url|function_exists|class_exists|defined|exit|header)\(\) not found\.#'
 		- '#Constant (ABSPATH|WP_DEBUG|WP_CLI|STR_PAD_RIGHT|PHP_VERSION_ID|JWT_AUTH_ACCESS_TTL|JWT_AUTH_REFRESH_TTL|JWT_AUTH_PRO_SECRET|JWT_AUTH_PRO_ACCESS_TTL|JWT_AUTH_PRO_REFRESH_TTL|JWT_AUTH_PRO_PLUGIN_DIR|JWT_AUTH_PRO_PLUGIN_URL|JWT_AUTH_PRO_VERSION) not found\.#'
-		- '#Class (WP_REST_Response|WP_Error|WP_User|wpdb|JWTAuthPro\\JWT_Auth_Pro_Admin_Settings) not found\.#'
+		- '#Class (WP_REST_Response|WP_Error|WP_User|wpdb|JM_JWTAuthPro\\JWT_Auth_Pro_Admin_Settings) not found\.#'
 		- '#Access to an undefined property \$wpdb::\$prefix\.#'
 		- '#Call to method [a-zA-Z_]+\(\) on an unknown class wpdb\.#'
 		- '#Variable \$wpdb might not be defined\.#'

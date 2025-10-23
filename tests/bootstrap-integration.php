@@ -12,7 +12,7 @@
  * including WordPress hooks, database queries, REST API responses, and user
  * authentication flows.
  *
- * @package   JWTAuthProWPRestAPI
+ * @package   JM_JWTAuthProWPRestAPI
  * @author    WordPress Developer
  * @copyright 2025 WordPress Developer
  * @license   GPL-2.0-or-later

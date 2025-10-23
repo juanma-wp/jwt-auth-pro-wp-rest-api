@@ -2,7 +2,7 @@
 /**
  * Enable pretty permalinks automatically when wp-env starts.
  *
- * @package JWTAuthPro
+ * @package JM_JWTAuthPro
  */
 
 add_action(

@@ -6,7 +6,7 @@
  * Integration tests for plugin activation and deactivation processes.
  * Tests database table creation, option setup, and complete cleanup on deactivation.
  *
- * @package   JWTAuthPro
+ * @package   JM_JWTAuthPro
  * @author    Juan Manuel Garrido
  * @copyright 2025 Juan Manuel Garrido
  * @license   GPL-2.0-or-later
@@ -118,16 +118,16 @@ class PluginActivationTest extends WP_UnitTestCase
 		global $wpdb;
 
 		// Set up test data.
-		update_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS, ['test' => 'data']);
+		update_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS, ['test' => 'data']);
 
 		// Verify option exists before deactivation.
-		$this->assertNotFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
+		$this->assertNotFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
 
 		// Run deactivation - should execute without errors.
 		$this->plugin->deactivate();
 
 		// Verify options are deleted.
-		$this->assertFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
+		$this->assertFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
 
 		// Note: Table deletion cannot be verified due to transaction rollback,
 		// but we can verify the method completes without throwing exceptions.
@@ -140,13 +140,13 @@ class PluginActivationTest extends WP_UnitTestCase
 	public function test_deactivation_removes_options(): void
 	{
 		// Set up options.
-		update_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS, [
+		update_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS, [
 			'secret_key'           => 'test-secret',
 			'access_token_expiry'  => 3600,
 			'refresh_token_expiry' => 2592000,
 		]);
 
-		update_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS, [
+		update_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS, [
 			'enable_debug_logging' => true,
 			'cors_allowed_origins' => 'http://localhost:3000',
 		]);
@@ -159,16 +159,16 @@ class PluginActivationTest extends WP_UnitTestCase
 		]);
 
 		// Verify options exist.
-		$this->assertNotFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
-		$this->assertNotFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS));
+		$this->assertNotFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
+		$this->assertNotFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS));
 		$this->assertNotFalse(get_option('jwt_auth_cookie_config'));
 
 		// Run deactivation.
 		$this->plugin->deactivate();
 
 		// Verify options are removed.
-		$this->assertFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
-		$this->assertFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS));
+		$this->assertFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
+		$this->assertFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS));
 		$this->assertFalse(get_option('jwt_auth_cookie_config'));
 	}
 
@@ -237,14 +237,14 @@ class PluginActivationTest extends WP_UnitTestCase
 		$this->plugin->activate();
 
 		// Set up plugin options.
-		update_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS, ['secret_key' => 'test-cycle']);
-		update_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS, ['debug' => true]);
+		update_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS, ['secret_key' => 'test-cycle']);
+		update_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS, ['debug' => true]);
 		update_option('jwt_auth_cookie_config', ['samesite' => 'Lax']);
 		set_transient('jwt_auth_pro_version', '1.0.0', HOUR_IN_SECONDS);
 
 		// Verify options exist.
-		$this->assertNotFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
-		$this->assertNotFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS));
+		$this->assertNotFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS));
+		$this->assertNotFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS));
 		$this->assertNotFalse(get_option('jwt_auth_cookie_config'));
 		$this->assertNotFalse(get_transient('jwt_auth_pro_version'));
 
@@ -252,8 +252,8 @@ class PluginActivationTest extends WP_UnitTestCase
 		$this->plugin->deactivate();
 
 		// Verify all options and transients are removed.
-		$this->assertFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS), 'JWT settings should be deleted');
-		$this->assertFalse(get_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS), 'General settings should be deleted');
+		$this->assertFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS), 'JWT settings should be deleted');
+		$this->assertFalse(get_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS), 'General settings should be deleted');
 		$this->assertFalse(get_option('jwt_auth_cookie_config'), 'Cookie config should be deleted');
 		$this->assertFalse(get_transient('jwt_auth_pro_version'), 'Version transient should be deleted');
 	}
@@ -269,8 +269,8 @@ class PluginActivationTest extends WP_UnitTestCase
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query("DROP TABLE IF EXISTS {$table_name}");
 
-		delete_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS);
-		delete_option(JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS);
+		delete_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_JWT_SETTINGS);
+		delete_option(JM_JWTAuthPro\JWT_Auth_Pro_Admin_Settings::OPTION_GENERAL_SETTINGS);
 		delete_option('jwt_auth_cookie_config');
 		delete_transient('jwt_auth_pro_version');
 

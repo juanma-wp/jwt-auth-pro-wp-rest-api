@@ -202,7 +202,7 @@ function wp_auth_jwt_delete_cookie( string $name, ?string $path = null ): bool {
  */
 function wp_auth_jwt_maybe_add_cors_headers(): void {
 	// No-op: CORS is now handled centrally by the toolkit's Cors class.
-	// See JWT_Auth_Pro::init_cors() in jwt-auth-pro-wp-rest-api.php.
+	// See JWT_Auth_Pro::init_cors() in the main plugin file.
 }
 
 /**
