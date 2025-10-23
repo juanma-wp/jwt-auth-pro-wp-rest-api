@@ -162,7 +162,7 @@ class JWT_Auth_Pro {
 					function () {
 						?>
 					<div class="notice notice-error">
-						<p><?php esc_html_e( 'JWT Auth Pro: Required dependency "wp-rest-auth-toolkit" is not loaded. Please check your installation.', 'juanma-jwt-auth-pro' ); ?></p>
+						<p><?php esc_html_e( 'JWT Auth Pro: Required dependency "wp-rest-auth-toolkit" is not loaded. Please check your installation.', 'jwt-auth-pro-wp-rest-api' ); ?></p>
 					</div>
 						<?php
 					}
