@@ -131,7 +131,7 @@ class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 		add_options_page(
 			'JuanMa JWT Auth Pro Settings',
 			'JuanMa JWT Auth Pro',
-			'manage_options',
+			'activate_plugins',
 			'juanma-jwt-auth-pro',
 			array( $this, 'admin_page' )
 		);
@@ -222,8 +222,8 @@ class JWT_Auth_Pro_Admin_Settings extends BaseAdminSettings {
 	 * Render the admin settings page.
 	 */
 	public function admin_page(): void {
-		// Check for valid admin page access - requires settings management permissions.
-		if ( ! current_user_can( 'manage_options' ) ) {
+		// Check for valid admin page access - requires plugin activation permissions.
+		if ( ! current_user_can( 'activate_plugins' ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'juanma-jwt-auth-pro' ) );
 		}
 

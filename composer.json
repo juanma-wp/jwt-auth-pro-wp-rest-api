@@ -49,10 +49,7 @@
   "autoload": {
     "psr-4": {
       "JM_JWTAuthPro\\": "includes/"
-    },
-    "classmap": [
-      "includes/"
-    ]
+    }
   },
   "autoload-dev": {
     "psr-4": {
